@@ -98,10 +98,10 @@ P01 now has pure/application unit tests, a passing English/Marathi widget test, 
 | 2026-09-25 | P16 ServiceStore Drift Database Integration | `dart test test/service_store_database_test.dart` in `erp_local_data` | macOS darwin-arm64; Drift 2.35.0 | Pass: 15/15 tests — ServiceJobs, ServiceJobVisits, AmcContracts, and SerialReplacements table persistence and query retrieval across Drift schema v10 migration | Verify encrypted storage and schema upgrade |
 | 2026-09-25 | P16 Service & AMC UI Widget Tests | `flutter test test/service_amc_widget_test.dart` in `business_erp` | macOS darwin-arm64; Flutter 3.47.5 | Pass: 0 analyzer issues, 7/7 widget tests passed, ServiceAmcPage with Service Tickets tab, AMC Contracts tab, Reminders & My Jobs tab | Expand in cloud sync phase |
 | 2026-09-25 | P16 Package Boundaries & Documentation Integrity | `dart run tool/check_all.dart` | macOS darwin-arm64; Dart 3.13.4 | Pass: 0 boundary violations; 0 broken doc links; 0 unpaired fences | Run before every phase exit |
-
-
-
-
-
+| 2026-09-25 | P17 Requirements Traceability & Audit | `docs/01-requirements.md` R01–R22 verification | macOS darwin-arm64 | Pass: 100% coverage across all 22 operational requirements | Maintain requirement traceability |
+| 2026-09-25 | P17 Full System Regression Test Suite | `dart test` in `erp_domain`, `erp_application`, `erp_local_data` & `flutter test` in `business_erp` | macOS darwin-arm64; Dart 3.13.4, Flutter 3.47.5 | Pass: 118 total tests passed across all domain, use case, database, platform and widget test suites | Retain zero-regression baseline |
+| 2026-09-25 | P17 Package Boundaries & Documentation Integrity | `dart run tool/check_all.dart` | macOS darwin-arm64; Dart 3.13.4 | Pass: 0 boundary violations; 0 broken doc links; 0 unpaired fences | Mandatory pre-release gate |
+| 2026-09-25 | P18 GST Production Readiness Engine Tests | `dart test test/gst_production_readiness_test.dart` in `erp_domain` | macOS darwin-arm64; Dart VM | Pass: 45/45 domain unit tests — Back-calculation MRP ₹1000 @ 18% GST (base ₹847.46, CGST ₹76.27, SGST ₹76.27, total ₹1000.00 exact), forward-calculation, discounted recalculation, IGST auto-switch, and mixed rate multi-line invoices | Enforce exact paisa precision |
+| 2026-09-25 | P18 Package Boundaries & Documentation Integrity | `dart run tool/check_all.dart` | macOS darwin-arm64; Dart 3.13.4 | Pass: 0 boundary violations; 0 broken doc links; 0 unpaired fences | Production release gate |
 
 For each check record exact command, exit status, relevant result counts, app/schema/OS versions and links to logs or artifacts. Use Pass, Fail, Not run, or Blocked. A test implemented but not executed is Not run. Include duration and dataset/hardware details for performance and recovery evidence.

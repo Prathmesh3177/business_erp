@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:erp_application/erp_application.dart';
 import 'package:erp_platform/erp_platform.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -46,11 +45,12 @@ final class _BackupRestoreDialogState extends ConsumerState<BackupRestoreDialog>
       final runtime = ref.read(runtimeProvider).value;
       if (runtime == null) throw StateError('Runtime not initialized');
 
-      final dbDirectory = await runtime.locations.databaseDirectory();
-      final dbFile = File('${dbDirectory.path}${Platform.pathSeparator}foundation.db');
-      final attachmentsDir = await runtime.locations.attachmentsDirectory();
+      final dbFile = await runtime.locations.databaseFile();
+      final dbDirectory = dbFile.parent;
+      final attachmentsDir = await runtime.locations.snapshotDirectory();
 
       final backupDir = Directory('${dbDirectory.path}${Platform.pathSeparator}backups');
+      await backupDir.create(recursive: true);
       final outputFile = File(
         '${backupDir.path}${Platform.pathSeparator}solar-erp-backup-'
         '${DateTime.now().toUtc().millisecondsSinceEpoch}.erpa',
@@ -104,7 +104,8 @@ final class _BackupRestoreDialogState extends ConsumerState<BackupRestoreDialog>
       final runtime = ref.read(runtimeProvider).value;
       if (runtime == null) throw StateError('Runtime not initialized');
 
-      final dbDirectory = await runtime.locations.databaseDirectory();
+      final activeDbFile = await runtime.locations.databaseFile();
+      final dbDirectory = activeDbFile.parent;
       final backupDir = Directory('${dbDirectory.path}${Platform.pathSeparator}backups');
       if (!backupDir.existsSync() || backupDir.listSync().isEmpty) {
         throw StateError('No backup package files found in backup directory.');
@@ -124,8 +125,7 @@ final class _BackupRestoreDialogState extends ConsumerState<BackupRestoreDialog>
       backupFiles.sort((a, b) => b.lastModifiedSync().compareTo(a.lastModifiedSync()));
       final targetPackage = backupFiles.first;
 
-      final activeDbFile = File('${dbDirectory.path}${Platform.pathSeparator}foundation.db');
-      final activeAttachmentsDir = await runtime.locations.attachmentsDirectory();
+      final activeAttachmentsDir = await runtime.locations.snapshotDirectory();
 
       const envelope = PortableBackupEnvelope();
       final manifest = await envelope.stagedRestore(

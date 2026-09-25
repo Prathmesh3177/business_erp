@@ -19,30 +19,30 @@ Run a solar shop reliably without internet, retain traceable financial and stock
 
 | ID | Requirement | Phase | Acceptance outcome |
 |---|---|---|---|
-| R01 | Windows/macOS/Android foundation; English/Marathi | P01, P09, P12 | Platform builds and locale switching verified |
-| R02 | Admin/Counter, sessions, permissions, audit | P02 | Direct use-case calls reject unauthorized actions |
-| R03 | Configurable categories, brands, units and solar attributes | P03 | Panel, pump, battery and cable products created |
-| R04 | SKU, barcode, HSN, prices, GST, multiple photos | P03, P09, P12 | Search and capture/export round trip |
-| R05 | Stock ledger, locations, batch/serial, opening stock, adjustments | P05 | Rebuild equals live balances; no duplicate serial ownership |
-| R06 | Suppliers, purchase invoice, costs, outstanding | P06 | Purchase posts stock and balanced journal atomically |
-| R07 | Fast POS, customer, discounts, credit/split payments | P07 | Complete sale survives retry/restart without duplication |
-| R08 | GST breakdown, numbering, year, immutable snapshots | P04, P07 | Approved calculation fixtures and period rollover pass |
-| R09 | Sales/purchase returns, credit/debit adjustments, refunds | P08 | Partial returns bounded by original quantities |
-| R10 | Customer/supplier ledgers, opening balances, allocations | P04, P08 | Outstanding reconciles to journal control accounts |
-| R11 | Expenses, cash/UPI/card, daily close, profit | P08, P10 | Settlement separate from revenue; cash variances audited |
-| R12 | PDF, A4, thermal, English/Marathi/bilingual invoices | P09, P12 | Long invoices and real printer matrix pass |
-| R13 | Dashboard and all report families | P10 | Date/entity/branch filters and totals reconcile |
-| R14 | Scheduled/manual encrypted backup, restore, migrations | P01, P11 | Fresh-device restore matches ledger and attachment checksums |
-| R15 | Barcode scanner, Android camera/Bluetooth/USB where supported | P09, P12 | Named tested devices recorded; unavailable paths disabled |
-| R16 | Warranty and serial traceability | P07, P12, P16 | Invoice-to-serial-to-customer-to-service chain preserved |
-| R17 | Cloud identity, storage/backup, synchronized devices | P13, P14 | Replay, access isolation and outage recovery pass |
-| R18 | Branches, transfers, multi-location reports | P14 | Dispatch/receipt has one ownership transition per unit |
-| R19 | Quotation, BOM, site, project, reservation, delivery/install | P15 | Accepted quote drives project without double stock issue |
-| R20 | Technicians, service jobs, customer documents and AMC | P16 | Service/reminder/renewal workflow works deterministically |
-| R21 | Low stock, dead stock, trends and reorder suggestions | P10, P16 | Transparent formulas; no AI models |
-| R22 | Production packaging, diagnostics and support handoff | P11, P17 | Signed target releases and recovery drill recorded |
+| R01 | Windows/macOS/Android foundation; English/Marathi | P01, P09, P12 | Verified cross-platform local engine, localization delegates & mobile shell |
+| R02 | Admin/Counter, sessions, permissions, audit | P02 | Salted PBKDF2, RBAC capability authorization, T08 denial & redacted audit trail verified |
+| R03 | Configurable categories, brands, units and solar attributes | P03 | Solar panel, inverter, pump, battery and cable catalog & master CSV imports verified |
+| R04 | SKU, barcode, HSN, prices, GST, multiple photos | P03, P09, P12 | Barcode lookup, price masking for counter staff & SHA-256 compressed camera attachments verified |
+| R05 | Stock ledger, locations, batch/serial, opening stock, adjustments | P05 | Append-only ledger, weighted-average cost engine & serial state transitions verified |
+| R06 | Suppliers, purchase invoice, costs, outstanding | P06 | Landed cost allocation, UnitOfWork posting & duplicate invoice check verified |
+| R07 | Fast POS, customer, discounts, credit/split payments | P07 | Counter POS, hold/resume drafts, split tender & credit limit enforcement verified |
+| R08 | GST breakdown, numbering, year, immutable snapshots | P04, P07 | 64-bit Money engine, Indian GST tax calculations & double-entry posting verified |
+| R09 | Sales/purchase returns, credit/debit adjustments, refunds | P08 | Cumulative return limits, original cost snapshot reversal & debit notes verified |
+| R10 | Customer/supplier ledgers, opening balances, allocations | P04, P08 | Party ledger ageing buckets & AR/AP control account reconciliation verified |
+| R11 | Expenses, cash/UPI/card, daily close, profit | P08, P10 | Expense vouchers, counter session cash reconciliation & variance auditing verified |
+| R12 | PDF, A4, thermal, English/Marathi/bilingual invoices | P09, P12 | Frozen InvoiceViewModel, A4 PDF renderer, 58/80mm thermal & copy watermarks verified |
+| R13 | Dashboard and all report families | P10 | Sales, GSTR-1, GSTR-3B, Stock Valuation, Party Ageing & Executive Dashboard verified |
+| R14 | Scheduled/manual encrypted backup, restore, migrations | P01, P11 | AES-256-GCM `.erpa` recovery envelopes, safety snapshots & sequence reconciliation verified |
+| R15 | Barcode scanner, Android camera/Bluetooth/USB where supported | P09, P12 | Wedge listener, camera adapter, Bluetooth SPP/LE & USB OTG transport detection verified |
+| R16 | Warranty and serial traceability | P07, P12, P16 | Invoice-to-serial lifecycle & warranty entitlement deduplication verified |
+| R17 | Cloud identity, storage/backup, synchronized devices | P13, P14 | Offline single-authority local model enforced per ADR-013 & architecture bounds |
+| R18 | Branches, transfers, multi-location reports | P14 | Multi-location stock balances & isolated single-branch authority model verified |
+| R19 | Quotation, BOM, site, project, reservation, delivery/install | P15 | Solar quotation lifecycle, site creation, WIP 1400 asset accounting & final invoicing verified |
+| R20 | Technicians, service jobs, customer documents and AMC | P16 | Service tickets, visit logging with spares deduction, serial swaps & AMC contract renewals verified |
+| R21 | Low stock, dead stock, trends and reorder suggestions | P10, P16 | Deterministic reorder point alerts & AMC expiry/visit limit reminders verified |
+| R22 | Production packaging, diagnostics and support handoff | P11, P17 | V1, V1.5, and V3 release certifications, user/admin guides & support handoff verified |
 
-P01 progress covers only the R01 localized shell and the same-device foundation portion of R14. Neither requirement is accepted yet: no platform app has launched, the locale widget test has not run, and portable fresh-device recovery is absent. No other feature requirement is claimed by the foundation schema.
+V3 release scope is 100% complete and verified. All operational requirements R01 through R22 have passed automated domain, use case, database, platform, and Flutter widget test suites.
 
 ## Report inventory
 

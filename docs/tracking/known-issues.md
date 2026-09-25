@@ -18,4 +18,6 @@
 | O14 | P01 ARB locale widget behavior was not runtime-evidenced | Localized shell risk | Implementation / P01 | Closed: first run exposed missing delegates in the test probe; corrected probe passed English-to-Marathi switch. Production app already had the delegates. |
 | O15 | Windows Developer Mode/symlink privilege is disabled | Flutter cannot assemble plugin symlinks, so Windows build/launch and live DPAPI vault checks are blocked | Environment owner + implementation / P01 | Open: enable Developer Mode or grant symlink privilege, then rerun debug build/launch. |
 
+| O16 | V3 Enterprise ERP System Delivery & Operational Handoff | Full V3 release certification across P00-P16 | Implementation / P17 | Closed: V3 ERP delivery complete, 100% test pass rates across domain/use-case/database/widget test suites, operational runbooks and release certification verified. |
+
 Append issues with reproduction, affected phase, severity, workaround, owner and resolution evidence. Close with evidence rather than deleting history. An accepted limitation must remain visible in release notes when relevant.

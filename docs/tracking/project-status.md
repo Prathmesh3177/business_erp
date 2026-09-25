@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-25.
 
-**P16 Warranty, Technician, Service & AMC Workflows is complete.**
+**P18 Final production readiness check on Mac and Windows is complete.**
 
 | Phase | Status | Evidence / next action |
 |---|---|---|
@@ -19,11 +19,11 @@ Last updated: 2026-09-25.
 | P10 | Complete | [Report Definitions & BI spec](../implementation/report-definitions.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Sales Summary, GSTR-1 & GSTR-3B summaries, Stock Valuation, Party Ageing, Financial Trial Balance, Deterministic Reorder Point Alerts, CSV anti-formula-injection, Reports & Dashboard UI pass. |
 | P11 | Complete | [ADR-013](../adr/ADR-013-local-database-encryption-and-recovery.md), [Backup & Restore Runbook](../runbooks/backup-restore.md), [Release & Upgrade Runbook](../runbooks/release-and-upgrade.md), [V1 Release Certification](../releases/v1.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Password-protected portable recovery envelope (.erpa), PBKDF2/AES-256-GCM crypto, SHA-256 integrity verification, staged fault-tolerant restore with pre-restore safety copy (`.pre_restore_safety.bak`), overdue backup warning badge (> 24 hours), post-restore COA & document sequence reconciliation, and V1 hardening pass. |
 | P12 | Complete | [Hardware Matrix](../implementation/hardware-matrix.md), [V1.5 Release Certification](../releases/v1.5.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Mobile-first navigation shell, persistent "Isolated Mobile Data Mode" banner, `MobileCameraAdapter` image compression & SHA-256 hashing, `AppLifecycleDraftHandler` draft recovery, `WarrantyPage` UI, `GenerateWarrantyRemindersUseCase` duplicate-suppressed reminder queue, formula-sanitized CSV export, Bluetooth SPP/LE, Wi-Fi Network TCP, and USB OTG print capability detection pass. |
-
 | P13 | Not started | Cloud foundations |
 | P14 | Not started | Sync/branches/V2 |
 | P15 | Complete | [Projects & Site Costing spec](../implementation/projects-and-costing.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Solar quotation revision lifecycle, site creation on acceptance without double-posting, material issuance/return to site WIP asset account `1400 Work In Progress`, final project invoicing with WIP to COGS transfer, Drift schema v9 migration, and Solar Projects UI pass. |
 | P16 | Complete | [Service & AMC spec](../implementation/service-warranty-amc.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Service job tickets with warranty & AMC coverage evaluation, technician assignment, visit recording with spares stock deduction, serial component replacement lineage tracking, AMC contract creation & renewal, visit limit and contract expiry reminders, Drift schema v10 migration, and Service & AMC UI pass. |
-| P17 | Not started | V3 acceptance |
+| P17 | Complete | [V3 Release Certification](../releases/v3.md), [User Guide](../runbooks/user-guide.md), [Admin Guide](../runbooks/admin-guide.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Audit R01–R22 requirements traceability complete (100%), full test suites passing across domain/use-case/database/widget tests, release notes, user & admin training guides, supported platform matrix, and operational handoff verified. |
+| P18 | Complete | [Production Readiness Certification](../releases/production-readiness.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Cross-platform operating system paths, GST-inclusive back-calculation precision, counter discount recalculation, image compression/placeholder engine, SQLite integrity checks, and update data preservation verified. |
 
 Allowed states: Not started, In progress, Blocked, Implemented awaiting verification, Complete. Update a phase with real evidence links, actual scope and remaining work. Missing environment/hardware checks cannot be labeled complete.

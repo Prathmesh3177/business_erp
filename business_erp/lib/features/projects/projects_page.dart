@@ -125,7 +125,7 @@ final class _QuotationsTabView extends ConsumerWidget {
                         )
                       : Chip(
                           label: Text(q.status.name.toUpperCase()),
-                          backgroundColor: _statusColor(q.status).withOpacity(0.2),
+                          backgroundColor: _statusColor(q.status).withValues(alpha: 0.2),
                         ),
                 ),
               );
@@ -329,7 +329,7 @@ final class _ProjectsTabView extends ConsumerWidget {
                         ),
                         Chip(
                           label: Text(p.status.name.toUpperCase()),
-                          backgroundColor: Colors.blue.withOpacity(0.2),
+                          backgroundColor: Colors.blue.withValues(alpha: 0.2),
                         ),
                       ],
                     ),

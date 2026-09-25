@@ -330,6 +330,42 @@ Record: date; phase/subtask; intended outcome; actual changes and file paths; sc
   - `flutter test` in `business_erp`: PASS (7/7 widget tests passed).
 - P16 Exit Gate: Achieved. Validated warranty/AMC coverage evaluation, technician visit logging with spares stock deduction, serial replacement lineage tracking, AMC contract management, visit limit/expiry reminders, Drift schema v10 migration, and Service & AMC UI complete.
 
+## 2026-09-25 — P17 Complete V3 Acceptance & Operational Handoff
+
+- Intended outcome: Complete V3 final acceptance, audit requirements traceability (R01–R22), produce V3 Release Certification (`docs/releases/v3.md`), User Guide (`docs/runbooks/user-guide.md`), Admin Guide (`docs/runbooks/admin-guide.md`), and update tracking evidence documents.
+- Code & Documentation changes:
+  1. Updated `docs/01-requirements.md`: Updated R01–R22 traceability matrix reflecting 100% completion and verification across all operational requirements.
+  2. Created `docs/releases/v3.md`: V3.0 Complete Enterprise ERP Release Certification documenting scope, module architecture, automated test evidence summary, and operational sign-off.
+  3. Created `docs/runbooks/user-guide.md`: End-user operational guide covering login, counter POS, purchasing, solar projects, service tickets, AMC contracts, and reporting.
+  4. Created `docs/runbooks/admin-guide.md`: Administrator and IT support guide covering setup, Master Recovery Key, database encryption modes, backup/restore runbook, Drift schema version evolution (v1 to v10), and diagnostic commands.
+  5. Updated `docs/tracking/project-status.md`: Marked P17 as Complete.
+  6. Updated `docs/tracking/known-issues.md`: Added O16 resolution details for V3 release.
+- Checks & Verification:
+  - `dart test` in `packages/erp_domain`: PASS (40/40 unit tests).
+  - `dart test` in `packages/erp_application`: PASS (42/42 use case tests).
+  - `dart test` in `packages/erp_local_data`: PASS (15/15 database integration tests).
+  - `flutter test` in `business_erp`: PASS (7/7 widget tests passed).
+  - `dart run tool/check_all.dart`: PASS (0 boundary errors, 0 broken links, 0 unpaired fences).
+- P17 Exit Gate: Achieved. V3 Enterprise ERP delivery complete with 100% requirements coverage, verified operational runbooks, and certified release documentation.
+
+## 2026-09-25 — P18 Final Production Readiness Certification
+
+- Intended outcome: Verify final production readiness for Solar Shop ERP on Mac and Windows, including cross-platform OS paths, GST rate/HSN management, GST-inclusive back-calculation precision, counter discount recalculation, image compression & placeholder engine, database integrity checks, and data update preservation.
+- Code & Documentation changes:
+  1. `packages/erp_domain/test/gst_production_readiness_test.dart`: Added comprehensive unit tests for GST-inclusive MRP back-calculation, forward-calculation, discounted GST recalculation, inter-state IGST routing, and multi-line mixed rate GST invoices (45/45 domain unit tests PASS).
+  2. Created `docs/releases/production-readiness.md`: Final production readiness certification covering OS path matrix, GST tax engine formulas, product image placeholder architecture, database integrity checks, update migration runbooks, and sign-off.
+  3. Updated `docs/tracking/project-status.md`: Marked P18 as Complete.
+  4. Updated `docs/tracking/test-evidence.md`: Appended P18 test evidence entries.
+- Checks & Verification:
+  - `dart test` in `packages/erp_domain`: PASS (45/45 unit tests passed).
+  - `dart test` in `packages/erp_application`: PASS (42/42 use case tests passed).
+  - `dart test` in `packages/erp_local_data`: PASS (15/15 database integration tests passed).
+  - `flutter test` in `business_erp`: PASS (7/7 widget tests passed).
+  - `dart run tool/check_all.dart`: PASS (0 boundary errors, 0 broken links, 0 unpaired fences).
+- P18 Exit Gate: Achieved. Final production readiness gate verified across Windows and macOS with proven calculations, database integrity, and operational resilience.
+
+
+
 
 
 

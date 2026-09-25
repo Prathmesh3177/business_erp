@@ -19,6 +19,7 @@ import '../features/mobile/mobile_navigation_shell.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/warranty/warranty_page.dart';
 import '../features/service/service_amc_page.dart';
+import '../features/settings/user_management_page.dart';
 import '../l10n/strings.dart';
 import 'auth_controller.dart';
 import 'bootstrap.dart';
