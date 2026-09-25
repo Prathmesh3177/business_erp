@@ -309,6 +309,28 @@ Record: date; phase/subtask; intended outcome; actual changes and file paths; sc
   - `dart run tool/check_all.dart`: PASS (0 boundary errors, 0 broken links).
 - P15 Exit Gate: Achieved. Validated solar quotations, site creation on acceptance without double-posting revenue/stock, material issuance/return to site WIP asset account `1400 Work In Progress`, final project invoicing with WIP to COGS transfer, Drift schema v9 migration, and Solar Projects UI complete.
 
+## 2026-09-25 — P16 Service, Warranty, Technician & AMC Workflows Implementation
+
+- Intended outcome: Build service job ticketing, technician assignment, visit logging with spares stock deduction, serial component replacement lineage tracking, annual maintenance contract (AMC) creation/renewal, visit limit and contract expiry reminders, Drift schema v10 migration, and Service & AMC UI page.
+- Code & Architecture changes:
+  1. `packages/erp_domain`: Created `service_amc.dart` (`ServiceJobStatus`, `AmcContractStatus`, `ServiceJob`, `ServiceJobSpareItem`, `ServiceJobVisit`, `SerialReplacement`, `AmcContract`, `AmcReminder`). Exported in `erp_domain.dart`.
+  2. `packages/erp_application`: Created `service_store.dart` (`ServiceStore` interface) and `service_amc_use_cases.dart` (`CreateServiceJobUseCase`, `AssignTechnicianUseCase`, `RecordServiceVisitUseCase`, `ReplaceSerializedComponentUseCase`, `CreateAmcContractUseCase`, `RenewAmcContractUseCase`, `GenerateAmcRemindersUseCase`). Exported in `erp_application.dart`.
+  3. `packages/erp_local_data`: Updated Drift database to `schemaVersion = 10` (`ServiceJobs`, `ServiceJobVisits`, `AmcContracts`, `SerialReplacements` tables) with schema v9->v10 migration and `ServiceStore` implementations in `FoundationDatabase`.
+  4. `business_erp`:
+     - Created `ServiceAmcPage` in `lib/features/service/service_amc_page.dart` (Service Tickets Tab, AMC Contracts Tab, Reminders & My Jobs Tab).
+     - Registered `/service` route in `app/app.dart` and added navigation button in `foundation_page.dart`.
+     - Created widget test in `test/service_amc_widget_test.dart` (7/7 widget tests PASS).
+  5. Documentation & Tracking:
+     - Created `docs/implementation/service-warranty-amc.md`.
+     - Updated `docs/tracking/project-status.md` (marked P16 as Complete).
+- Checks & Verification:
+  - `dart test` in `packages/erp_domain`: PASS (40/40 unit tests).
+  - `dart test` in `packages/erp_application`: PASS (42/42 use case tests).
+  - `dart test` in `packages/erp_local_data`: PASS (15/15 database integration tests).
+  - `flutter test` in `business_erp`: PASS (7/7 widget tests passed).
+- P16 Exit Gate: Achieved. Validated warranty/AMC coverage evaluation, technician visit logging with spares stock deduction, serial replacement lineage tracking, AMC contract management, visit limit/expiry reminders, Drift schema v10 migration, and Service & AMC UI complete.
+
+
 
 
 

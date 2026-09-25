@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-25.
 
-**P15 Solar Projects & Quotations, Site Inventory, Work-in-Progress (1400 WIP), and Site Costing BI is complete.**
+**P16 Warranty, Technician, Service & AMC Workflows is complete.**
 
 | Phase | Status | Evidence / next action |
 |---|---|---|
@@ -23,7 +23,7 @@ Last updated: 2026-09-25.
 | P13 | Not started | Cloud foundations |
 | P14 | Not started | Sync/branches/V2 |
 | P15 | Complete | [Projects & Site Costing spec](../implementation/projects-and-costing.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Solar quotation revision lifecycle, site creation on acceptance without double-posting, material issuance/return to site WIP asset account `1400 Work In Progress`, final project invoicing with WIP to COGS transfer, Drift schema v9 migration, and Solar Projects UI pass. |
-| P16 | Not started | Service/AMC |
+| P16 | Complete | [Service & AMC spec](../implementation/service-warranty-amc.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Service job tickets with warranty & AMC coverage evaluation, technician assignment, visit recording with spares stock deduction, serial component replacement lineage tracking, AMC contract creation & renewal, visit limit and contract expiry reminders, Drift schema v10 migration, and Service & AMC UI pass. |
 | P17 | Not started | V3 acceptance |
 
 Allowed states: Not started, In progress, Blocked, Implemented awaiting verification, Complete. Update a phase with real evidence links, actual scope and remaining work. Missing environment/hardware checks cannot be labeled complete.

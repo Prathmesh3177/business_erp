@@ -408,6 +408,12 @@ final class _ReadyView extends ConsumerWidget {
                   icon: const Icon(Icons.wb_sunny),
                   label: const Text('Solar Projects & Quotations'),
                 ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0288D1), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/service'),
+                  icon: const Icon(Icons.build),
+                  label: const Text('Service & AMC Workflows'),
+                ),
                 FilledButton.tonalIcon(
                   onPressed: () => _snapshot(context),
                   icon: const Icon(Icons.backup_outlined),

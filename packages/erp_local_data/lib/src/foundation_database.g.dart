@@ -33477,6 +33477,2917 @@ class ProjectMaterialIssueLinesCompanion
   }
 }
 
+class $ServiceJobsTable extends ServiceJobs
+    with TableInfo<$ServiceJobsTable, ServiceJobRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ServiceJobsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _branchIdMeta = const VerificationMeta(
+    'branchId',
+  );
+  @override
+  late final GeneratedColumn<String> branchId = GeneratedColumn<String>(
+    'branch_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jobTicketNumberMeta = const VerificationMeta(
+    'jobTicketNumber',
+  );
+  @override
+  late final GeneratedColumn<String> jobTicketNumber = GeneratedColumn<String>(
+    'job_ticket_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customerPartyIdMeta = const VerificationMeta(
+    'customerPartyId',
+  );
+  @override
+  late final GeneratedColumn<String> customerPartyId = GeneratedColumn<String>(
+    'customer_party_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customerNameMeta = const VerificationMeta(
+    'customerName',
+  );
+  @override
+  late final GeneratedColumn<String> customerName = GeneratedColumn<String>(
+    'customer_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _siteAddressMeta = const VerificationMeta(
+    'siteAddress',
+  );
+  @override
+  late final GeneratedColumn<String> siteAddress = GeneratedColumn<String>(
+    'site_address',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _equipmentSerialIdMeta = const VerificationMeta(
+    'equipmentSerialId',
+  );
+  @override
+  late final GeneratedColumn<String> equipmentSerialId =
+      GeneratedColumn<String>(
+        'equipment_serial_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _issueDescriptionMeta = const VerificationMeta(
+    'issueDescription',
+  );
+  @override
+  late final GeneratedColumn<String> issueDescription = GeneratedColumn<String>(
+    'issue_description',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _assignedTechnicianUserIdMeta =
+      const VerificationMeta('assignedTechnicianUserId');
+  @override
+  late final GeneratedColumn<String> assignedTechnicianUserId =
+      GeneratedColumn<String>(
+        'assigned_technician_user_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _assignedTechnicianNameMeta =
+      const VerificationMeta('assignedTechnicianName');
+  @override
+  late final GeneratedColumn<String> assignedTechnicianName =
+      GeneratedColumn<String>(
+        'assigned_technician_name',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _isCoveredByWarrantyMeta =
+      const VerificationMeta('isCoveredByWarranty');
+  @override
+  late final GeneratedColumn<bool> isCoveredByWarranty = GeneratedColumn<bool>(
+    'is_covered_by_warranty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_covered_by_warranty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _isCoveredByAmcMeta = const VerificationMeta(
+    'isCoveredByAmc',
+  );
+  @override
+  late final GeneratedColumn<bool> isCoveredByAmc = GeneratedColumn<bool>(
+    'is_covered_by_amc',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_covered_by_amc" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('logged'),
+  );
+  static const VerificationMeta _createdAtUtcMsMeta = const VerificationMeta(
+    'createdAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtUtcMs = GeneratedColumn<int>(
+    'created_at_utc_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    branchId,
+    jobTicketNumber,
+    customerPartyId,
+    customerName,
+    siteAddress,
+    equipmentSerialId,
+    issueDescription,
+    assignedTechnicianUserId,
+    assignedTechnicianName,
+    isCoveredByWarranty,
+    isCoveredByAmc,
+    status,
+    createdAtUtcMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'service_jobs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ServiceJobRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('branch_id')) {
+      context.handle(
+        _branchIdMeta,
+        branchId.isAcceptableOrUnknown(data['branch_id']!, _branchIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_branchIdMeta);
+    }
+    if (data.containsKey('job_ticket_number')) {
+      context.handle(
+        _jobTicketNumberMeta,
+        jobTicketNumber.isAcceptableOrUnknown(
+          data['job_ticket_number']!,
+          _jobTicketNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_jobTicketNumberMeta);
+    }
+    if (data.containsKey('customer_party_id')) {
+      context.handle(
+        _customerPartyIdMeta,
+        customerPartyId.isAcceptableOrUnknown(
+          data['customer_party_id']!,
+          _customerPartyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_customerPartyIdMeta);
+    }
+    if (data.containsKey('customer_name')) {
+      context.handle(
+        _customerNameMeta,
+        customerName.isAcceptableOrUnknown(
+          data['customer_name']!,
+          _customerNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_customerNameMeta);
+    }
+    if (data.containsKey('site_address')) {
+      context.handle(
+        _siteAddressMeta,
+        siteAddress.isAcceptableOrUnknown(
+          data['site_address']!,
+          _siteAddressMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_siteAddressMeta);
+    }
+    if (data.containsKey('equipment_serial_id')) {
+      context.handle(
+        _equipmentSerialIdMeta,
+        equipmentSerialId.isAcceptableOrUnknown(
+          data['equipment_serial_id']!,
+          _equipmentSerialIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_equipmentSerialIdMeta);
+    }
+    if (data.containsKey('issue_description')) {
+      context.handle(
+        _issueDescriptionMeta,
+        issueDescription.isAcceptableOrUnknown(
+          data['issue_description']!,
+          _issueDescriptionMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_issueDescriptionMeta);
+    }
+    if (data.containsKey('assigned_technician_user_id')) {
+      context.handle(
+        _assignedTechnicianUserIdMeta,
+        assignedTechnicianUserId.isAcceptableOrUnknown(
+          data['assigned_technician_user_id']!,
+          _assignedTechnicianUserIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('assigned_technician_name')) {
+      context.handle(
+        _assignedTechnicianNameMeta,
+        assignedTechnicianName.isAcceptableOrUnknown(
+          data['assigned_technician_name']!,
+          _assignedTechnicianNameMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_covered_by_warranty')) {
+      context.handle(
+        _isCoveredByWarrantyMeta,
+        isCoveredByWarranty.isAcceptableOrUnknown(
+          data['is_covered_by_warranty']!,
+          _isCoveredByWarrantyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_covered_by_amc')) {
+      context.handle(
+        _isCoveredByAmcMeta,
+        isCoveredByAmc.isAcceptableOrUnknown(
+          data['is_covered_by_amc']!,
+          _isCoveredByAmcMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at_utc_ms')) {
+      context.handle(
+        _createdAtUtcMsMeta,
+        createdAtUtcMs.isAcceptableOrUnknown(
+          data['created_at_utc_ms']!,
+          _createdAtUtcMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtUtcMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ServiceJobRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ServiceJobRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      branchId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}branch_id'],
+      )!,
+      jobTicketNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}job_ticket_number'],
+      )!,
+      customerPartyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_party_id'],
+      )!,
+      customerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_name'],
+      )!,
+      siteAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}site_address'],
+      )!,
+      equipmentSerialId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}equipment_serial_id'],
+      )!,
+      issueDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}issue_description'],
+      )!,
+      assignedTechnicianUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assigned_technician_user_id'],
+      ),
+      assignedTechnicianName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assigned_technician_name'],
+      ),
+      isCoveredByWarranty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_covered_by_warranty'],
+      )!,
+      isCoveredByAmc: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_covered_by_amc'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_utc_ms'],
+      )!,
+    );
+  }
+
+  @override
+  $ServiceJobsTable createAlias(String alias) {
+    return $ServiceJobsTable(attachedDatabase, alias);
+  }
+}
+
+class ServiceJobRow extends DataClass implements Insertable<ServiceJobRow> {
+  final String id;
+  final String organizationId;
+  final String branchId;
+  final String jobTicketNumber;
+  final String customerPartyId;
+  final String customerName;
+  final String siteAddress;
+  final String equipmentSerialId;
+  final String issueDescription;
+  final String? assignedTechnicianUserId;
+  final String? assignedTechnicianName;
+  final bool isCoveredByWarranty;
+  final bool isCoveredByAmc;
+  final String status;
+  final int createdAtUtcMs;
+  const ServiceJobRow({
+    required this.id,
+    required this.organizationId,
+    required this.branchId,
+    required this.jobTicketNumber,
+    required this.customerPartyId,
+    required this.customerName,
+    required this.siteAddress,
+    required this.equipmentSerialId,
+    required this.issueDescription,
+    this.assignedTechnicianUserId,
+    this.assignedTechnicianName,
+    required this.isCoveredByWarranty,
+    required this.isCoveredByAmc,
+    required this.status,
+    required this.createdAtUtcMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['branch_id'] = Variable<String>(branchId);
+    map['job_ticket_number'] = Variable<String>(jobTicketNumber);
+    map['customer_party_id'] = Variable<String>(customerPartyId);
+    map['customer_name'] = Variable<String>(customerName);
+    map['site_address'] = Variable<String>(siteAddress);
+    map['equipment_serial_id'] = Variable<String>(equipmentSerialId);
+    map['issue_description'] = Variable<String>(issueDescription);
+    if (!nullToAbsent || assignedTechnicianUserId != null) {
+      map['assigned_technician_user_id'] = Variable<String>(
+        assignedTechnicianUserId,
+      );
+    }
+    if (!nullToAbsent || assignedTechnicianName != null) {
+      map['assigned_technician_name'] = Variable<String>(
+        assignedTechnicianName,
+      );
+    }
+    map['is_covered_by_warranty'] = Variable<bool>(isCoveredByWarranty);
+    map['is_covered_by_amc'] = Variable<bool>(isCoveredByAmc);
+    map['status'] = Variable<String>(status);
+    map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs);
+    return map;
+  }
+
+  ServiceJobsCompanion toCompanion(bool nullToAbsent) {
+    return ServiceJobsCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      branchId: Value(branchId),
+      jobTicketNumber: Value(jobTicketNumber),
+      customerPartyId: Value(customerPartyId),
+      customerName: Value(customerName),
+      siteAddress: Value(siteAddress),
+      equipmentSerialId: Value(equipmentSerialId),
+      issueDescription: Value(issueDescription),
+      assignedTechnicianUserId: assignedTechnicianUserId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assignedTechnicianUserId),
+      assignedTechnicianName: assignedTechnicianName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(assignedTechnicianName),
+      isCoveredByWarranty: Value(isCoveredByWarranty),
+      isCoveredByAmc: Value(isCoveredByAmc),
+      status: Value(status),
+      createdAtUtcMs: Value(createdAtUtcMs),
+    );
+  }
+
+  factory ServiceJobRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ServiceJobRow(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      branchId: serializer.fromJson<String>(json['branchId']),
+      jobTicketNumber: serializer.fromJson<String>(json['jobTicketNumber']),
+      customerPartyId: serializer.fromJson<String>(json['customerPartyId']),
+      customerName: serializer.fromJson<String>(json['customerName']),
+      siteAddress: serializer.fromJson<String>(json['siteAddress']),
+      equipmentSerialId: serializer.fromJson<String>(json['equipmentSerialId']),
+      issueDescription: serializer.fromJson<String>(json['issueDescription']),
+      assignedTechnicianUserId: serializer.fromJson<String?>(
+        json['assignedTechnicianUserId'],
+      ),
+      assignedTechnicianName: serializer.fromJson<String?>(
+        json['assignedTechnicianName'],
+      ),
+      isCoveredByWarranty: serializer.fromJson<bool>(
+        json['isCoveredByWarranty'],
+      ),
+      isCoveredByAmc: serializer.fromJson<bool>(json['isCoveredByAmc']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAtUtcMs: serializer.fromJson<int>(json['createdAtUtcMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'branchId': serializer.toJson<String>(branchId),
+      'jobTicketNumber': serializer.toJson<String>(jobTicketNumber),
+      'customerPartyId': serializer.toJson<String>(customerPartyId),
+      'customerName': serializer.toJson<String>(customerName),
+      'siteAddress': serializer.toJson<String>(siteAddress),
+      'equipmentSerialId': serializer.toJson<String>(equipmentSerialId),
+      'issueDescription': serializer.toJson<String>(issueDescription),
+      'assignedTechnicianUserId': serializer.toJson<String?>(
+        assignedTechnicianUserId,
+      ),
+      'assignedTechnicianName': serializer.toJson<String?>(
+        assignedTechnicianName,
+      ),
+      'isCoveredByWarranty': serializer.toJson<bool>(isCoveredByWarranty),
+      'isCoveredByAmc': serializer.toJson<bool>(isCoveredByAmc),
+      'status': serializer.toJson<String>(status),
+      'createdAtUtcMs': serializer.toJson<int>(createdAtUtcMs),
+    };
+  }
+
+  ServiceJobRow copyWith({
+    String? id,
+    String? organizationId,
+    String? branchId,
+    String? jobTicketNumber,
+    String? customerPartyId,
+    String? customerName,
+    String? siteAddress,
+    String? equipmentSerialId,
+    String? issueDescription,
+    Value<String?> assignedTechnicianUserId = const Value.absent(),
+    Value<String?> assignedTechnicianName = const Value.absent(),
+    bool? isCoveredByWarranty,
+    bool? isCoveredByAmc,
+    String? status,
+    int? createdAtUtcMs,
+  }) => ServiceJobRow(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    branchId: branchId ?? this.branchId,
+    jobTicketNumber: jobTicketNumber ?? this.jobTicketNumber,
+    customerPartyId: customerPartyId ?? this.customerPartyId,
+    customerName: customerName ?? this.customerName,
+    siteAddress: siteAddress ?? this.siteAddress,
+    equipmentSerialId: equipmentSerialId ?? this.equipmentSerialId,
+    issueDescription: issueDescription ?? this.issueDescription,
+    assignedTechnicianUserId: assignedTechnicianUserId.present
+        ? assignedTechnicianUserId.value
+        : this.assignedTechnicianUserId,
+    assignedTechnicianName: assignedTechnicianName.present
+        ? assignedTechnicianName.value
+        : this.assignedTechnicianName,
+    isCoveredByWarranty: isCoveredByWarranty ?? this.isCoveredByWarranty,
+    isCoveredByAmc: isCoveredByAmc ?? this.isCoveredByAmc,
+    status: status ?? this.status,
+    createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+  );
+  ServiceJobRow copyWithCompanion(ServiceJobsCompanion data) {
+    return ServiceJobRow(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      branchId: data.branchId.present ? data.branchId.value : this.branchId,
+      jobTicketNumber: data.jobTicketNumber.present
+          ? data.jobTicketNumber.value
+          : this.jobTicketNumber,
+      customerPartyId: data.customerPartyId.present
+          ? data.customerPartyId.value
+          : this.customerPartyId,
+      customerName: data.customerName.present
+          ? data.customerName.value
+          : this.customerName,
+      siteAddress: data.siteAddress.present
+          ? data.siteAddress.value
+          : this.siteAddress,
+      equipmentSerialId: data.equipmentSerialId.present
+          ? data.equipmentSerialId.value
+          : this.equipmentSerialId,
+      issueDescription: data.issueDescription.present
+          ? data.issueDescription.value
+          : this.issueDescription,
+      assignedTechnicianUserId: data.assignedTechnicianUserId.present
+          ? data.assignedTechnicianUserId.value
+          : this.assignedTechnicianUserId,
+      assignedTechnicianName: data.assignedTechnicianName.present
+          ? data.assignedTechnicianName.value
+          : this.assignedTechnicianName,
+      isCoveredByWarranty: data.isCoveredByWarranty.present
+          ? data.isCoveredByWarranty.value
+          : this.isCoveredByWarranty,
+      isCoveredByAmc: data.isCoveredByAmc.present
+          ? data.isCoveredByAmc.value
+          : this.isCoveredByAmc,
+      status: data.status.present ? data.status.value : this.status,
+      createdAtUtcMs: data.createdAtUtcMs.present
+          ? data.createdAtUtcMs.value
+          : this.createdAtUtcMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ServiceJobRow(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('branchId: $branchId, ')
+          ..write('jobTicketNumber: $jobTicketNumber, ')
+          ..write('customerPartyId: $customerPartyId, ')
+          ..write('customerName: $customerName, ')
+          ..write('siteAddress: $siteAddress, ')
+          ..write('equipmentSerialId: $equipmentSerialId, ')
+          ..write('issueDescription: $issueDescription, ')
+          ..write('assignedTechnicianUserId: $assignedTechnicianUserId, ')
+          ..write('assignedTechnicianName: $assignedTechnicianName, ')
+          ..write('isCoveredByWarranty: $isCoveredByWarranty, ')
+          ..write('isCoveredByAmc: $isCoveredByAmc, ')
+          ..write('status: $status, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    branchId,
+    jobTicketNumber,
+    customerPartyId,
+    customerName,
+    siteAddress,
+    equipmentSerialId,
+    issueDescription,
+    assignedTechnicianUserId,
+    assignedTechnicianName,
+    isCoveredByWarranty,
+    isCoveredByAmc,
+    status,
+    createdAtUtcMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ServiceJobRow &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.branchId == this.branchId &&
+          other.jobTicketNumber == this.jobTicketNumber &&
+          other.customerPartyId == this.customerPartyId &&
+          other.customerName == this.customerName &&
+          other.siteAddress == this.siteAddress &&
+          other.equipmentSerialId == this.equipmentSerialId &&
+          other.issueDescription == this.issueDescription &&
+          other.assignedTechnicianUserId == this.assignedTechnicianUserId &&
+          other.assignedTechnicianName == this.assignedTechnicianName &&
+          other.isCoveredByWarranty == this.isCoveredByWarranty &&
+          other.isCoveredByAmc == this.isCoveredByAmc &&
+          other.status == this.status &&
+          other.createdAtUtcMs == this.createdAtUtcMs);
+}
+
+class ServiceJobsCompanion extends UpdateCompanion<ServiceJobRow> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> branchId;
+  final Value<String> jobTicketNumber;
+  final Value<String> customerPartyId;
+  final Value<String> customerName;
+  final Value<String> siteAddress;
+  final Value<String> equipmentSerialId;
+  final Value<String> issueDescription;
+  final Value<String?> assignedTechnicianUserId;
+  final Value<String?> assignedTechnicianName;
+  final Value<bool> isCoveredByWarranty;
+  final Value<bool> isCoveredByAmc;
+  final Value<String> status;
+  final Value<int> createdAtUtcMs;
+  final Value<int> rowid;
+  const ServiceJobsCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.branchId = const Value.absent(),
+    this.jobTicketNumber = const Value.absent(),
+    this.customerPartyId = const Value.absent(),
+    this.customerName = const Value.absent(),
+    this.siteAddress = const Value.absent(),
+    this.equipmentSerialId = const Value.absent(),
+    this.issueDescription = const Value.absent(),
+    this.assignedTechnicianUserId = const Value.absent(),
+    this.assignedTechnicianName = const Value.absent(),
+    this.isCoveredByWarranty = const Value.absent(),
+    this.isCoveredByAmc = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAtUtcMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ServiceJobsCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String branchId,
+    required String jobTicketNumber,
+    required String customerPartyId,
+    required String customerName,
+    required String siteAddress,
+    required String equipmentSerialId,
+    required String issueDescription,
+    this.assignedTechnicianUserId = const Value.absent(),
+    this.assignedTechnicianName = const Value.absent(),
+    this.isCoveredByWarranty = const Value.absent(),
+    this.isCoveredByAmc = const Value.absent(),
+    this.status = const Value.absent(),
+    required int createdAtUtcMs,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       branchId = Value(branchId),
+       jobTicketNumber = Value(jobTicketNumber),
+       customerPartyId = Value(customerPartyId),
+       customerName = Value(customerName),
+       siteAddress = Value(siteAddress),
+       equipmentSerialId = Value(equipmentSerialId),
+       issueDescription = Value(issueDescription),
+       createdAtUtcMs = Value(createdAtUtcMs);
+  static Insertable<ServiceJobRow> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? branchId,
+    Expression<String>? jobTicketNumber,
+    Expression<String>? customerPartyId,
+    Expression<String>? customerName,
+    Expression<String>? siteAddress,
+    Expression<String>? equipmentSerialId,
+    Expression<String>? issueDescription,
+    Expression<String>? assignedTechnicianUserId,
+    Expression<String>? assignedTechnicianName,
+    Expression<bool>? isCoveredByWarranty,
+    Expression<bool>? isCoveredByAmc,
+    Expression<String>? status,
+    Expression<int>? createdAtUtcMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (branchId != null) 'branch_id': branchId,
+      if (jobTicketNumber != null) 'job_ticket_number': jobTicketNumber,
+      if (customerPartyId != null) 'customer_party_id': customerPartyId,
+      if (customerName != null) 'customer_name': customerName,
+      if (siteAddress != null) 'site_address': siteAddress,
+      if (equipmentSerialId != null) 'equipment_serial_id': equipmentSerialId,
+      if (issueDescription != null) 'issue_description': issueDescription,
+      if (assignedTechnicianUserId != null)
+        'assigned_technician_user_id': assignedTechnicianUserId,
+      if (assignedTechnicianName != null)
+        'assigned_technician_name': assignedTechnicianName,
+      if (isCoveredByWarranty != null)
+        'is_covered_by_warranty': isCoveredByWarranty,
+      if (isCoveredByAmc != null) 'is_covered_by_amc': isCoveredByAmc,
+      if (status != null) 'status': status,
+      if (createdAtUtcMs != null) 'created_at_utc_ms': createdAtUtcMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ServiceJobsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? branchId,
+    Value<String>? jobTicketNumber,
+    Value<String>? customerPartyId,
+    Value<String>? customerName,
+    Value<String>? siteAddress,
+    Value<String>? equipmentSerialId,
+    Value<String>? issueDescription,
+    Value<String?>? assignedTechnicianUserId,
+    Value<String?>? assignedTechnicianName,
+    Value<bool>? isCoveredByWarranty,
+    Value<bool>? isCoveredByAmc,
+    Value<String>? status,
+    Value<int>? createdAtUtcMs,
+    Value<int>? rowid,
+  }) {
+    return ServiceJobsCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      branchId: branchId ?? this.branchId,
+      jobTicketNumber: jobTicketNumber ?? this.jobTicketNumber,
+      customerPartyId: customerPartyId ?? this.customerPartyId,
+      customerName: customerName ?? this.customerName,
+      siteAddress: siteAddress ?? this.siteAddress,
+      equipmentSerialId: equipmentSerialId ?? this.equipmentSerialId,
+      issueDescription: issueDescription ?? this.issueDescription,
+      assignedTechnicianUserId:
+          assignedTechnicianUserId ?? this.assignedTechnicianUserId,
+      assignedTechnicianName:
+          assignedTechnicianName ?? this.assignedTechnicianName,
+      isCoveredByWarranty: isCoveredByWarranty ?? this.isCoveredByWarranty,
+      isCoveredByAmc: isCoveredByAmc ?? this.isCoveredByAmc,
+      status: status ?? this.status,
+      createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (branchId.present) {
+      map['branch_id'] = Variable<String>(branchId.value);
+    }
+    if (jobTicketNumber.present) {
+      map['job_ticket_number'] = Variable<String>(jobTicketNumber.value);
+    }
+    if (customerPartyId.present) {
+      map['customer_party_id'] = Variable<String>(customerPartyId.value);
+    }
+    if (customerName.present) {
+      map['customer_name'] = Variable<String>(customerName.value);
+    }
+    if (siteAddress.present) {
+      map['site_address'] = Variable<String>(siteAddress.value);
+    }
+    if (equipmentSerialId.present) {
+      map['equipment_serial_id'] = Variable<String>(equipmentSerialId.value);
+    }
+    if (issueDescription.present) {
+      map['issue_description'] = Variable<String>(issueDescription.value);
+    }
+    if (assignedTechnicianUserId.present) {
+      map['assigned_technician_user_id'] = Variable<String>(
+        assignedTechnicianUserId.value,
+      );
+    }
+    if (assignedTechnicianName.present) {
+      map['assigned_technician_name'] = Variable<String>(
+        assignedTechnicianName.value,
+      );
+    }
+    if (isCoveredByWarranty.present) {
+      map['is_covered_by_warranty'] = Variable<bool>(isCoveredByWarranty.value);
+    }
+    if (isCoveredByAmc.present) {
+      map['is_covered_by_amc'] = Variable<bool>(isCoveredByAmc.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAtUtcMs.present) {
+      map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ServiceJobsCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('branchId: $branchId, ')
+          ..write('jobTicketNumber: $jobTicketNumber, ')
+          ..write('customerPartyId: $customerPartyId, ')
+          ..write('customerName: $customerName, ')
+          ..write('siteAddress: $siteAddress, ')
+          ..write('equipmentSerialId: $equipmentSerialId, ')
+          ..write('issueDescription: $issueDescription, ')
+          ..write('assignedTechnicianUserId: $assignedTechnicianUserId, ')
+          ..write('assignedTechnicianName: $assignedTechnicianName, ')
+          ..write('isCoveredByWarranty: $isCoveredByWarranty, ')
+          ..write('isCoveredByAmc: $isCoveredByAmc, ')
+          ..write('status: $status, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ServiceJobVisitsTable extends ServiceJobVisits
+    with TableInfo<$ServiceJobVisitsTable, ServiceJobVisitRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ServiceJobVisitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
+  @override
+  late final GeneratedColumn<String> jobId = GeneratedColumn<String>(
+    'job_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _technicianUserIdMeta = const VerificationMeta(
+    'technicianUserId',
+  );
+  @override
+  late final GeneratedColumn<String> technicianUserId = GeneratedColumn<String>(
+    'technician_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _technicianNameMeta = const VerificationMeta(
+    'technicianName',
+  );
+  @override
+  late final GeneratedColumn<String> technicianName = GeneratedColumn<String>(
+    'technician_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visitDateMsMeta = const VerificationMeta(
+    'visitDateMs',
+  );
+  @override
+  late final GeneratedColumn<int> visitDateMs = GeneratedColumn<int>(
+    'visit_date_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _workPerformedMeta = const VerificationMeta(
+    'workPerformed',
+  );
+  @override
+  late final GeneratedColumn<String> workPerformed = GeneratedColumn<String>(
+    'work_performed',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _travelExpensesPaiseMeta =
+      const VerificationMeta('travelExpensesPaise');
+  @override
+  late final GeneratedColumn<int> travelExpensesPaise = GeneratedColumn<int>(
+    'travel_expenses_paise',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _laborCostPaiseMeta = const VerificationMeta(
+    'laborCostPaise',
+  );
+  @override
+  late final GeneratedColumn<int> laborCostPaise = GeneratedColumn<int>(
+    'labor_cost_paise',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _billableAmountPaiseMeta =
+      const VerificationMeta('billableAmountPaise');
+  @override
+  late final GeneratedColumn<int> billableAmountPaise = GeneratedColumn<int>(
+    'billable_amount_paise',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sparesUsedJsonMeta = const VerificationMeta(
+    'sparesUsedJson',
+  );
+  @override
+  late final GeneratedColumn<String> sparesUsedJson = GeneratedColumn<String>(
+    'spares_used_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _isCompletedMeta = const VerificationMeta(
+    'isCompleted',
+  );
+  @override
+  late final GeneratedColumn<bool> isCompleted = GeneratedColumn<bool>(
+    'is_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_completed" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    jobId,
+    technicianUserId,
+    technicianName,
+    visitDateMs,
+    workPerformed,
+    travelExpensesPaise,
+    laborCostPaise,
+    billableAmountPaise,
+    sparesUsedJson,
+    isCompleted,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'service_job_visits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ServiceJobVisitRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('job_id')) {
+      context.handle(
+        _jobIdMeta,
+        jobId.isAcceptableOrUnknown(data['job_id']!, _jobIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jobIdMeta);
+    }
+    if (data.containsKey('technician_user_id')) {
+      context.handle(
+        _technicianUserIdMeta,
+        technicianUserId.isAcceptableOrUnknown(
+          data['technician_user_id']!,
+          _technicianUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_technicianUserIdMeta);
+    }
+    if (data.containsKey('technician_name')) {
+      context.handle(
+        _technicianNameMeta,
+        technicianName.isAcceptableOrUnknown(
+          data['technician_name']!,
+          _technicianNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_technicianNameMeta);
+    }
+    if (data.containsKey('visit_date_ms')) {
+      context.handle(
+        _visitDateMsMeta,
+        visitDateMs.isAcceptableOrUnknown(
+          data['visit_date_ms']!,
+          _visitDateMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_visitDateMsMeta);
+    }
+    if (data.containsKey('work_performed')) {
+      context.handle(
+        _workPerformedMeta,
+        workPerformed.isAcceptableOrUnknown(
+          data['work_performed']!,
+          _workPerformedMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_workPerformedMeta);
+    }
+    if (data.containsKey('travel_expenses_paise')) {
+      context.handle(
+        _travelExpensesPaiseMeta,
+        travelExpensesPaise.isAcceptableOrUnknown(
+          data['travel_expenses_paise']!,
+          _travelExpensesPaiseMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_travelExpensesPaiseMeta);
+    }
+    if (data.containsKey('labor_cost_paise')) {
+      context.handle(
+        _laborCostPaiseMeta,
+        laborCostPaise.isAcceptableOrUnknown(
+          data['labor_cost_paise']!,
+          _laborCostPaiseMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_laborCostPaiseMeta);
+    }
+    if (data.containsKey('billable_amount_paise')) {
+      context.handle(
+        _billableAmountPaiseMeta,
+        billableAmountPaise.isAcceptableOrUnknown(
+          data['billable_amount_paise']!,
+          _billableAmountPaiseMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_billableAmountPaiseMeta);
+    }
+    if (data.containsKey('spares_used_json')) {
+      context.handle(
+        _sparesUsedJsonMeta,
+        sparesUsedJson.isAcceptableOrUnknown(
+          data['spares_used_json']!,
+          _sparesUsedJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('is_completed')) {
+      context.handle(
+        _isCompletedMeta,
+        isCompleted.isAcceptableOrUnknown(
+          data['is_completed']!,
+          _isCompletedMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ServiceJobVisitRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ServiceJobVisitRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      jobId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}job_id'],
+      )!,
+      technicianUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}technician_user_id'],
+      )!,
+      technicianName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}technician_name'],
+      )!,
+      visitDateMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visit_date_ms'],
+      )!,
+      workPerformed: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}work_performed'],
+      )!,
+      travelExpensesPaise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}travel_expenses_paise'],
+      )!,
+      laborCostPaise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}labor_cost_paise'],
+      )!,
+      billableAmountPaise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}billable_amount_paise'],
+      )!,
+      sparesUsedJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}spares_used_json'],
+      )!,
+      isCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_completed'],
+      )!,
+    );
+  }
+
+  @override
+  $ServiceJobVisitsTable createAlias(String alias) {
+    return $ServiceJobVisitsTable(attachedDatabase, alias);
+  }
+}
+
+class ServiceJobVisitRow extends DataClass
+    implements Insertable<ServiceJobVisitRow> {
+  final String id;
+  final String jobId;
+  final String technicianUserId;
+  final String technicianName;
+  final int visitDateMs;
+  final String workPerformed;
+  final int travelExpensesPaise;
+  final int laborCostPaise;
+  final int billableAmountPaise;
+  final String sparesUsedJson;
+  final bool isCompleted;
+  const ServiceJobVisitRow({
+    required this.id,
+    required this.jobId,
+    required this.technicianUserId,
+    required this.technicianName,
+    required this.visitDateMs,
+    required this.workPerformed,
+    required this.travelExpensesPaise,
+    required this.laborCostPaise,
+    required this.billableAmountPaise,
+    required this.sparesUsedJson,
+    required this.isCompleted,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['job_id'] = Variable<String>(jobId);
+    map['technician_user_id'] = Variable<String>(technicianUserId);
+    map['technician_name'] = Variable<String>(technicianName);
+    map['visit_date_ms'] = Variable<int>(visitDateMs);
+    map['work_performed'] = Variable<String>(workPerformed);
+    map['travel_expenses_paise'] = Variable<int>(travelExpensesPaise);
+    map['labor_cost_paise'] = Variable<int>(laborCostPaise);
+    map['billable_amount_paise'] = Variable<int>(billableAmountPaise);
+    map['spares_used_json'] = Variable<String>(sparesUsedJson);
+    map['is_completed'] = Variable<bool>(isCompleted);
+    return map;
+  }
+
+  ServiceJobVisitsCompanion toCompanion(bool nullToAbsent) {
+    return ServiceJobVisitsCompanion(
+      id: Value(id),
+      jobId: Value(jobId),
+      technicianUserId: Value(technicianUserId),
+      technicianName: Value(technicianName),
+      visitDateMs: Value(visitDateMs),
+      workPerformed: Value(workPerformed),
+      travelExpensesPaise: Value(travelExpensesPaise),
+      laborCostPaise: Value(laborCostPaise),
+      billableAmountPaise: Value(billableAmountPaise),
+      sparesUsedJson: Value(sparesUsedJson),
+      isCompleted: Value(isCompleted),
+    );
+  }
+
+  factory ServiceJobVisitRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ServiceJobVisitRow(
+      id: serializer.fromJson<String>(json['id']),
+      jobId: serializer.fromJson<String>(json['jobId']),
+      technicianUserId: serializer.fromJson<String>(json['technicianUserId']),
+      technicianName: serializer.fromJson<String>(json['technicianName']),
+      visitDateMs: serializer.fromJson<int>(json['visitDateMs']),
+      workPerformed: serializer.fromJson<String>(json['workPerformed']),
+      travelExpensesPaise: serializer.fromJson<int>(
+        json['travelExpensesPaise'],
+      ),
+      laborCostPaise: serializer.fromJson<int>(json['laborCostPaise']),
+      billableAmountPaise: serializer.fromJson<int>(
+        json['billableAmountPaise'],
+      ),
+      sparesUsedJson: serializer.fromJson<String>(json['sparesUsedJson']),
+      isCompleted: serializer.fromJson<bool>(json['isCompleted']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'jobId': serializer.toJson<String>(jobId),
+      'technicianUserId': serializer.toJson<String>(technicianUserId),
+      'technicianName': serializer.toJson<String>(technicianName),
+      'visitDateMs': serializer.toJson<int>(visitDateMs),
+      'workPerformed': serializer.toJson<String>(workPerformed),
+      'travelExpensesPaise': serializer.toJson<int>(travelExpensesPaise),
+      'laborCostPaise': serializer.toJson<int>(laborCostPaise),
+      'billableAmountPaise': serializer.toJson<int>(billableAmountPaise),
+      'sparesUsedJson': serializer.toJson<String>(sparesUsedJson),
+      'isCompleted': serializer.toJson<bool>(isCompleted),
+    };
+  }
+
+  ServiceJobVisitRow copyWith({
+    String? id,
+    String? jobId,
+    String? technicianUserId,
+    String? technicianName,
+    int? visitDateMs,
+    String? workPerformed,
+    int? travelExpensesPaise,
+    int? laborCostPaise,
+    int? billableAmountPaise,
+    String? sparesUsedJson,
+    bool? isCompleted,
+  }) => ServiceJobVisitRow(
+    id: id ?? this.id,
+    jobId: jobId ?? this.jobId,
+    technicianUserId: technicianUserId ?? this.technicianUserId,
+    technicianName: technicianName ?? this.technicianName,
+    visitDateMs: visitDateMs ?? this.visitDateMs,
+    workPerformed: workPerformed ?? this.workPerformed,
+    travelExpensesPaise: travelExpensesPaise ?? this.travelExpensesPaise,
+    laborCostPaise: laborCostPaise ?? this.laborCostPaise,
+    billableAmountPaise: billableAmountPaise ?? this.billableAmountPaise,
+    sparesUsedJson: sparesUsedJson ?? this.sparesUsedJson,
+    isCompleted: isCompleted ?? this.isCompleted,
+  );
+  ServiceJobVisitRow copyWithCompanion(ServiceJobVisitsCompanion data) {
+    return ServiceJobVisitRow(
+      id: data.id.present ? data.id.value : this.id,
+      jobId: data.jobId.present ? data.jobId.value : this.jobId,
+      technicianUserId: data.technicianUserId.present
+          ? data.technicianUserId.value
+          : this.technicianUserId,
+      technicianName: data.technicianName.present
+          ? data.technicianName.value
+          : this.technicianName,
+      visitDateMs: data.visitDateMs.present
+          ? data.visitDateMs.value
+          : this.visitDateMs,
+      workPerformed: data.workPerformed.present
+          ? data.workPerformed.value
+          : this.workPerformed,
+      travelExpensesPaise: data.travelExpensesPaise.present
+          ? data.travelExpensesPaise.value
+          : this.travelExpensesPaise,
+      laborCostPaise: data.laborCostPaise.present
+          ? data.laborCostPaise.value
+          : this.laborCostPaise,
+      billableAmountPaise: data.billableAmountPaise.present
+          ? data.billableAmountPaise.value
+          : this.billableAmountPaise,
+      sparesUsedJson: data.sparesUsedJson.present
+          ? data.sparesUsedJson.value
+          : this.sparesUsedJson,
+      isCompleted: data.isCompleted.present
+          ? data.isCompleted.value
+          : this.isCompleted,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ServiceJobVisitRow(')
+          ..write('id: $id, ')
+          ..write('jobId: $jobId, ')
+          ..write('technicianUserId: $technicianUserId, ')
+          ..write('technicianName: $technicianName, ')
+          ..write('visitDateMs: $visitDateMs, ')
+          ..write('workPerformed: $workPerformed, ')
+          ..write('travelExpensesPaise: $travelExpensesPaise, ')
+          ..write('laborCostPaise: $laborCostPaise, ')
+          ..write('billableAmountPaise: $billableAmountPaise, ')
+          ..write('sparesUsedJson: $sparesUsedJson, ')
+          ..write('isCompleted: $isCompleted')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    jobId,
+    technicianUserId,
+    technicianName,
+    visitDateMs,
+    workPerformed,
+    travelExpensesPaise,
+    laborCostPaise,
+    billableAmountPaise,
+    sparesUsedJson,
+    isCompleted,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ServiceJobVisitRow &&
+          other.id == this.id &&
+          other.jobId == this.jobId &&
+          other.technicianUserId == this.technicianUserId &&
+          other.technicianName == this.technicianName &&
+          other.visitDateMs == this.visitDateMs &&
+          other.workPerformed == this.workPerformed &&
+          other.travelExpensesPaise == this.travelExpensesPaise &&
+          other.laborCostPaise == this.laborCostPaise &&
+          other.billableAmountPaise == this.billableAmountPaise &&
+          other.sparesUsedJson == this.sparesUsedJson &&
+          other.isCompleted == this.isCompleted);
+}
+
+class ServiceJobVisitsCompanion extends UpdateCompanion<ServiceJobVisitRow> {
+  final Value<String> id;
+  final Value<String> jobId;
+  final Value<String> technicianUserId;
+  final Value<String> technicianName;
+  final Value<int> visitDateMs;
+  final Value<String> workPerformed;
+  final Value<int> travelExpensesPaise;
+  final Value<int> laborCostPaise;
+  final Value<int> billableAmountPaise;
+  final Value<String> sparesUsedJson;
+  final Value<bool> isCompleted;
+  final Value<int> rowid;
+  const ServiceJobVisitsCompanion({
+    this.id = const Value.absent(),
+    this.jobId = const Value.absent(),
+    this.technicianUserId = const Value.absent(),
+    this.technicianName = const Value.absent(),
+    this.visitDateMs = const Value.absent(),
+    this.workPerformed = const Value.absent(),
+    this.travelExpensesPaise = const Value.absent(),
+    this.laborCostPaise = const Value.absent(),
+    this.billableAmountPaise = const Value.absent(),
+    this.sparesUsedJson = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ServiceJobVisitsCompanion.insert({
+    required String id,
+    required String jobId,
+    required String technicianUserId,
+    required String technicianName,
+    required int visitDateMs,
+    required String workPerformed,
+    required int travelExpensesPaise,
+    required int laborCostPaise,
+    required int billableAmountPaise,
+    this.sparesUsedJson = const Value.absent(),
+    this.isCompleted = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       jobId = Value(jobId),
+       technicianUserId = Value(technicianUserId),
+       technicianName = Value(technicianName),
+       visitDateMs = Value(visitDateMs),
+       workPerformed = Value(workPerformed),
+       travelExpensesPaise = Value(travelExpensesPaise),
+       laborCostPaise = Value(laborCostPaise),
+       billableAmountPaise = Value(billableAmountPaise);
+  static Insertable<ServiceJobVisitRow> custom({
+    Expression<String>? id,
+    Expression<String>? jobId,
+    Expression<String>? technicianUserId,
+    Expression<String>? technicianName,
+    Expression<int>? visitDateMs,
+    Expression<String>? workPerformed,
+    Expression<int>? travelExpensesPaise,
+    Expression<int>? laborCostPaise,
+    Expression<int>? billableAmountPaise,
+    Expression<String>? sparesUsedJson,
+    Expression<bool>? isCompleted,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (jobId != null) 'job_id': jobId,
+      if (technicianUserId != null) 'technician_user_id': technicianUserId,
+      if (technicianName != null) 'technician_name': technicianName,
+      if (visitDateMs != null) 'visit_date_ms': visitDateMs,
+      if (workPerformed != null) 'work_performed': workPerformed,
+      if (travelExpensesPaise != null)
+        'travel_expenses_paise': travelExpensesPaise,
+      if (laborCostPaise != null) 'labor_cost_paise': laborCostPaise,
+      if (billableAmountPaise != null)
+        'billable_amount_paise': billableAmountPaise,
+      if (sparesUsedJson != null) 'spares_used_json': sparesUsedJson,
+      if (isCompleted != null) 'is_completed': isCompleted,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ServiceJobVisitsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? jobId,
+    Value<String>? technicianUserId,
+    Value<String>? technicianName,
+    Value<int>? visitDateMs,
+    Value<String>? workPerformed,
+    Value<int>? travelExpensesPaise,
+    Value<int>? laborCostPaise,
+    Value<int>? billableAmountPaise,
+    Value<String>? sparesUsedJson,
+    Value<bool>? isCompleted,
+    Value<int>? rowid,
+  }) {
+    return ServiceJobVisitsCompanion(
+      id: id ?? this.id,
+      jobId: jobId ?? this.jobId,
+      technicianUserId: technicianUserId ?? this.technicianUserId,
+      technicianName: technicianName ?? this.technicianName,
+      visitDateMs: visitDateMs ?? this.visitDateMs,
+      workPerformed: workPerformed ?? this.workPerformed,
+      travelExpensesPaise: travelExpensesPaise ?? this.travelExpensesPaise,
+      laborCostPaise: laborCostPaise ?? this.laborCostPaise,
+      billableAmountPaise: billableAmountPaise ?? this.billableAmountPaise,
+      sparesUsedJson: sparesUsedJson ?? this.sparesUsedJson,
+      isCompleted: isCompleted ?? this.isCompleted,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (jobId.present) {
+      map['job_id'] = Variable<String>(jobId.value);
+    }
+    if (technicianUserId.present) {
+      map['technician_user_id'] = Variable<String>(technicianUserId.value);
+    }
+    if (technicianName.present) {
+      map['technician_name'] = Variable<String>(technicianName.value);
+    }
+    if (visitDateMs.present) {
+      map['visit_date_ms'] = Variable<int>(visitDateMs.value);
+    }
+    if (workPerformed.present) {
+      map['work_performed'] = Variable<String>(workPerformed.value);
+    }
+    if (travelExpensesPaise.present) {
+      map['travel_expenses_paise'] = Variable<int>(travelExpensesPaise.value);
+    }
+    if (laborCostPaise.present) {
+      map['labor_cost_paise'] = Variable<int>(laborCostPaise.value);
+    }
+    if (billableAmountPaise.present) {
+      map['billable_amount_paise'] = Variable<int>(billableAmountPaise.value);
+    }
+    if (sparesUsedJson.present) {
+      map['spares_used_json'] = Variable<String>(sparesUsedJson.value);
+    }
+    if (isCompleted.present) {
+      map['is_completed'] = Variable<bool>(isCompleted.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ServiceJobVisitsCompanion(')
+          ..write('id: $id, ')
+          ..write('jobId: $jobId, ')
+          ..write('technicianUserId: $technicianUserId, ')
+          ..write('technicianName: $technicianName, ')
+          ..write('visitDateMs: $visitDateMs, ')
+          ..write('workPerformed: $workPerformed, ')
+          ..write('travelExpensesPaise: $travelExpensesPaise, ')
+          ..write('laborCostPaise: $laborCostPaise, ')
+          ..write('billableAmountPaise: $billableAmountPaise, ')
+          ..write('sparesUsedJson: $sparesUsedJson, ')
+          ..write('isCompleted: $isCompleted, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $AmcContractsTable extends AmcContracts
+    with TableInfo<$AmcContractsTable, AmcContractRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AmcContractsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _branchIdMeta = const VerificationMeta(
+    'branchId',
+  );
+  @override
+  late final GeneratedColumn<String> branchId = GeneratedColumn<String>(
+    'branch_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contractNumberMeta = const VerificationMeta(
+    'contractNumber',
+  );
+  @override
+  late final GeneratedColumn<String> contractNumber = GeneratedColumn<String>(
+    'contract_number',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customerPartyIdMeta = const VerificationMeta(
+    'customerPartyId',
+  );
+  @override
+  late final GeneratedColumn<String> customerPartyId = GeneratedColumn<String>(
+    'customer_party_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customerNameMeta = const VerificationMeta(
+    'customerName',
+  );
+  @override
+  late final GeneratedColumn<String> customerName = GeneratedColumn<String>(
+    'customer_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _siteAddressMeta = const VerificationMeta(
+    'siteAddress',
+  );
+  @override
+  late final GeneratedColumn<String> siteAddress = GeneratedColumn<String>(
+    'site_address',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startDateMsMeta = const VerificationMeta(
+    'startDateMs',
+  );
+  @override
+  late final GeneratedColumn<int> startDateMs = GeneratedColumn<int>(
+    'start_date_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endDateMsMeta = const VerificationMeta(
+    'endDateMs',
+  );
+  @override
+  late final GeneratedColumn<int> endDateMs = GeneratedColumn<int>(
+    'end_date_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contractValuePaiseMeta =
+      const VerificationMeta('contractValuePaise');
+  @override
+  late final GeneratedColumn<int> contractValuePaise = GeneratedColumn<int>(
+    'contract_value_paise',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visitLimitPerYearMeta = const VerificationMeta(
+    'visitLimitPerYear',
+  );
+  @override
+  late final GeneratedColumn<int> visitLimitPerYear = GeneratedColumn<int>(
+    'visit_limit_per_year',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visitsCompletedMeta = const VerificationMeta(
+    'visitsCompleted',
+  );
+  @override
+  late final GeneratedColumn<int> visitsCompleted = GeneratedColumn<int>(
+    'visits_completed',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('active'),
+  );
+  static const VerificationMeta _createdAtUtcMsMeta = const VerificationMeta(
+    'createdAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtUtcMs = GeneratedColumn<int>(
+    'created_at_utc_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    branchId,
+    contractNumber,
+    customerPartyId,
+    customerName,
+    siteAddress,
+    startDateMs,
+    endDateMs,
+    contractValuePaise,
+    visitLimitPerYear,
+    visitsCompleted,
+    status,
+    createdAtUtcMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'amc_contracts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<AmcContractRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('branch_id')) {
+      context.handle(
+        _branchIdMeta,
+        branchId.isAcceptableOrUnknown(data['branch_id']!, _branchIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_branchIdMeta);
+    }
+    if (data.containsKey('contract_number')) {
+      context.handle(
+        _contractNumberMeta,
+        contractNumber.isAcceptableOrUnknown(
+          data['contract_number']!,
+          _contractNumberMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contractNumberMeta);
+    }
+    if (data.containsKey('customer_party_id')) {
+      context.handle(
+        _customerPartyIdMeta,
+        customerPartyId.isAcceptableOrUnknown(
+          data['customer_party_id']!,
+          _customerPartyIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_customerPartyIdMeta);
+    }
+    if (data.containsKey('customer_name')) {
+      context.handle(
+        _customerNameMeta,
+        customerName.isAcceptableOrUnknown(
+          data['customer_name']!,
+          _customerNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_customerNameMeta);
+    }
+    if (data.containsKey('site_address')) {
+      context.handle(
+        _siteAddressMeta,
+        siteAddress.isAcceptableOrUnknown(
+          data['site_address']!,
+          _siteAddressMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_siteAddressMeta);
+    }
+    if (data.containsKey('start_date_ms')) {
+      context.handle(
+        _startDateMsMeta,
+        startDateMs.isAcceptableOrUnknown(
+          data['start_date_ms']!,
+          _startDateMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_startDateMsMeta);
+    }
+    if (data.containsKey('end_date_ms')) {
+      context.handle(
+        _endDateMsMeta,
+        endDateMs.isAcceptableOrUnknown(data['end_date_ms']!, _endDateMsMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endDateMsMeta);
+    }
+    if (data.containsKey('contract_value_paise')) {
+      context.handle(
+        _contractValuePaiseMeta,
+        contractValuePaise.isAcceptableOrUnknown(
+          data['contract_value_paise']!,
+          _contractValuePaiseMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contractValuePaiseMeta);
+    }
+    if (data.containsKey('visit_limit_per_year')) {
+      context.handle(
+        _visitLimitPerYearMeta,
+        visitLimitPerYear.isAcceptableOrUnknown(
+          data['visit_limit_per_year']!,
+          _visitLimitPerYearMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_visitLimitPerYearMeta);
+    }
+    if (data.containsKey('visits_completed')) {
+      context.handle(
+        _visitsCompletedMeta,
+        visitsCompleted.isAcceptableOrUnknown(
+          data['visits_completed']!,
+          _visitsCompletedMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('created_at_utc_ms')) {
+      context.handle(
+        _createdAtUtcMsMeta,
+        createdAtUtcMs.isAcceptableOrUnknown(
+          data['created_at_utc_ms']!,
+          _createdAtUtcMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtUtcMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  AmcContractRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return AmcContractRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      branchId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}branch_id'],
+      )!,
+      contractNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}contract_number'],
+      )!,
+      customerPartyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_party_id'],
+      )!,
+      customerName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_name'],
+      )!,
+      siteAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}site_address'],
+      )!,
+      startDateMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}start_date_ms'],
+      )!,
+      endDateMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}end_date_ms'],
+      )!,
+      contractValuePaise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}contract_value_paise'],
+      )!,
+      visitLimitPerYear: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visit_limit_per_year'],
+      )!,
+      visitsCompleted: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}visits_completed'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_utc_ms'],
+      )!,
+    );
+  }
+
+  @override
+  $AmcContractsTable createAlias(String alias) {
+    return $AmcContractsTable(attachedDatabase, alias);
+  }
+}
+
+class AmcContractRow extends DataClass implements Insertable<AmcContractRow> {
+  final String id;
+  final String organizationId;
+  final String branchId;
+  final String contractNumber;
+  final String customerPartyId;
+  final String customerName;
+  final String siteAddress;
+  final int startDateMs;
+  final int endDateMs;
+  final int contractValuePaise;
+  final int visitLimitPerYear;
+  final int visitsCompleted;
+  final String status;
+  final int createdAtUtcMs;
+  const AmcContractRow({
+    required this.id,
+    required this.organizationId,
+    required this.branchId,
+    required this.contractNumber,
+    required this.customerPartyId,
+    required this.customerName,
+    required this.siteAddress,
+    required this.startDateMs,
+    required this.endDateMs,
+    required this.contractValuePaise,
+    required this.visitLimitPerYear,
+    required this.visitsCompleted,
+    required this.status,
+    required this.createdAtUtcMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['branch_id'] = Variable<String>(branchId);
+    map['contract_number'] = Variable<String>(contractNumber);
+    map['customer_party_id'] = Variable<String>(customerPartyId);
+    map['customer_name'] = Variable<String>(customerName);
+    map['site_address'] = Variable<String>(siteAddress);
+    map['start_date_ms'] = Variable<int>(startDateMs);
+    map['end_date_ms'] = Variable<int>(endDateMs);
+    map['contract_value_paise'] = Variable<int>(contractValuePaise);
+    map['visit_limit_per_year'] = Variable<int>(visitLimitPerYear);
+    map['visits_completed'] = Variable<int>(visitsCompleted);
+    map['status'] = Variable<String>(status);
+    map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs);
+    return map;
+  }
+
+  AmcContractsCompanion toCompanion(bool nullToAbsent) {
+    return AmcContractsCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      branchId: Value(branchId),
+      contractNumber: Value(contractNumber),
+      customerPartyId: Value(customerPartyId),
+      customerName: Value(customerName),
+      siteAddress: Value(siteAddress),
+      startDateMs: Value(startDateMs),
+      endDateMs: Value(endDateMs),
+      contractValuePaise: Value(contractValuePaise),
+      visitLimitPerYear: Value(visitLimitPerYear),
+      visitsCompleted: Value(visitsCompleted),
+      status: Value(status),
+      createdAtUtcMs: Value(createdAtUtcMs),
+    );
+  }
+
+  factory AmcContractRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return AmcContractRow(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      branchId: serializer.fromJson<String>(json['branchId']),
+      contractNumber: serializer.fromJson<String>(json['contractNumber']),
+      customerPartyId: serializer.fromJson<String>(json['customerPartyId']),
+      customerName: serializer.fromJson<String>(json['customerName']),
+      siteAddress: serializer.fromJson<String>(json['siteAddress']),
+      startDateMs: serializer.fromJson<int>(json['startDateMs']),
+      endDateMs: serializer.fromJson<int>(json['endDateMs']),
+      contractValuePaise: serializer.fromJson<int>(json['contractValuePaise']),
+      visitLimitPerYear: serializer.fromJson<int>(json['visitLimitPerYear']),
+      visitsCompleted: serializer.fromJson<int>(json['visitsCompleted']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAtUtcMs: serializer.fromJson<int>(json['createdAtUtcMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'branchId': serializer.toJson<String>(branchId),
+      'contractNumber': serializer.toJson<String>(contractNumber),
+      'customerPartyId': serializer.toJson<String>(customerPartyId),
+      'customerName': serializer.toJson<String>(customerName),
+      'siteAddress': serializer.toJson<String>(siteAddress),
+      'startDateMs': serializer.toJson<int>(startDateMs),
+      'endDateMs': serializer.toJson<int>(endDateMs),
+      'contractValuePaise': serializer.toJson<int>(contractValuePaise),
+      'visitLimitPerYear': serializer.toJson<int>(visitLimitPerYear),
+      'visitsCompleted': serializer.toJson<int>(visitsCompleted),
+      'status': serializer.toJson<String>(status),
+      'createdAtUtcMs': serializer.toJson<int>(createdAtUtcMs),
+    };
+  }
+
+  AmcContractRow copyWith({
+    String? id,
+    String? organizationId,
+    String? branchId,
+    String? contractNumber,
+    String? customerPartyId,
+    String? customerName,
+    String? siteAddress,
+    int? startDateMs,
+    int? endDateMs,
+    int? contractValuePaise,
+    int? visitLimitPerYear,
+    int? visitsCompleted,
+    String? status,
+    int? createdAtUtcMs,
+  }) => AmcContractRow(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    branchId: branchId ?? this.branchId,
+    contractNumber: contractNumber ?? this.contractNumber,
+    customerPartyId: customerPartyId ?? this.customerPartyId,
+    customerName: customerName ?? this.customerName,
+    siteAddress: siteAddress ?? this.siteAddress,
+    startDateMs: startDateMs ?? this.startDateMs,
+    endDateMs: endDateMs ?? this.endDateMs,
+    contractValuePaise: contractValuePaise ?? this.contractValuePaise,
+    visitLimitPerYear: visitLimitPerYear ?? this.visitLimitPerYear,
+    visitsCompleted: visitsCompleted ?? this.visitsCompleted,
+    status: status ?? this.status,
+    createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+  );
+  AmcContractRow copyWithCompanion(AmcContractsCompanion data) {
+    return AmcContractRow(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      branchId: data.branchId.present ? data.branchId.value : this.branchId,
+      contractNumber: data.contractNumber.present
+          ? data.contractNumber.value
+          : this.contractNumber,
+      customerPartyId: data.customerPartyId.present
+          ? data.customerPartyId.value
+          : this.customerPartyId,
+      customerName: data.customerName.present
+          ? data.customerName.value
+          : this.customerName,
+      siteAddress: data.siteAddress.present
+          ? data.siteAddress.value
+          : this.siteAddress,
+      startDateMs: data.startDateMs.present
+          ? data.startDateMs.value
+          : this.startDateMs,
+      endDateMs: data.endDateMs.present ? data.endDateMs.value : this.endDateMs,
+      contractValuePaise: data.contractValuePaise.present
+          ? data.contractValuePaise.value
+          : this.contractValuePaise,
+      visitLimitPerYear: data.visitLimitPerYear.present
+          ? data.visitLimitPerYear.value
+          : this.visitLimitPerYear,
+      visitsCompleted: data.visitsCompleted.present
+          ? data.visitsCompleted.value
+          : this.visitsCompleted,
+      status: data.status.present ? data.status.value : this.status,
+      createdAtUtcMs: data.createdAtUtcMs.present
+          ? data.createdAtUtcMs.value
+          : this.createdAtUtcMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AmcContractRow(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('branchId: $branchId, ')
+          ..write('contractNumber: $contractNumber, ')
+          ..write('customerPartyId: $customerPartyId, ')
+          ..write('customerName: $customerName, ')
+          ..write('siteAddress: $siteAddress, ')
+          ..write('startDateMs: $startDateMs, ')
+          ..write('endDateMs: $endDateMs, ')
+          ..write('contractValuePaise: $contractValuePaise, ')
+          ..write('visitLimitPerYear: $visitLimitPerYear, ')
+          ..write('visitsCompleted: $visitsCompleted, ')
+          ..write('status: $status, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    branchId,
+    contractNumber,
+    customerPartyId,
+    customerName,
+    siteAddress,
+    startDateMs,
+    endDateMs,
+    contractValuePaise,
+    visitLimitPerYear,
+    visitsCompleted,
+    status,
+    createdAtUtcMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is AmcContractRow &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.branchId == this.branchId &&
+          other.contractNumber == this.contractNumber &&
+          other.customerPartyId == this.customerPartyId &&
+          other.customerName == this.customerName &&
+          other.siteAddress == this.siteAddress &&
+          other.startDateMs == this.startDateMs &&
+          other.endDateMs == this.endDateMs &&
+          other.contractValuePaise == this.contractValuePaise &&
+          other.visitLimitPerYear == this.visitLimitPerYear &&
+          other.visitsCompleted == this.visitsCompleted &&
+          other.status == this.status &&
+          other.createdAtUtcMs == this.createdAtUtcMs);
+}
+
+class AmcContractsCompanion extends UpdateCompanion<AmcContractRow> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> branchId;
+  final Value<String> contractNumber;
+  final Value<String> customerPartyId;
+  final Value<String> customerName;
+  final Value<String> siteAddress;
+  final Value<int> startDateMs;
+  final Value<int> endDateMs;
+  final Value<int> contractValuePaise;
+  final Value<int> visitLimitPerYear;
+  final Value<int> visitsCompleted;
+  final Value<String> status;
+  final Value<int> createdAtUtcMs;
+  final Value<int> rowid;
+  const AmcContractsCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.branchId = const Value.absent(),
+    this.contractNumber = const Value.absent(),
+    this.customerPartyId = const Value.absent(),
+    this.customerName = const Value.absent(),
+    this.siteAddress = const Value.absent(),
+    this.startDateMs = const Value.absent(),
+    this.endDateMs = const Value.absent(),
+    this.contractValuePaise = const Value.absent(),
+    this.visitLimitPerYear = const Value.absent(),
+    this.visitsCompleted = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAtUtcMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  AmcContractsCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String branchId,
+    required String contractNumber,
+    required String customerPartyId,
+    required String customerName,
+    required String siteAddress,
+    required int startDateMs,
+    required int endDateMs,
+    required int contractValuePaise,
+    required int visitLimitPerYear,
+    this.visitsCompleted = const Value.absent(),
+    this.status = const Value.absent(),
+    required int createdAtUtcMs,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       branchId = Value(branchId),
+       contractNumber = Value(contractNumber),
+       customerPartyId = Value(customerPartyId),
+       customerName = Value(customerName),
+       siteAddress = Value(siteAddress),
+       startDateMs = Value(startDateMs),
+       endDateMs = Value(endDateMs),
+       contractValuePaise = Value(contractValuePaise),
+       visitLimitPerYear = Value(visitLimitPerYear),
+       createdAtUtcMs = Value(createdAtUtcMs);
+  static Insertable<AmcContractRow> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? branchId,
+    Expression<String>? contractNumber,
+    Expression<String>? customerPartyId,
+    Expression<String>? customerName,
+    Expression<String>? siteAddress,
+    Expression<int>? startDateMs,
+    Expression<int>? endDateMs,
+    Expression<int>? contractValuePaise,
+    Expression<int>? visitLimitPerYear,
+    Expression<int>? visitsCompleted,
+    Expression<String>? status,
+    Expression<int>? createdAtUtcMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (branchId != null) 'branch_id': branchId,
+      if (contractNumber != null) 'contract_number': contractNumber,
+      if (customerPartyId != null) 'customer_party_id': customerPartyId,
+      if (customerName != null) 'customer_name': customerName,
+      if (siteAddress != null) 'site_address': siteAddress,
+      if (startDateMs != null) 'start_date_ms': startDateMs,
+      if (endDateMs != null) 'end_date_ms': endDateMs,
+      if (contractValuePaise != null)
+        'contract_value_paise': contractValuePaise,
+      if (visitLimitPerYear != null) 'visit_limit_per_year': visitLimitPerYear,
+      if (visitsCompleted != null) 'visits_completed': visitsCompleted,
+      if (status != null) 'status': status,
+      if (createdAtUtcMs != null) 'created_at_utc_ms': createdAtUtcMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  AmcContractsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? branchId,
+    Value<String>? contractNumber,
+    Value<String>? customerPartyId,
+    Value<String>? customerName,
+    Value<String>? siteAddress,
+    Value<int>? startDateMs,
+    Value<int>? endDateMs,
+    Value<int>? contractValuePaise,
+    Value<int>? visitLimitPerYear,
+    Value<int>? visitsCompleted,
+    Value<String>? status,
+    Value<int>? createdAtUtcMs,
+    Value<int>? rowid,
+  }) {
+    return AmcContractsCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      branchId: branchId ?? this.branchId,
+      contractNumber: contractNumber ?? this.contractNumber,
+      customerPartyId: customerPartyId ?? this.customerPartyId,
+      customerName: customerName ?? this.customerName,
+      siteAddress: siteAddress ?? this.siteAddress,
+      startDateMs: startDateMs ?? this.startDateMs,
+      endDateMs: endDateMs ?? this.endDateMs,
+      contractValuePaise: contractValuePaise ?? this.contractValuePaise,
+      visitLimitPerYear: visitLimitPerYear ?? this.visitLimitPerYear,
+      visitsCompleted: visitsCompleted ?? this.visitsCompleted,
+      status: status ?? this.status,
+      createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (branchId.present) {
+      map['branch_id'] = Variable<String>(branchId.value);
+    }
+    if (contractNumber.present) {
+      map['contract_number'] = Variable<String>(contractNumber.value);
+    }
+    if (customerPartyId.present) {
+      map['customer_party_id'] = Variable<String>(customerPartyId.value);
+    }
+    if (customerName.present) {
+      map['customer_name'] = Variable<String>(customerName.value);
+    }
+    if (siteAddress.present) {
+      map['site_address'] = Variable<String>(siteAddress.value);
+    }
+    if (startDateMs.present) {
+      map['start_date_ms'] = Variable<int>(startDateMs.value);
+    }
+    if (endDateMs.present) {
+      map['end_date_ms'] = Variable<int>(endDateMs.value);
+    }
+    if (contractValuePaise.present) {
+      map['contract_value_paise'] = Variable<int>(contractValuePaise.value);
+    }
+    if (visitLimitPerYear.present) {
+      map['visit_limit_per_year'] = Variable<int>(visitLimitPerYear.value);
+    }
+    if (visitsCompleted.present) {
+      map['visits_completed'] = Variable<int>(visitsCompleted.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAtUtcMs.present) {
+      map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AmcContractsCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('branchId: $branchId, ')
+          ..write('contractNumber: $contractNumber, ')
+          ..write('customerPartyId: $customerPartyId, ')
+          ..write('customerName: $customerName, ')
+          ..write('siteAddress: $siteAddress, ')
+          ..write('startDateMs: $startDateMs, ')
+          ..write('endDateMs: $endDateMs, ')
+          ..write('contractValuePaise: $contractValuePaise, ')
+          ..write('visitLimitPerYear: $visitLimitPerYear, ')
+          ..write('visitsCompleted: $visitsCompleted, ')
+          ..write('status: $status, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SerialReplacementsTable extends SerialReplacements
+    with TableInfo<$SerialReplacementsTable, SerialReplacementRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SerialReplacementsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jobIdMeta = const VerificationMeta('jobId');
+  @override
+  late final GeneratedColumn<String> jobId = GeneratedColumn<String>(
+    'job_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _oldSerialIdMeta = const VerificationMeta(
+    'oldSerialId',
+  );
+  @override
+  late final GeneratedColumn<String> oldSerialId = GeneratedColumn<String>(
+    'old_serial_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _newSerialIdMeta = const VerificationMeta(
+    'newSerialId',
+  );
+  @override
+  late final GeneratedColumn<String> newSerialId = GeneratedColumn<String>(
+    'new_serial_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _replacementDateMsMeta = const VerificationMeta(
+    'replacementDateMs',
+  );
+  @override
+  late final GeneratedColumn<int> replacementDateMs = GeneratedColumn<int>(
+    'replacement_date_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    jobId,
+    oldSerialId,
+    newSerialId,
+    replacementDateMs,
+    reason,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'serial_replacements';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SerialReplacementRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('job_id')) {
+      context.handle(
+        _jobIdMeta,
+        jobId.isAcceptableOrUnknown(data['job_id']!, _jobIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jobIdMeta);
+    }
+    if (data.containsKey('old_serial_id')) {
+      context.handle(
+        _oldSerialIdMeta,
+        oldSerialId.isAcceptableOrUnknown(
+          data['old_serial_id']!,
+          _oldSerialIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_oldSerialIdMeta);
+    }
+    if (data.containsKey('new_serial_id')) {
+      context.handle(
+        _newSerialIdMeta,
+        newSerialId.isAcceptableOrUnknown(
+          data['new_serial_id']!,
+          _newSerialIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_newSerialIdMeta);
+    }
+    if (data.containsKey('replacement_date_ms')) {
+      context.handle(
+        _replacementDateMsMeta,
+        replacementDateMs.isAcceptableOrUnknown(
+          data['replacement_date_ms']!,
+          _replacementDateMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_replacementDateMsMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_reasonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SerialReplacementRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SerialReplacementRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      jobId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}job_id'],
+      )!,
+      oldSerialId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}old_serial_id'],
+      )!,
+      newSerialId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}new_serial_id'],
+      )!,
+      replacementDateMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}replacement_date_ms'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      )!,
+    );
+  }
+
+  @override
+  $SerialReplacementsTable createAlias(String alias) {
+    return $SerialReplacementsTable(attachedDatabase, alias);
+  }
+}
+
+class SerialReplacementRow extends DataClass
+    implements Insertable<SerialReplacementRow> {
+  final String id;
+  final String jobId;
+  final String oldSerialId;
+  final String newSerialId;
+  final int replacementDateMs;
+  final String reason;
+  const SerialReplacementRow({
+    required this.id,
+    required this.jobId,
+    required this.oldSerialId,
+    required this.newSerialId,
+    required this.replacementDateMs,
+    required this.reason,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['job_id'] = Variable<String>(jobId);
+    map['old_serial_id'] = Variable<String>(oldSerialId);
+    map['new_serial_id'] = Variable<String>(newSerialId);
+    map['replacement_date_ms'] = Variable<int>(replacementDateMs);
+    map['reason'] = Variable<String>(reason);
+    return map;
+  }
+
+  SerialReplacementsCompanion toCompanion(bool nullToAbsent) {
+    return SerialReplacementsCompanion(
+      id: Value(id),
+      jobId: Value(jobId),
+      oldSerialId: Value(oldSerialId),
+      newSerialId: Value(newSerialId),
+      replacementDateMs: Value(replacementDateMs),
+      reason: Value(reason),
+    );
+  }
+
+  factory SerialReplacementRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SerialReplacementRow(
+      id: serializer.fromJson<String>(json['id']),
+      jobId: serializer.fromJson<String>(json['jobId']),
+      oldSerialId: serializer.fromJson<String>(json['oldSerialId']),
+      newSerialId: serializer.fromJson<String>(json['newSerialId']),
+      replacementDateMs: serializer.fromJson<int>(json['replacementDateMs']),
+      reason: serializer.fromJson<String>(json['reason']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'jobId': serializer.toJson<String>(jobId),
+      'oldSerialId': serializer.toJson<String>(oldSerialId),
+      'newSerialId': serializer.toJson<String>(newSerialId),
+      'replacementDateMs': serializer.toJson<int>(replacementDateMs),
+      'reason': serializer.toJson<String>(reason),
+    };
+  }
+
+  SerialReplacementRow copyWith({
+    String? id,
+    String? jobId,
+    String? oldSerialId,
+    String? newSerialId,
+    int? replacementDateMs,
+    String? reason,
+  }) => SerialReplacementRow(
+    id: id ?? this.id,
+    jobId: jobId ?? this.jobId,
+    oldSerialId: oldSerialId ?? this.oldSerialId,
+    newSerialId: newSerialId ?? this.newSerialId,
+    replacementDateMs: replacementDateMs ?? this.replacementDateMs,
+    reason: reason ?? this.reason,
+  );
+  SerialReplacementRow copyWithCompanion(SerialReplacementsCompanion data) {
+    return SerialReplacementRow(
+      id: data.id.present ? data.id.value : this.id,
+      jobId: data.jobId.present ? data.jobId.value : this.jobId,
+      oldSerialId: data.oldSerialId.present
+          ? data.oldSerialId.value
+          : this.oldSerialId,
+      newSerialId: data.newSerialId.present
+          ? data.newSerialId.value
+          : this.newSerialId,
+      replacementDateMs: data.replacementDateMs.present
+          ? data.replacementDateMs.value
+          : this.replacementDateMs,
+      reason: data.reason.present ? data.reason.value : this.reason,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SerialReplacementRow(')
+          ..write('id: $id, ')
+          ..write('jobId: $jobId, ')
+          ..write('oldSerialId: $oldSerialId, ')
+          ..write('newSerialId: $newSerialId, ')
+          ..write('replacementDateMs: $replacementDateMs, ')
+          ..write('reason: $reason')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    jobId,
+    oldSerialId,
+    newSerialId,
+    replacementDateMs,
+    reason,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SerialReplacementRow &&
+          other.id == this.id &&
+          other.jobId == this.jobId &&
+          other.oldSerialId == this.oldSerialId &&
+          other.newSerialId == this.newSerialId &&
+          other.replacementDateMs == this.replacementDateMs &&
+          other.reason == this.reason);
+}
+
+class SerialReplacementsCompanion
+    extends UpdateCompanion<SerialReplacementRow> {
+  final Value<String> id;
+  final Value<String> jobId;
+  final Value<String> oldSerialId;
+  final Value<String> newSerialId;
+  final Value<int> replacementDateMs;
+  final Value<String> reason;
+  final Value<int> rowid;
+  const SerialReplacementsCompanion({
+    this.id = const Value.absent(),
+    this.jobId = const Value.absent(),
+    this.oldSerialId = const Value.absent(),
+    this.newSerialId = const Value.absent(),
+    this.replacementDateMs = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SerialReplacementsCompanion.insert({
+    required String id,
+    required String jobId,
+    required String oldSerialId,
+    required String newSerialId,
+    required int replacementDateMs,
+    required String reason,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       jobId = Value(jobId),
+       oldSerialId = Value(oldSerialId),
+       newSerialId = Value(newSerialId),
+       replacementDateMs = Value(replacementDateMs),
+       reason = Value(reason);
+  static Insertable<SerialReplacementRow> custom({
+    Expression<String>? id,
+    Expression<String>? jobId,
+    Expression<String>? oldSerialId,
+    Expression<String>? newSerialId,
+    Expression<int>? replacementDateMs,
+    Expression<String>? reason,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (jobId != null) 'job_id': jobId,
+      if (oldSerialId != null) 'old_serial_id': oldSerialId,
+      if (newSerialId != null) 'new_serial_id': newSerialId,
+      if (replacementDateMs != null) 'replacement_date_ms': replacementDateMs,
+      if (reason != null) 'reason': reason,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SerialReplacementsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? jobId,
+    Value<String>? oldSerialId,
+    Value<String>? newSerialId,
+    Value<int>? replacementDateMs,
+    Value<String>? reason,
+    Value<int>? rowid,
+  }) {
+    return SerialReplacementsCompanion(
+      id: id ?? this.id,
+      jobId: jobId ?? this.jobId,
+      oldSerialId: oldSerialId ?? this.oldSerialId,
+      newSerialId: newSerialId ?? this.newSerialId,
+      replacementDateMs: replacementDateMs ?? this.replacementDateMs,
+      reason: reason ?? this.reason,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (jobId.present) {
+      map['job_id'] = Variable<String>(jobId.value);
+    }
+    if (oldSerialId.present) {
+      map['old_serial_id'] = Variable<String>(oldSerialId.value);
+    }
+    if (newSerialId.present) {
+      map['new_serial_id'] = Variable<String>(newSerialId.value);
+    }
+    if (replacementDateMs.present) {
+      map['replacement_date_ms'] = Variable<int>(replacementDateMs.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SerialReplacementsCompanion(')
+          ..write('id: $id, ')
+          ..write('jobId: $jobId, ')
+          ..write('oldSerialId: $oldSerialId, ')
+          ..write('newSerialId: $newSerialId, ')
+          ..write('replacementDateMs: $replacementDateMs, ')
+          ..write('reason: $reason, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$FoundationDatabase extends GeneratedDatabase {
   _$FoundationDatabase(QueryExecutor e) : super(e);
   $FoundationDatabaseManager get managers => $FoundationDatabaseManager(this);
@@ -33561,6 +36472,13 @@ abstract class _$FoundationDatabase extends GeneratedDatabase {
       $ProjectMaterialIssuesTable(this);
   late final $ProjectMaterialIssueLinesTable projectMaterialIssueLines =
       $ProjectMaterialIssueLinesTable(this);
+  late final $ServiceJobsTable serviceJobs = $ServiceJobsTable(this);
+  late final $ServiceJobVisitsTable serviceJobVisits = $ServiceJobVisitsTable(
+    this,
+  );
+  late final $AmcContractsTable amcContracts = $AmcContractsTable(this);
+  late final $SerialReplacementsTable serialReplacements =
+      $SerialReplacementsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -33623,6 +36541,10 @@ abstract class _$FoundationDatabase extends GeneratedDatabase {
     solarProjects,
     projectMaterialIssues,
     projectMaterialIssueLines,
+    serviceJobs,
+    serviceJobVisits,
+    amcContracts,
+    serialReplacements,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -51963,6 +54885,1447 @@ typedef $$ProjectMaterialIssueLinesTableProcessedTableManager =
       ProjectMaterialIssueLineRow,
       PrefetchHooks Function()
     >;
+typedef $$ServiceJobsTableCreateCompanionBuilder =
+    ServiceJobsCompanion Function({
+      required String id,
+      required String organizationId,
+      required String branchId,
+      required String jobTicketNumber,
+      required String customerPartyId,
+      required String customerName,
+      required String siteAddress,
+      required String equipmentSerialId,
+      required String issueDescription,
+      Value<String?> assignedTechnicianUserId,
+      Value<String?> assignedTechnicianName,
+      Value<bool> isCoveredByWarranty,
+      Value<bool> isCoveredByAmc,
+      Value<String> status,
+      required int createdAtUtcMs,
+      Value<int> rowid,
+    });
+typedef $$ServiceJobsTableUpdateCompanionBuilder =
+    ServiceJobsCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> branchId,
+      Value<String> jobTicketNumber,
+      Value<String> customerPartyId,
+      Value<String> customerName,
+      Value<String> siteAddress,
+      Value<String> equipmentSerialId,
+      Value<String> issueDescription,
+      Value<String?> assignedTechnicianUserId,
+      Value<String?> assignedTechnicianName,
+      Value<bool> isCoveredByWarranty,
+      Value<bool> isCoveredByAmc,
+      Value<String> status,
+      Value<int> createdAtUtcMs,
+      Value<int> rowid,
+    });
+
+class $$ServiceJobsTableFilterComposer
+    extends Composer<_$FoundationDatabase, $ServiceJobsTable> {
+  $$ServiceJobsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get branchId => $composableBuilder(
+    column: $table.branchId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jobTicketNumber => $composableBuilder(
+    column: $table.jobTicketNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerPartyId => $composableBuilder(
+    column: $table.customerPartyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get siteAddress => $composableBuilder(
+    column: $table.siteAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get equipmentSerialId => $composableBuilder(
+    column: $table.equipmentSerialId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get issueDescription => $composableBuilder(
+    column: $table.issueDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assignedTechnicianUserId => $composableBuilder(
+    column: $table.assignedTechnicianUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assignedTechnicianName => $composableBuilder(
+    column: $table.assignedTechnicianName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCoveredByWarranty => $composableBuilder(
+    column: $table.isCoveredByWarranty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCoveredByAmc => $composableBuilder(
+    column: $table.isCoveredByAmc,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ServiceJobsTableOrderingComposer
+    extends Composer<_$FoundationDatabase, $ServiceJobsTable> {
+  $$ServiceJobsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get branchId => $composableBuilder(
+    column: $table.branchId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jobTicketNumber => $composableBuilder(
+    column: $table.jobTicketNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerPartyId => $composableBuilder(
+    column: $table.customerPartyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get siteAddress => $composableBuilder(
+    column: $table.siteAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get equipmentSerialId => $composableBuilder(
+    column: $table.equipmentSerialId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get issueDescription => $composableBuilder(
+    column: $table.issueDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assignedTechnicianUserId => $composableBuilder(
+    column: $table.assignedTechnicianUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assignedTechnicianName => $composableBuilder(
+    column: $table.assignedTechnicianName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCoveredByWarranty => $composableBuilder(
+    column: $table.isCoveredByWarranty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCoveredByAmc => $composableBuilder(
+    column: $table.isCoveredByAmc,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ServiceJobsTableAnnotationComposer
+    extends Composer<_$FoundationDatabase, $ServiceJobsTable> {
+  $$ServiceJobsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get branchId =>
+      $composableBuilder(column: $table.branchId, builder: (column) => column);
+
+  GeneratedColumn<String> get jobTicketNumber => $composableBuilder(
+    column: $table.jobTicketNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerPartyId => $composableBuilder(
+    column: $table.customerPartyId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get siteAddress => $composableBuilder(
+    column: $table.siteAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get equipmentSerialId => $composableBuilder(
+    column: $table.equipmentSerialId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get issueDescription => $composableBuilder(
+    column: $table.issueDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get assignedTechnicianUserId => $composableBuilder(
+    column: $table.assignedTechnicianUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get assignedTechnicianName => $composableBuilder(
+    column: $table.assignedTechnicianName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isCoveredByWarranty => $composableBuilder(
+    column: $table.isCoveredByWarranty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isCoveredByAmc => $composableBuilder(
+    column: $table.isCoveredByAmc,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => column,
+  );
+}
+
+class $$ServiceJobsTableTableManager
+    extends
+        RootTableManager<
+          _$FoundationDatabase,
+          $ServiceJobsTable,
+          ServiceJobRow,
+          $$ServiceJobsTableFilterComposer,
+          $$ServiceJobsTableOrderingComposer,
+          $$ServiceJobsTableAnnotationComposer,
+          $$ServiceJobsTableCreateCompanionBuilder,
+          $$ServiceJobsTableUpdateCompanionBuilder,
+          (
+            ServiceJobRow,
+            BaseReferences<
+              _$FoundationDatabase,
+              $ServiceJobsTable,
+              ServiceJobRow
+            >,
+          ),
+          ServiceJobRow,
+          PrefetchHooks Function()
+        > {
+  $$ServiceJobsTableTableManager(
+    _$FoundationDatabase db,
+    $ServiceJobsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ServiceJobsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ServiceJobsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ServiceJobsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> branchId = const Value.absent(),
+                Value<String> jobTicketNumber = const Value.absent(),
+                Value<String> customerPartyId = const Value.absent(),
+                Value<String> customerName = const Value.absent(),
+                Value<String> siteAddress = const Value.absent(),
+                Value<String> equipmentSerialId = const Value.absent(),
+                Value<String> issueDescription = const Value.absent(),
+                Value<String?> assignedTechnicianUserId = const Value.absent(),
+                Value<String?> assignedTechnicianName = const Value.absent(),
+                Value<bool> isCoveredByWarranty = const Value.absent(),
+                Value<bool> isCoveredByAmc = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAtUtcMs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ServiceJobsCompanion(
+                id: id,
+                organizationId: organizationId,
+                branchId: branchId,
+                jobTicketNumber: jobTicketNumber,
+                customerPartyId: customerPartyId,
+                customerName: customerName,
+                siteAddress: siteAddress,
+                equipmentSerialId: equipmentSerialId,
+                issueDescription: issueDescription,
+                assignedTechnicianUserId: assignedTechnicianUserId,
+                assignedTechnicianName: assignedTechnicianName,
+                isCoveredByWarranty: isCoveredByWarranty,
+                isCoveredByAmc: isCoveredByAmc,
+                status: status,
+                createdAtUtcMs: createdAtUtcMs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String branchId,
+                required String jobTicketNumber,
+                required String customerPartyId,
+                required String customerName,
+                required String siteAddress,
+                required String equipmentSerialId,
+                required String issueDescription,
+                Value<String?> assignedTechnicianUserId = const Value.absent(),
+                Value<String?> assignedTechnicianName = const Value.absent(),
+                Value<bool> isCoveredByWarranty = const Value.absent(),
+                Value<bool> isCoveredByAmc = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required int createdAtUtcMs,
+                Value<int> rowid = const Value.absent(),
+              }) => ServiceJobsCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                branchId: branchId,
+                jobTicketNumber: jobTicketNumber,
+                customerPartyId: customerPartyId,
+                customerName: customerName,
+                siteAddress: siteAddress,
+                equipmentSerialId: equipmentSerialId,
+                issueDescription: issueDescription,
+                assignedTechnicianUserId: assignedTechnicianUserId,
+                assignedTechnicianName: assignedTechnicianName,
+                isCoveredByWarranty: isCoveredByWarranty,
+                isCoveredByAmc: isCoveredByAmc,
+                status: status,
+                createdAtUtcMs: createdAtUtcMs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ServiceJobsTable, ServiceJobRow>(table),
+                  BaseReferences<
+                    _$FoundationDatabase,
+                    $ServiceJobsTable,
+                    ServiceJobRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ServiceJobsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FoundationDatabase,
+      $ServiceJobsTable,
+      ServiceJobRow,
+      $$ServiceJobsTableFilterComposer,
+      $$ServiceJobsTableOrderingComposer,
+      $$ServiceJobsTableAnnotationComposer,
+      $$ServiceJobsTableCreateCompanionBuilder,
+      $$ServiceJobsTableUpdateCompanionBuilder,
+      (
+        ServiceJobRow,
+        BaseReferences<_$FoundationDatabase, $ServiceJobsTable, ServiceJobRow>,
+      ),
+      ServiceJobRow,
+      PrefetchHooks Function()
+    >;
+typedef $$ServiceJobVisitsTableCreateCompanionBuilder =
+    ServiceJobVisitsCompanion Function({
+      required String id,
+      required String jobId,
+      required String technicianUserId,
+      required String technicianName,
+      required int visitDateMs,
+      required String workPerformed,
+      required int travelExpensesPaise,
+      required int laborCostPaise,
+      required int billableAmountPaise,
+      Value<String> sparesUsedJson,
+      Value<bool> isCompleted,
+      Value<int> rowid,
+    });
+typedef $$ServiceJobVisitsTableUpdateCompanionBuilder =
+    ServiceJobVisitsCompanion Function({
+      Value<String> id,
+      Value<String> jobId,
+      Value<String> technicianUserId,
+      Value<String> technicianName,
+      Value<int> visitDateMs,
+      Value<String> workPerformed,
+      Value<int> travelExpensesPaise,
+      Value<int> laborCostPaise,
+      Value<int> billableAmountPaise,
+      Value<String> sparesUsedJson,
+      Value<bool> isCompleted,
+      Value<int> rowid,
+    });
+
+class $$ServiceJobVisitsTableFilterComposer
+    extends Composer<_$FoundationDatabase, $ServiceJobVisitsTable> {
+  $$ServiceJobVisitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jobId => $composableBuilder(
+    column: $table.jobId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get technicianUserId => $composableBuilder(
+    column: $table.technicianUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get technicianName => $composableBuilder(
+    column: $table.technicianName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get visitDateMs => $composableBuilder(
+    column: $table.visitDateMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workPerformed => $composableBuilder(
+    column: $table.workPerformed,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get travelExpensesPaise => $composableBuilder(
+    column: $table.travelExpensesPaise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get laborCostPaise => $composableBuilder(
+    column: $table.laborCostPaise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get billableAmountPaise => $composableBuilder(
+    column: $table.billableAmountPaise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sparesUsedJson => $composableBuilder(
+    column: $table.sparesUsedJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ServiceJobVisitsTableOrderingComposer
+    extends Composer<_$FoundationDatabase, $ServiceJobVisitsTable> {
+  $$ServiceJobVisitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jobId => $composableBuilder(
+    column: $table.jobId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get technicianUserId => $composableBuilder(
+    column: $table.technicianUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get technicianName => $composableBuilder(
+    column: $table.technicianName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get visitDateMs => $composableBuilder(
+    column: $table.visitDateMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get workPerformed => $composableBuilder(
+    column: $table.workPerformed,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get travelExpensesPaise => $composableBuilder(
+    column: $table.travelExpensesPaise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get laborCostPaise => $composableBuilder(
+    column: $table.laborCostPaise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get billableAmountPaise => $composableBuilder(
+    column: $table.billableAmountPaise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sparesUsedJson => $composableBuilder(
+    column: $table.sparesUsedJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ServiceJobVisitsTableAnnotationComposer
+    extends Composer<_$FoundationDatabase, $ServiceJobVisitsTable> {
+  $$ServiceJobVisitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get jobId =>
+      $composableBuilder(column: $table.jobId, builder: (column) => column);
+
+  GeneratedColumn<String> get technicianUserId => $composableBuilder(
+    column: $table.technicianUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get technicianName => $composableBuilder(
+    column: $table.technicianName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get visitDateMs => $composableBuilder(
+    column: $table.visitDateMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get workPerformed => $composableBuilder(
+    column: $table.workPerformed,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get travelExpensesPaise => $composableBuilder(
+    column: $table.travelExpensesPaise,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get laborCostPaise => $composableBuilder(
+    column: $table.laborCostPaise,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get billableAmountPaise => $composableBuilder(
+    column: $table.billableAmountPaise,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sparesUsedJson => $composableBuilder(
+    column: $table.sparesUsedJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isCompleted => $composableBuilder(
+    column: $table.isCompleted,
+    builder: (column) => column,
+  );
+}
+
+class $$ServiceJobVisitsTableTableManager
+    extends
+        RootTableManager<
+          _$FoundationDatabase,
+          $ServiceJobVisitsTable,
+          ServiceJobVisitRow,
+          $$ServiceJobVisitsTableFilterComposer,
+          $$ServiceJobVisitsTableOrderingComposer,
+          $$ServiceJobVisitsTableAnnotationComposer,
+          $$ServiceJobVisitsTableCreateCompanionBuilder,
+          $$ServiceJobVisitsTableUpdateCompanionBuilder,
+          (
+            ServiceJobVisitRow,
+            BaseReferences<
+              _$FoundationDatabase,
+              $ServiceJobVisitsTable,
+              ServiceJobVisitRow
+            >,
+          ),
+          ServiceJobVisitRow,
+          PrefetchHooks Function()
+        > {
+  $$ServiceJobVisitsTableTableManager(
+    _$FoundationDatabase db,
+    $ServiceJobVisitsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ServiceJobVisitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ServiceJobVisitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ServiceJobVisitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> jobId = const Value.absent(),
+                Value<String> technicianUserId = const Value.absent(),
+                Value<String> technicianName = const Value.absent(),
+                Value<int> visitDateMs = const Value.absent(),
+                Value<String> workPerformed = const Value.absent(),
+                Value<int> travelExpensesPaise = const Value.absent(),
+                Value<int> laborCostPaise = const Value.absent(),
+                Value<int> billableAmountPaise = const Value.absent(),
+                Value<String> sparesUsedJson = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ServiceJobVisitsCompanion(
+                id: id,
+                jobId: jobId,
+                technicianUserId: technicianUserId,
+                technicianName: technicianName,
+                visitDateMs: visitDateMs,
+                workPerformed: workPerformed,
+                travelExpensesPaise: travelExpensesPaise,
+                laborCostPaise: laborCostPaise,
+                billableAmountPaise: billableAmountPaise,
+                sparesUsedJson: sparesUsedJson,
+                isCompleted: isCompleted,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String jobId,
+                required String technicianUserId,
+                required String technicianName,
+                required int visitDateMs,
+                required String workPerformed,
+                required int travelExpensesPaise,
+                required int laborCostPaise,
+                required int billableAmountPaise,
+                Value<String> sparesUsedJson = const Value.absent(),
+                Value<bool> isCompleted = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ServiceJobVisitsCompanion.insert(
+                id: id,
+                jobId: jobId,
+                technicianUserId: technicianUserId,
+                technicianName: technicianName,
+                visitDateMs: visitDateMs,
+                workPerformed: workPerformed,
+                travelExpensesPaise: travelExpensesPaise,
+                laborCostPaise: laborCostPaise,
+                billableAmountPaise: billableAmountPaise,
+                sparesUsedJson: sparesUsedJson,
+                isCompleted: isCompleted,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ServiceJobVisitsTable, ServiceJobVisitRow>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$FoundationDatabase,
+                    $ServiceJobVisitsTable,
+                    ServiceJobVisitRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ServiceJobVisitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FoundationDatabase,
+      $ServiceJobVisitsTable,
+      ServiceJobVisitRow,
+      $$ServiceJobVisitsTableFilterComposer,
+      $$ServiceJobVisitsTableOrderingComposer,
+      $$ServiceJobVisitsTableAnnotationComposer,
+      $$ServiceJobVisitsTableCreateCompanionBuilder,
+      $$ServiceJobVisitsTableUpdateCompanionBuilder,
+      (
+        ServiceJobVisitRow,
+        BaseReferences<
+          _$FoundationDatabase,
+          $ServiceJobVisitsTable,
+          ServiceJobVisitRow
+        >,
+      ),
+      ServiceJobVisitRow,
+      PrefetchHooks Function()
+    >;
+typedef $$AmcContractsTableCreateCompanionBuilder =
+    AmcContractsCompanion Function({
+      required String id,
+      required String organizationId,
+      required String branchId,
+      required String contractNumber,
+      required String customerPartyId,
+      required String customerName,
+      required String siteAddress,
+      required int startDateMs,
+      required int endDateMs,
+      required int contractValuePaise,
+      required int visitLimitPerYear,
+      Value<int> visitsCompleted,
+      Value<String> status,
+      required int createdAtUtcMs,
+      Value<int> rowid,
+    });
+typedef $$AmcContractsTableUpdateCompanionBuilder =
+    AmcContractsCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> branchId,
+      Value<String> contractNumber,
+      Value<String> customerPartyId,
+      Value<String> customerName,
+      Value<String> siteAddress,
+      Value<int> startDateMs,
+      Value<int> endDateMs,
+      Value<int> contractValuePaise,
+      Value<int> visitLimitPerYear,
+      Value<int> visitsCompleted,
+      Value<String> status,
+      Value<int> createdAtUtcMs,
+      Value<int> rowid,
+    });
+
+class $$AmcContractsTableFilterComposer
+    extends Composer<_$FoundationDatabase, $AmcContractsTable> {
+  $$AmcContractsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get branchId => $composableBuilder(
+    column: $table.branchId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contractNumber => $composableBuilder(
+    column: $table.contractNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerPartyId => $composableBuilder(
+    column: $table.customerPartyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get siteAddress => $composableBuilder(
+    column: $table.siteAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startDateMs => $composableBuilder(
+    column: $table.startDateMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get endDateMs => $composableBuilder(
+    column: $table.endDateMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get contractValuePaise => $composableBuilder(
+    column: $table.contractValuePaise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get visitLimitPerYear => $composableBuilder(
+    column: $table.visitLimitPerYear,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get visitsCompleted => $composableBuilder(
+    column: $table.visitsCompleted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$AmcContractsTableOrderingComposer
+    extends Composer<_$FoundationDatabase, $AmcContractsTable> {
+  $$AmcContractsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get branchId => $composableBuilder(
+    column: $table.branchId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contractNumber => $composableBuilder(
+    column: $table.contractNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerPartyId => $composableBuilder(
+    column: $table.customerPartyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get siteAddress => $composableBuilder(
+    column: $table.siteAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startDateMs => $composableBuilder(
+    column: $table.startDateMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get endDateMs => $composableBuilder(
+    column: $table.endDateMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get contractValuePaise => $composableBuilder(
+    column: $table.contractValuePaise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get visitLimitPerYear => $composableBuilder(
+    column: $table.visitLimitPerYear,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get visitsCompleted => $composableBuilder(
+    column: $table.visitsCompleted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$AmcContractsTableAnnotationComposer
+    extends Composer<_$FoundationDatabase, $AmcContractsTable> {
+  $$AmcContractsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get branchId =>
+      $composableBuilder(column: $table.branchId, builder: (column) => column);
+
+  GeneratedColumn<String> get contractNumber => $composableBuilder(
+    column: $table.contractNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerPartyId => $composableBuilder(
+    column: $table.customerPartyId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerName => $composableBuilder(
+    column: $table.customerName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get siteAddress => $composableBuilder(
+    column: $table.siteAddress,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get startDateMs => $composableBuilder(
+    column: $table.startDateMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get endDateMs =>
+      $composableBuilder(column: $table.endDateMs, builder: (column) => column);
+
+  GeneratedColumn<int> get contractValuePaise => $composableBuilder(
+    column: $table.contractValuePaise,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get visitLimitPerYear => $composableBuilder(
+    column: $table.visitLimitPerYear,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get visitsCompleted => $composableBuilder(
+    column: $table.visitsCompleted,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => column,
+  );
+}
+
+class $$AmcContractsTableTableManager
+    extends
+        RootTableManager<
+          _$FoundationDatabase,
+          $AmcContractsTable,
+          AmcContractRow,
+          $$AmcContractsTableFilterComposer,
+          $$AmcContractsTableOrderingComposer,
+          $$AmcContractsTableAnnotationComposer,
+          $$AmcContractsTableCreateCompanionBuilder,
+          $$AmcContractsTableUpdateCompanionBuilder,
+          (
+            AmcContractRow,
+            BaseReferences<
+              _$FoundationDatabase,
+              $AmcContractsTable,
+              AmcContractRow
+            >,
+          ),
+          AmcContractRow,
+          PrefetchHooks Function()
+        > {
+  $$AmcContractsTableTableManager(
+    _$FoundationDatabase db,
+    $AmcContractsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AmcContractsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AmcContractsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AmcContractsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> branchId = const Value.absent(),
+                Value<String> contractNumber = const Value.absent(),
+                Value<String> customerPartyId = const Value.absent(),
+                Value<String> customerName = const Value.absent(),
+                Value<String> siteAddress = const Value.absent(),
+                Value<int> startDateMs = const Value.absent(),
+                Value<int> endDateMs = const Value.absent(),
+                Value<int> contractValuePaise = const Value.absent(),
+                Value<int> visitLimitPerYear = const Value.absent(),
+                Value<int> visitsCompleted = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> createdAtUtcMs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => AmcContractsCompanion(
+                id: id,
+                organizationId: organizationId,
+                branchId: branchId,
+                contractNumber: contractNumber,
+                customerPartyId: customerPartyId,
+                customerName: customerName,
+                siteAddress: siteAddress,
+                startDateMs: startDateMs,
+                endDateMs: endDateMs,
+                contractValuePaise: contractValuePaise,
+                visitLimitPerYear: visitLimitPerYear,
+                visitsCompleted: visitsCompleted,
+                status: status,
+                createdAtUtcMs: createdAtUtcMs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String branchId,
+                required String contractNumber,
+                required String customerPartyId,
+                required String customerName,
+                required String siteAddress,
+                required int startDateMs,
+                required int endDateMs,
+                required int contractValuePaise,
+                required int visitLimitPerYear,
+                Value<int> visitsCompleted = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                required int createdAtUtcMs,
+                Value<int> rowid = const Value.absent(),
+              }) => AmcContractsCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                branchId: branchId,
+                contractNumber: contractNumber,
+                customerPartyId: customerPartyId,
+                customerName: customerName,
+                siteAddress: siteAddress,
+                startDateMs: startDateMs,
+                endDateMs: endDateMs,
+                contractValuePaise: contractValuePaise,
+                visitLimitPerYear: visitLimitPerYear,
+                visitsCompleted: visitsCompleted,
+                status: status,
+                createdAtUtcMs: createdAtUtcMs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$AmcContractsTable, AmcContractRow>(table),
+                  BaseReferences<
+                    _$FoundationDatabase,
+                    $AmcContractsTable,
+                    AmcContractRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$AmcContractsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FoundationDatabase,
+      $AmcContractsTable,
+      AmcContractRow,
+      $$AmcContractsTableFilterComposer,
+      $$AmcContractsTableOrderingComposer,
+      $$AmcContractsTableAnnotationComposer,
+      $$AmcContractsTableCreateCompanionBuilder,
+      $$AmcContractsTableUpdateCompanionBuilder,
+      (
+        AmcContractRow,
+        BaseReferences<
+          _$FoundationDatabase,
+          $AmcContractsTable,
+          AmcContractRow
+        >,
+      ),
+      AmcContractRow,
+      PrefetchHooks Function()
+    >;
+typedef $$SerialReplacementsTableCreateCompanionBuilder =
+    SerialReplacementsCompanion Function({
+      required String id,
+      required String jobId,
+      required String oldSerialId,
+      required String newSerialId,
+      required int replacementDateMs,
+      required String reason,
+      Value<int> rowid,
+    });
+typedef $$SerialReplacementsTableUpdateCompanionBuilder =
+    SerialReplacementsCompanion Function({
+      Value<String> id,
+      Value<String> jobId,
+      Value<String> oldSerialId,
+      Value<String> newSerialId,
+      Value<int> replacementDateMs,
+      Value<String> reason,
+      Value<int> rowid,
+    });
+
+class $$SerialReplacementsTableFilterComposer
+    extends Composer<_$FoundationDatabase, $SerialReplacementsTable> {
+  $$SerialReplacementsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get jobId => $composableBuilder(
+    column: $table.jobId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get oldSerialId => $composableBuilder(
+    column: $table.oldSerialId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get newSerialId => $composableBuilder(
+    column: $table.newSerialId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get replacementDateMs => $composableBuilder(
+    column: $table.replacementDateMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SerialReplacementsTableOrderingComposer
+    extends Composer<_$FoundationDatabase, $SerialReplacementsTable> {
+  $$SerialReplacementsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get jobId => $composableBuilder(
+    column: $table.jobId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get oldSerialId => $composableBuilder(
+    column: $table.oldSerialId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get newSerialId => $composableBuilder(
+    column: $table.newSerialId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get replacementDateMs => $composableBuilder(
+    column: $table.replacementDateMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SerialReplacementsTableAnnotationComposer
+    extends Composer<_$FoundationDatabase, $SerialReplacementsTable> {
+  $$SerialReplacementsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get jobId =>
+      $composableBuilder(column: $table.jobId, builder: (column) => column);
+
+  GeneratedColumn<String> get oldSerialId => $composableBuilder(
+    column: $table.oldSerialId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get newSerialId => $composableBuilder(
+    column: $table.newSerialId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get replacementDateMs => $composableBuilder(
+    column: $table.replacementDateMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+}
+
+class $$SerialReplacementsTableTableManager
+    extends
+        RootTableManager<
+          _$FoundationDatabase,
+          $SerialReplacementsTable,
+          SerialReplacementRow,
+          $$SerialReplacementsTableFilterComposer,
+          $$SerialReplacementsTableOrderingComposer,
+          $$SerialReplacementsTableAnnotationComposer,
+          $$SerialReplacementsTableCreateCompanionBuilder,
+          $$SerialReplacementsTableUpdateCompanionBuilder,
+          (
+            SerialReplacementRow,
+            BaseReferences<
+              _$FoundationDatabase,
+              $SerialReplacementsTable,
+              SerialReplacementRow
+            >,
+          ),
+          SerialReplacementRow,
+          PrefetchHooks Function()
+        > {
+  $$SerialReplacementsTableTableManager(
+    _$FoundationDatabase db,
+    $SerialReplacementsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SerialReplacementsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SerialReplacementsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SerialReplacementsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> jobId = const Value.absent(),
+                Value<String> oldSerialId = const Value.absent(),
+                Value<String> newSerialId = const Value.absent(),
+                Value<int> replacementDateMs = const Value.absent(),
+                Value<String> reason = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SerialReplacementsCompanion(
+                id: id,
+                jobId: jobId,
+                oldSerialId: oldSerialId,
+                newSerialId: newSerialId,
+                replacementDateMs: replacementDateMs,
+                reason: reason,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String jobId,
+                required String oldSerialId,
+                required String newSerialId,
+                required int replacementDateMs,
+                required String reason,
+                Value<int> rowid = const Value.absent(),
+              }) => SerialReplacementsCompanion.insert(
+                id: id,
+                jobId: jobId,
+                oldSerialId: oldSerialId,
+                newSerialId: newSerialId,
+                replacementDateMs: replacementDateMs,
+                reason: reason,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SerialReplacementsTable, SerialReplacementRow>(
+                    table,
+                  ),
+                  BaseReferences<
+                    _$FoundationDatabase,
+                    $SerialReplacementsTable,
+                    SerialReplacementRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SerialReplacementsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FoundationDatabase,
+      $SerialReplacementsTable,
+      SerialReplacementRow,
+      $$SerialReplacementsTableFilterComposer,
+      $$SerialReplacementsTableOrderingComposer,
+      $$SerialReplacementsTableAnnotationComposer,
+      $$SerialReplacementsTableCreateCompanionBuilder,
+      $$SerialReplacementsTableUpdateCompanionBuilder,
+      (
+        SerialReplacementRow,
+        BaseReferences<
+          _$FoundationDatabase,
+          $SerialReplacementsTable,
+          SerialReplacementRow
+        >,
+      ),
+      SerialReplacementRow,
+      PrefetchHooks Function()
+    >;
 
 class $FoundationDatabaseManager {
   final _$FoundationDatabase _db;
@@ -52087,4 +56450,12 @@ class $FoundationDatabaseManager {
         _db,
         _db.projectMaterialIssueLines,
       );
+  $$ServiceJobsTableTableManager get serviceJobs =>
+      $$ServiceJobsTableTableManager(_db, _db.serviceJobs);
+  $$ServiceJobVisitsTableTableManager get serviceJobVisits =>
+      $$ServiceJobVisitsTableTableManager(_db, _db.serviceJobVisits);
+  $$AmcContractsTableTableManager get amcContracts =>
+      $$AmcContractsTableTableManager(_db, _db.amcContracts);
+  $$SerialReplacementsTableTableManager get serialReplacements =>
+      $$SerialReplacementsTableTableManager(_db, _db.serialReplacements);
 }
