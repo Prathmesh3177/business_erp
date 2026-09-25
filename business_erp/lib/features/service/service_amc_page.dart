@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
+import '../common/erp_shell.dart';
 
 final serviceJobsProvider = FutureProvider.autoDispose<List<ServiceJob>>((
   ref,
@@ -66,7 +67,7 @@ final class _ServiceAmcPageState extends ConsumerState<ServiceAmcPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Service & AMC Workflows'),
         bottom: TabBar(

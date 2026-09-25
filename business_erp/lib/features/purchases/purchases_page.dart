@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
+import '../common/erp_shell.dart';
 
 final class PurchasesPage extends ConsumerStatefulWidget {
   const PurchasesPage({super.key});
@@ -31,11 +32,11 @@ final class _PurchasesPageState extends ConsumerState<PurchasesPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Supplier Purchasing & Receipt Posting'),
-        backgroundColor: const Color(0xFF990000),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E293B),
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,

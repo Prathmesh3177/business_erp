@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../../l10n/strings.dart';
+import '../common/erp_shell.dart';
 
 final class UserManagementPage extends ConsumerStatefulWidget {
   const UserManagementPage({super.key});
@@ -33,7 +34,7 @@ final class _UserManagementPageState extends ConsumerState<UserManagementPage>
   @override
   Widget build(BuildContext context) {
     final strings = AppStrings.of(context);
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: Text(strings.get('userManagement')),
         bottom: TabBar(

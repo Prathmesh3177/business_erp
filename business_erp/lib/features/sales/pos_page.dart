@@ -9,6 +9,7 @@ import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../../app/theme.dart';
 import '../common/erp_ui.dart';
+import '../common/erp_shell.dart';
 import '../printing/invoice_preview_dialog.dart';
 
 final class PosPage extends ConsumerStatefulWidget {
@@ -36,7 +37,7 @@ final class _PosPageState extends ConsumerState<PosPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Counter POS & Sales Billing'),
         bottom: TabBar(

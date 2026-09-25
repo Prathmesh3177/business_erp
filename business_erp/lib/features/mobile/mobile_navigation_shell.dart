@@ -15,8 +15,8 @@ class _MobileNavigationShellState extends State<MobileNavigationShell> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Shree Krushna Sales — Mobile Drafts'),
-        backgroundColor: const Color(0xFF990000),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E293B),
       ),
       body: Column(
         children: [

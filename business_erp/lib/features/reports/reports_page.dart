@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../common/erp_ui.dart';
+import '../common/erp_shell.dart';
 
 final reportStoreProvider = Provider<ReportStore>((ref) {
   final runtime = ref.watch(runtimeProvider).value;
@@ -163,7 +164,7 @@ final class _ReportsPageState extends ConsumerState<ReportsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Reports & Business Intelligence'),
         bottom: TabBar(

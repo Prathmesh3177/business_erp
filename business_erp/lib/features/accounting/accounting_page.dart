@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/bootstrap.dart';
+import '../common/erp_shell.dart';
 
 final class AccountingPage extends ConsumerStatefulWidget {
   const AccountingPage({super.key});
@@ -29,11 +30,11 @@ final class _AccountingPageState extends ConsumerState<AccountingPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Accounting & GST Engine'),
-        backgroundColor: const Color(0xFF990000),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E293B),
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,

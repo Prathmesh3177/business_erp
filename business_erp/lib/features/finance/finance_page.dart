@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
+import '../common/erp_shell.dart';
 
 final financeCategoriesProvider = FutureProvider.autoDispose<List<ExpenseCategory>>((ref) async {
   final runtime = await ref.watch(runtimeProvider.future);
@@ -94,11 +95,11 @@ final class _FinancePageState extends ConsumerState<FinancePage>
     final canManageExpenses = session?.hasCapability(Capability.expensesManage) ?? false;
     final canManageCash = session?.hasCapability(Capability.cashSessionManage) ?? false;
 
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Finance, Returns & Expenses'),
-        backgroundColor: const Color(0xFF990000),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E293B),
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,

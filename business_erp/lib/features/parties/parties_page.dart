@@ -2,6 +2,8 @@ import 'package:erp_domain/erp_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../common/erp_shell.dart';
+
 final class PartiesPage extends ConsumerStatefulWidget {
   const PartiesPage({super.key});
 
@@ -48,7 +50,7 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Party Masters (Customers & Suppliers)'),
         bottom: TabBar(

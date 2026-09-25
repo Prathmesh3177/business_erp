@@ -2,6 +2,8 @@ import 'package:erp_application/erp_application.dart';
 import 'package:erp_domain/erp_domain.dart';
 import 'package:flutter/material.dart';
 
+import '../common/erp_shell.dart';
+
 class WarrantyPage extends StatefulWidget {
   const WarrantyPage({
     super.key,
@@ -104,11 +106,11 @@ class _WarrantyPageState extends State<WarrantyPage>
         .where((r) => r.status == WarrantyReminderStatus.expired)
         .toList();
 
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Warranty Management & Reminders'),
-        backgroundColor: const Color(0xFF990000),
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF1E293B),
         actions: [
           IconButton(
             icon: const Icon(Icons.download),

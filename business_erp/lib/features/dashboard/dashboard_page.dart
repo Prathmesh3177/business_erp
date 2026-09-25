@@ -7,7 +7,9 @@ import 'package:go_router/go_router.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../../app/theme.dart';
+import '../../l10n/strings.dart';
 import '../common/erp_ui.dart';
+import '../common/erp_shell.dart';
 import '../reports/reports_page.dart';
 
 final class DashboardPage extends ConsumerStatefulWidget {
@@ -35,24 +37,13 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
       final session = ref.read(authProvider);
       final orgId = runtime?.identity?.organization.id.value ?? 'org_1';
 
+      if (session == null) {
+        throw StateError(
+          'A signed-in user is required to load dashboard data.',
+        );
+      }
       final contextUseCase = CommandContext(
-        session:
-            session ??
-            UserSession(
-              id: const SessionId('sess_guest'),
-              userId: const UserId('user_guest'),
-              username: 'guest',
-              roleId: 'admin',
-              branchId: const BranchId('branch_1'),
-              capabilities: {
-                Capability.salesCreate,
-                Capability.inventoryManage,
-                Capability.costDataRead,
-              },
-              token: 'tok_guest',
-              expiresAtUtc: DateTime.now().add(const Duration(hours: 1)),
-              lastActivityAtUtc: DateTime.now(),
-            ),
+        session: session,
         timestampUtc: DateTime.now().toUtc(),
       );
 
@@ -79,15 +70,16 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final metrics = _metrics;
+    final strings = AppStrings.of(context);
 
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
-        title: const Text('Executive Dashboard & BI Overview'),
+        title: Text(strings.get('dashboardTitle')),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadDashboard,
-            tooltip: 'Refresh Dashboard',
+            tooltip: strings.get('refresh'),
           ),
         ],
       ),
@@ -114,6 +106,7 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildKpiGrid(ThemeData theme, DashboardMetrics? metrics) {
+    final strings = AppStrings.of(context);
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWide = constraints.maxWidth > 800;
@@ -130,27 +123,27 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
           childAspectRatio: isCompact ? 1.3 : 2.2,
           children: [
             _KpiCard(
-              title: "Today's Sales",
+              title: strings.get('todaysSales'),
               value:
                   '₹${metrics?.todaySales.inRupees.toStringAsFixed(2) ?? "0.00"}',
               icon: Icons.point_of_sale,
               color: SolarColors.crimson,
             ),
             _KpiCard(
-              title: "Today's Collections",
+              title: strings.get('todaysCollections'),
               value:
                   '₹${metrics?.todayCollections.inRupees.toStringAsFixed(2) ?? "0.00"}',
               icon: Icons.account_balance_wallet,
               color: Colors.green,
             ),
             _KpiCard(
-              title: 'Low Stock Items',
-              value: '${metrics?.lowStockCount ?? 0} Alert(s)',
+              title: strings.get('lowStockItems'),
+              value: '${metrics?.lowStockCount ?? 0} ${strings.get('alerts')}',
               icon: Icons.warning_amber_rounded,
               color: Colors.amber.shade800,
             ),
             _KpiCard(
-              title: 'Outstanding Receivables',
+              title: strings.get('outstandingReceivables'),
               value:
                   '₹${metrics?.totalReceivables.inRupees.toStringAsFixed(2) ?? "0.00"}',
               icon: Icons.trending_up,
@@ -163,46 +156,55 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildQuickActionToolbar(BuildContext context) {
+    final strings = AppStrings.of(context);
+    final session = ref.watch(authProvider);
+    bool can(Capability capability) =>
+        session == null || session.hasCapability(capability);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Quick Access Navigation',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Text(
+              strings.get('quickAccess'),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
               runSpacing: 12,
               children: [
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.point_of_sale),
-                  label: const Text('POS Checkout'),
-                  onPressed: () => context.push('/sales'),
-                ),
-                ElevatedButton.icon(
-                  icon: const Icon(Icons.analytics),
-                  label: const Text('All Reports'),
-                  onPressed: () => context.push('/reports'),
-                ),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.inventory_2),
-                  label: const Text('Inventory'),
-                  onPressed: () => context.push('/inventory'),
-                ),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.shopping_cart),
-                  label: const Text('Purchases'),
-                  onPressed: () => context.push('/purchases'),
-                ),
-                OutlinedButton.icon(
-                  icon: const Icon(Icons.account_balance),
-                  label: const Text('Finance & Cash'),
-                  onPressed: () => context.push('/finance'),
-                ),
+                if (can(Capability.salesCreate))
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.point_of_sale),
+                    label: Text(strings.get('createInvoice')),
+                    onPressed: () => context.push('/sales'),
+                  ),
+                if (can(Capability.salesRead))
+                  ElevatedButton.icon(
+                    icon: const Icon(Icons.analytics),
+                    label: Text(strings.get('viewReports')),
+                    onPressed: () => context.push('/reports'),
+                  ),
+                if (can(Capability.inventoryManage))
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.inventory_2),
+                    label: Text(strings.get('checkStock')),
+                    onPressed: () => context.push('/inventory'),
+                  ),
+                if (can(Capability.purchaseManage))
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.shopping_cart),
+                    label: Text(strings.get('addPurchase')),
+                    onPressed: () => context.push('/purchases'),
+                  ),
+                if (can(Capability.financeManage))
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.account_balance),
+                    label: Text(strings.get('finance')),
+                    onPressed: () => context.push('/finance'),
+                  ),
               ],
             ),
           ],
@@ -215,6 +217,7 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
     ThemeData theme,
     DashboardMetrics? metrics,
   ) {
+    final strings = AppStrings.of(context);
     final alerts = metrics?.recentReorderAlerts ?? [];
 
     return Card(
@@ -229,9 +232,12 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
               spacing: 8,
               runSpacing: 8,
               children: [
-                const Text(
-                  'Deterministic Reorder Alerts & Suggestions',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                Text(
+                  strings.get('reorderAlerts'),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                  ),
                 ),
                 Chip(
                   label: const Text(
@@ -243,10 +249,10 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
             ),
             const SizedBox(height: 12),
             if (alerts.isEmpty)
-              const ErpEmptyState(
+              ErpEmptyState(
                 icon: Icons.inventory_2_outlined,
-                title: 'Stock levels are healthy',
-                message: 'No reorder alerts need attention.',
+                title: strings.get('stockHealthy'),
+                message: strings.get('stockHealthyMessage'),
               )
             else
               ListView.separated(

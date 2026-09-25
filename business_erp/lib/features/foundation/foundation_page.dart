@@ -6,7 +6,9 @@ import 'package:go_router/go_router.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../../app/locale_controller.dart';
+import '../../app/theme.dart';
 import '../../l10n/strings.dart';
+import '../common/erp_ui.dart';
 import '../settings/backup_restore_dialog.dart';
 
 final class FoundationPage extends ConsumerWidget {
@@ -269,8 +271,11 @@ final class _SetupFormState extends ConsumerState<_SetupForm> {
   }
 }
 
-final class _ReadyView extends ConsumerWidget {
-  const _ReadyView({required this.runtime});
+// Kept temporarily as a migration reference while the responsive workspace
+// below replaces the original button wall.
+// ignore: unused_element
+final class _LegacyReadyView extends ConsumerWidget {
+  const _LegacyReadyView({required this.runtime});
   final AppRuntime runtime;
 
   @override
@@ -539,4 +544,648 @@ final class _ReadyView extends ConsumerWidget {
       );
     }
   }
+}
+
+/// The signed-in workspace deliberately owns navigation.  Individual feature
+/// pages remain focused on their workflow, while this shell consistently shows
+/// only the areas the current role is allowed to open.
+final class _ReadyView extends ConsumerWidget {
+  const _ReadyView({required this.runtime});
+
+  final AppRuntime runtime;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(authProvider);
+    final strings = AppStrings.of(context);
+    final copy = _WorkspaceCopy.of(context);
+    final modules = _WorkspaceModule.values
+        .where((item) => item.isVisibleTo(session))
+        .toList();
+    final compact = ErpBreakpoints.isCompact(context);
+
+    final workspace = _WorkspaceOverview(
+      runtime: runtime,
+      modules: modules,
+      copy: copy,
+      onOpen: (module) => context.go(module.path),
+    );
+
+    return Scaffold(
+      drawer: compact
+          ? Drawer(
+              child: _WorkspaceNavigation(
+                modules: modules,
+                copy: copy,
+                onOpen: (module) {
+                  Navigator.of(context).pop();
+                  context.go(module.path);
+                },
+                onLogout: () => ref.read(authProvider.notifier).logout(),
+              ),
+            )
+          : null,
+      body: SafeArea(
+        child: Row(
+          children: [
+            if (!compact)
+              SizedBox(
+                width: 244,
+                child: _WorkspaceNavigation(
+                  modules: modules,
+                  copy: copy,
+                  onOpen: (module) => context.go(module.path),
+                  onLogout: () => ref.read(authProvider.notifier).logout(),
+                ),
+              ),
+            Expanded(
+              child: Column(
+                children: [
+                  Builder(
+                    builder: (scaffoldContext) => _WorkspaceTopBar(
+                      compact: compact,
+                      branch: runtime.identity!.branch.name,
+                      username: session?.username ?? '',
+                      role: session?.roleId == Role.adminRoleId
+                          ? copy.administrator
+                          : copy.counterStaff,
+                      language: strings.get('language'),
+                      onMenu: compact
+                          ? () => Scaffold.of(scaffoldContext).openDrawer()
+                          : null,
+                      onLanguage: () =>
+                          ref.read(localeProvider.notifier).toggle(),
+                      onLock: () =>
+                          ref.read(authProvider.notifier).lockSession(),
+                    ),
+                  ),
+                  Expanded(child: workspace),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+final class _WorkspaceTopBar extends StatelessWidget {
+  const _WorkspaceTopBar({
+    required this.compact,
+    required this.branch,
+    required this.username,
+    required this.role,
+    required this.language,
+    required this.onLanguage,
+    required this.onLock,
+    this.onMenu,
+  });
+
+  final bool compact;
+  final String branch;
+  final String username;
+  final String role;
+  final String language;
+  final VoidCallback onLanguage;
+  final VoidCallback onLock;
+  final VoidCallback? onMenu;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 80,
+    padding: const EdgeInsets.symmetric(horizontal: 18),
+    decoration: const BoxDecoration(
+      color: SolarColors.surface,
+      border: Border(bottom: BorderSide(color: SolarColors.slate100)),
+    ),
+    child: Row(
+      children: [
+        if (onMenu != null)
+          IconButton(onPressed: onMenu, icon: const Icon(Icons.menu)),
+        if (!compact) ...[
+          Expanded(
+            child: TextField(
+              decoration: const InputDecoration(
+                isDense: true,
+                hintText: 'Search products, customers, invoices…',
+                prefixIcon: Icon(Icons.search),
+                suffixIcon: Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text('Ctrl + K', style: TextStyle(fontSize: 11)),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 18),
+        ] else
+          const Spacer(),
+        OutlinedButton.icon(
+          onPressed: onLanguage,
+          icon: const Icon(Icons.language, size: 18),
+          label: Text(language),
+        ),
+        const SizedBox(width: 10),
+        PopupMenuButton<String>(
+          tooltip: 'Account',
+          onSelected: (item) {
+            if (item == 'lock') onLock();
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'lock', child: Text('Lock session')),
+          ],
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: SolarColors.success,
+                child: Text(
+                  username.isEmpty ? 'U' : username[0].toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              if (!compact) ...[
+                const SizedBox(width: 8),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      username,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    Text(
+                      '$role · $branch',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: SolarColors.slate500,
+                      ),
+                    ),
+                  ],
+                ),
+                const Icon(Icons.keyboard_arrow_down),
+              ],
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+final class _WorkspaceNavigation extends StatelessWidget {
+  const _WorkspaceNavigation({
+    required this.modules,
+    required this.copy,
+    required this.onOpen,
+    required this.onLogout,
+  });
+  final List<_WorkspaceModule> modules;
+  final _WorkspaceCopy copy;
+  final ValueChanged<_WorkspaceModule> onOpen;
+  final VoidCallback onLogout;
+
+  @override
+  Widget build(BuildContext context) => Material(
+    color: SolarColors.surface,
+    child: DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(right: BorderSide(color: SolarColors.slate100)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 22, 14, 18),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFEE2E2),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.solar_power,
+                    color: SolarColors.crimson,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Shree Krushna',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      Text(
+                        copy.salesErp,
+                        style: const TextStyle(
+                          color: SolarColors.crimson,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              children: [
+                _navTile(
+                  context,
+                  Icons.dashboard_outlined,
+                  copy.dashboard,
+                  onTap: () => onOpen(_WorkspaceModule.dashboard),
+                ),
+                for (final module in modules.where(
+                  (item) => item != _WorkspaceModule.dashboard,
+                ))
+                  _navTile(
+                    context,
+                    module.icon,
+                    copy.moduleName(module),
+                    onTap: () => onOpen(module),
+                  ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.logout, color: SolarColors.crimson),
+            title: Text(
+              copy.signOut,
+              style: const TextStyle(
+                color: SolarColors.crimson,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            onTap: onLogout,
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
+    ),
+  );
+
+  Widget _navTile(
+    BuildContext context,
+    IconData icon,
+    String label, {
+    required VoidCallback onTap,
+  }) => ListTile(
+    minLeadingWidth: 24,
+    leading: Icon(icon, color: SolarColors.charcoal),
+    title: Text(label),
+    onTap: onTap,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(9)),
+    contentPadding: const EdgeInsets.symmetric(horizontal: 22),
+  );
+}
+
+final class _WorkspaceOverview extends StatelessWidget {
+  const _WorkspaceOverview({
+    required this.runtime,
+    required this.modules,
+    required this.copy,
+    required this.onOpen,
+  });
+  final AppRuntime runtime;
+  final List<_WorkspaceModule> modules;
+  final _WorkspaceCopy copy;
+  final ValueChanged<_WorkspaceModule> onOpen;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    padding: EdgeInsets.all(ErpBreakpoints.isCompact(context) ? 14 : 22),
+    child: ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 1500),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _WelcomeBanner(runtime: runtime, copy: copy),
+          const SizedBox(height: 16),
+          Text(copy.quickAccess, style: Theme.of(context).textTheme.titleLarge),
+          const SizedBox(height: 10),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final count = constraints.maxWidth >= 1150
+                  ? 6
+                  : constraints.maxWidth >= 760
+                  ? 3
+                  : 2;
+              final quick = modules
+                  .where((item) => item != _WorkspaceModule.dashboard)
+                  .take(6)
+                  .toList();
+              return GridView.builder(
+                itemCount: quick.length,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: count,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 10,
+                  childAspectRatio: constraints.maxWidth < 600 ? 1.15 : 2.1,
+                ),
+                itemBuilder: (_, index) => _QuickModuleCard(
+                  module: quick[index],
+                  label: copy.moduleName(quick[index]),
+                  onTap: () => onOpen(quick[index]),
+                ),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          _RoleGuidance(
+            copy: copy,
+            isCounter:
+                modules.contains(_WorkspaceModule.sales) &&
+                !modules.contains(_WorkspaceModule.purchases),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+final class _WelcomeBanner extends StatelessWidget {
+  const _WelcomeBanner({required this.runtime, required this.copy});
+  final AppRuntime runtime;
+  final _WorkspaceCopy copy;
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.all(24),
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(14),
+      image: const DecorationImage(
+        image: AssetImage('assets/images/solar_pump_hero.png'),
+        fit: BoxFit.cover,
+        alignment: Alignment.centerRight,
+      ),
+      border: Border.all(color: SolarColors.slate100),
+    ),
+    child: Wrap(
+      spacing: 24,
+      runSpacing: 16,
+      alignment: WrapAlignment.spaceBetween,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .88),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                copy.welcome,
+                style: const TextStyle(
+                  color: SolarColors.slate500,
+                  fontSize: 16,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                runtime.identity!.organization.displayName,
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+              const SizedBox(height: 10),
+              ErpStatusBadge(
+                label: runtime.identity!.branch.name,
+                tone: ErpStatusTone.success,
+              ),
+            ],
+          ),
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.solar_power, size: 46, color: SolarColors.crimson),
+            const SizedBox(width: 10),
+            Text(
+              copy.solarPromise,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: SolarColors.charcoal,
+              ),
+            ),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+final class _QuickModuleCard extends StatelessWidget {
+  const _QuickModuleCard({
+    required this.module,
+    required this.label,
+    required this.onTap,
+  });
+  final _WorkspaceModule module;
+  final String label;
+  final VoidCallback onTap;
+  @override
+  Widget build(BuildContext context) => InkWell(
+    onTap: onTap,
+    borderRadius: BorderRadius.circular(12),
+    child: ErpSectionCard(
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: module.color.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(module.icon, color: module.color),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              label,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+final class _RoleGuidance extends StatelessWidget {
+  const _RoleGuidance({required this.copy, required this.isCounter});
+  final _WorkspaceCopy copy;
+  final bool isCounter;
+  @override
+  Widget build(BuildContext context) => ErpSectionCard(
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(
+          isCounter ? Icons.point_of_sale : Icons.admin_panel_settings_outlined,
+          color: SolarColors.info,
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                isCounter ? copy.counterWorkspace : copy.adminWorkspace,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                isCounter ? copy.counterHelp : copy.adminHelp,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+enum _WorkspaceModule {
+  dashboard('/', Icons.dashboard_outlined, SolarColors.info, null),
+  sales(
+    '/sales',
+    Icons.point_of_sale_outlined,
+    SolarColors.crimson,
+    Capability.salesCreate,
+  ),
+  inventory(
+    '/inventory',
+    Icons.inventory_2_outlined,
+    Color(0xFFB45309),
+    Capability.inventoryManage,
+  ),
+  catalog(
+    '/catalog',
+    Icons.category_outlined,
+    Color(0xFF2563EB),
+    Capability.inventoryManage,
+  ),
+  parties(
+    '/parties',
+    Icons.people_outline,
+    Color(0xFF7C3AED),
+    Capability.partyManage,
+  ),
+  purchases(
+    '/purchases',
+    Icons.local_shipping_outlined,
+    Color(0xFF059669),
+    Capability.purchaseManage,
+  ),
+  finance(
+    '/finance',
+    Icons.account_balance_wallet_outlined,
+    Color(0xFF0F766E),
+    Capability.financeManage,
+  ),
+  accounting(
+    '/accounting',
+    Icons.receipt_long_outlined,
+    Color(0xFF0369A1),
+    Capability.costDataRead,
+  ),
+  reports(
+    '/reports',
+    Icons.bar_chart_outlined,
+    SolarColors.info,
+    Capability.salesRead,
+  ),
+  projects('/projects', Icons.wb_sunny_outlined, Color(0xFFF59E0B), null),
+  service('/service', Icons.handyman_outlined, Color(0xFF0891B2), null),
+  warranty(
+    '/warranty',
+    Icons.verified_user_outlined,
+    Color(0xFF16A34A),
+    Capability.salesRead,
+  ),
+  users(
+    '/users',
+    Icons.manage_accounts_outlined,
+    SolarColors.crimson,
+    Capability.userManage,
+  );
+
+  const _WorkspaceModule(this.path, this.icon, this.color, this.capability);
+  final String path;
+  final IconData icon;
+  final Color color;
+  final Capability? capability;
+  bool isVisibleTo(UserSession? session) {
+    if (session == null) return false;
+    if (this == _WorkspaceModule.projects || this == _WorkspaceModule.service) {
+      return session.roleId == Role.adminRoleId;
+    }
+    return capability == null || session.hasCapability(capability!);
+  }
+}
+
+final class _WorkspaceCopy {
+  const _WorkspaceCopy(this.marathi);
+  final bool marathi;
+  static _WorkspaceCopy of(BuildContext context) =>
+      _WorkspaceCopy(Localizations.localeOf(context).languageCode == 'mr');
+  String get salesErp => marathi ? 'सेल्स ईआरपी' : 'Sales ERP';
+  String get dashboard => marathi ? 'डॅशबोर्ड' : 'Dashboard';
+  String get quickAccess => marathi ? 'जलद प्रवेश' : 'Quick access';
+  String get welcome => marathi ? 'आपले स्वागत आहे' : 'Welcome to';
+  String get solarPromise => marathi
+      ? 'उत्तम उद्यासाठी सौर उपाय'
+      : 'Solar solutions for a better tomorrow';
+  String get administrator => marathi ? 'प्रशासक' : 'Administrator';
+  String get counterStaff => marathi ? 'काउंटर कर्मचारी' : 'Counter staff';
+  String get signOut => marathi ? 'साइन आउट' : 'Sign out';
+  String get counterWorkspace =>
+      marathi ? 'काउंटर कार्यक्षेत्र' : 'Counter workspace';
+  String get adminWorkspace =>
+      marathi ? 'प्रशासक कार्यक्षेत्र' : 'Administrator workspace';
+  String get counterHelp => marathi
+      ? 'इनव्हॉइस तयार करा, उत्पादनांचा साठा तपासा आणि ग्राहकांची देयके नोंदवा.'
+      : 'Create invoices, check product availability, and record customer payments.';
+  String get adminHelp => marathi
+      ? 'साठा, खरेदी, वित्त, अहवाल आणि वापरकर्त्यांचे नियंत्रण एकाच ठिकाणी.'
+      : 'Control inventory, purchases, finance, reports, and users from one place.';
+  String moduleName(_WorkspaceModule module) => switch (module) {
+    _WorkspaceModule.dashboard => dashboard,
+    _WorkspaceModule.sales => marathi ? 'विक्री / पीओएस' : 'Sales / POS',
+    _WorkspaceModule.inventory =>
+      marathi ? 'साठा व सिरियल' : 'Inventory & serials',
+    _WorkspaceModule.catalog => marathi ? 'उत्पादन सूची' : 'Product catalog',
+    _WorkspaceModule.parties =>
+      marathi ? 'ग्राहक व पुरवठादार' : 'Customers & suppliers',
+    _WorkspaceModule.purchases => marathi ? 'खरेदी' : 'Purchases',
+    _WorkspaceModule.finance =>
+      marathi ? 'देयके व खर्च' : 'Payments & expenses',
+    _WorkspaceModule.accounting =>
+      marathi ? 'लेखांकन व जीएसटी' : 'Accounting & GST',
+    _WorkspaceModule.reports => marathi ? 'अहवाल' : 'Reports',
+    _WorkspaceModule.projects => marathi ? 'सौर प्रकल्प' : 'Solar projects',
+    _WorkspaceModule.service => marathi ? 'सेवा व एएमसी' : 'Service & AMC',
+    _WorkspaceModule.warranty =>
+      marathi ? 'हमी व स्मरणपत्रे' : 'Warranty & reminders',
+    _WorkspaceModule.users =>
+      marathi ? 'वापरकर्ता व्यवस्थापन' : 'User management',
+  };
 }

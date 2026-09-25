@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
+import '../common/erp_shell.dart';
 
 final class InventoryPage extends ConsumerStatefulWidget {
   const InventoryPage({super.key});
@@ -16,11 +17,16 @@ final class InventoryPage extends ConsumerStatefulWidget {
 final class _InventoryPageState extends ConsumerState<InventoryPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late final bool _isAdministrator;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _isAdministrator = ref.read(authProvider)?.roleId == Role.adminRoleId;
+    _tabController = TabController(
+      length: _isAdministrator ? 4 : 3,
+      vsync: this,
+    );
   }
 
   @override
@@ -31,27 +37,31 @@ final class _InventoryPageState extends ConsumerState<InventoryPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Inventory & Serial Control'),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
-          tabs: const [
-            Tab(icon: Icon(Icons.inventory_2), text: 'Stock Balances'),
-            Tab(icon: Icon(Icons.history), text: 'Movements'),
-            Tab(icon: Icon(Icons.qr_code_2), text: 'Serials & Batches'),
-            Tab(icon: Icon(Icons.swap_horiz), text: 'Adjustments & Transfers'),
+          tabs: [
+            const Tab(icon: Icon(Icons.inventory_2), text: 'Stock Balances'),
+            const Tab(icon: Icon(Icons.history), text: 'Movements'),
+            const Tab(icon: Icon(Icons.qr_code_2), text: 'Serials & Batches'),
+            if (_isAdministrator)
+              const Tab(
+                icon: Icon(Icons.swap_horiz),
+                text: 'Adjustments & Transfers',
+              ),
           ],
         ),
       ),
       body: TabBarView(
         controller: _tabController,
-        children: const [
-          _StockBalancesTab(),
-          _StockMovementsTab(),
-          _SerialsTab(),
-          _AdjustmentsAndTransfersTab(),
+        children: [
+          const _StockBalancesTab(),
+          const _StockMovementsTab(),
+          const _SerialsTab(),
+          if (_isAdministrator) const _AdjustmentsAndTransfersTab(),
         ],
       ),
     );
@@ -137,6 +147,7 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
       0.0,
       (sum, b) => sum + b.valueInRupees,
     );
+    final isAdministrator = ref.watch(authProvider)?.roleId == Role.adminRoleId;
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -156,32 +167,34 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                       color: const Color(0xFF004D40),
                     ),
                   ),
-                  Text(
-                    'Total Valuation: ₹${totalValuationRupees.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF990000),
+                  if (isAdministrator)
+                    Text(
+                      'Total Valuation: ₹${totalValuationRupees.toStringAsFixed(2)}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF990000),
+                      ),
                     ),
-                  ),
                 ],
               ),
-              FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: const Color(0xFF004D40),
+              if (isAdministrator)
+                FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF004D40),
+                  ),
+                  onPressed: _rebuilding ? null : _rebuildLedger,
+                  icon: _rebuilding
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Icon(Icons.refresh),
+                  label: const Text('Rebuild Stock Ledger'),
                 ),
-                onPressed: _rebuilding ? null : _rebuildLedger,
-                icon: _rebuilding
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(
-                          color: Colors.white,
-                          strokeWidth: 2,
-                        ),
-                      )
-                    : const Icon(Icons.refresh),
-                label: const Text('Rebuild Stock Ledger'),
-              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -236,13 +249,14 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                                   color: Color(0xFF004D40),
                                 ),
                               ),
-                              Text(
-                                'Val: ₹${b.valueInRupees.toStringAsFixed(2)} (Avg: ₹${(b.weightedAverageUnitCostMicroRupees / 1000000.0).toStringAsFixed(2)})',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: Color(0xFF990000),
+                              if (isAdministrator)
+                                Text(
+                                  'Val: ₹${b.valueInRupees.toStringAsFixed(2)} (Avg: ₹${(b.weightedAverageUnitCostMicroRupees / 1000000.0).toStringAsFixed(2)})',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF990000),
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         );

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
+import '../common/erp_shell.dart';
 
 final projectQuotationsProvider =
     FutureProvider.autoDispose<List<QuotationHeader>>((ref) async {
@@ -48,7 +49,7 @@ final class _ProjectsPageState extends ConsumerState<ProjectsPage>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Solar Projects & Quotations'),
         bottom: TabBar(

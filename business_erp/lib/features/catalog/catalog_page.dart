@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
+import '../common/erp_shell.dart';
 
 final class CatalogPage extends ConsumerStatefulWidget {
   const CatalogPage({super.key});
@@ -26,7 +27,11 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
       hsnCode: '85414011',
       costPricePaise: 1350000,
       sellingPricePaise: 1650000,
-      attributes: {'wattage': '540W', 'cell_type': 'Mono PERC', 'efficiency': '21.3%'},
+      attributes: {
+        'wattage': '540W',
+        'cell_type': 'Mono PERC',
+        'efficiency': '21.3%',
+      },
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     ),
@@ -40,7 +45,11 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
       hsnCode: '85044090',
       costPricePaise: 4200000,
       sellingPricePaise: 4950000,
-      attributes: {'capacity': '5kW', 'phase': 'Three Phase', 'waveform': 'Pure Sine'},
+      attributes: {
+        'capacity': '5kW',
+        'phase': 'Three Phase',
+        'waveform': 'Pure Sine',
+      },
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     ),
@@ -54,7 +63,11 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
       hsnCode: '85072000',
       costPricePaise: 1100000,
       sellingPricePaise: 1380000,
-      attributes: {'capacity': '150Ah', 'voltage': '12V', 'type': 'C10 Lead Acid'},
+      attributes: {
+        'capacity': '150Ah',
+        'voltage': '12V',
+        'type': 'C10 Lead Acid',
+      },
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     ),
@@ -63,26 +76,31 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(authProvider);
-    final hasCostAccess = session?.hasCapability(Capability.costDataRead) ?? false;
+    final hasCostAccess =
+        session?.hasCapability(Capability.costDataRead) ?? false;
+    final isAdministrator = session?.roleId == Role.adminRoleId;
 
     final filteredProducts = _mockProducts.where((p) {
-      final matchesCategory = _selectedCategory == 'all' || p.categoryId == _selectedCategory;
-      final matchesQuery = _searchQuery.isEmpty ||
+      final matchesCategory =
+          _selectedCategory == 'all' || p.categoryId == _selectedCategory;
+      final matchesQuery =
+          _searchQuery.isEmpty ||
           p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           p.sku.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           p.hsnCode.contains(_searchQuery);
       return matchesCategory && matchesQuery;
     }).toList();
 
-    return Scaffold(
+    return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Product Catalog & Solar Attributes'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.add),
-            tooltip: 'Add Product',
-            onPressed: () => _showAddProductDialog(context),
-          ),
+          if (isAdministrator)
+            IconButton(
+              icon: const Icon(Icons.add),
+              tooltip: 'Add Product',
+              onPressed: () => _showAddProductDialog(context),
+            ),
         ],
       ),
       body: Padding(
@@ -97,8 +115,13 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                     decoration: InputDecoration(
                       hintText: 'Search by SKU, Name, HSN...',
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                     onChanged: (val) => setState(() => _searchQuery = val),
                   ),
@@ -124,28 +147,42 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
               child: Card(
                 child: ListView.separated(
                   itemCount: filteredProducts.length,
-                  separatorBuilder: (context, index) => const Divider(height: 1),
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final product = filteredProducts[index];
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundColor: const Color(0xFF990000).withValues(alpha: 0.1),
-                        child: Icon(_getCategoryIcon(product.categoryId), color: const Color(0xFF990000)),
+                        backgroundColor: const Color(0xFF990000)
+                            .withValues(alpha: 0.1),
+                        child: Icon(
+                          _getCategoryIcon(product.categoryId),
+                          color: const Color(0xFF990000),
+                        ),
                       ),
-                      title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                      title: Text(
+                        product.name,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('SKU: ${product.sku} | HSN: ${product.hsnCode} | Unit: ${product.baseUnitId}'),
+                          Text(
+                            'SKU: ${product.sku} | HSN: ${product.hsnCode} | Unit: ${product.baseUnitId}',
+                          ),
                           const SizedBox(height: 4),
                           Wrap(
                             spacing: 6,
                             children: product.attributes.entries.map((e) {
                               return Chip(
-                                label: Text('${e.key}: ${e.value}', style: const TextStyle(fontSize: 11)),
+                                label: Text(
+                                  '${e.key}: ${e.value}',
+                                  style: const TextStyle(fontSize: 11),
+                                ),
                                 visualDensity: VisualDensity.compact,
                                 padding: EdgeInsets.zero,
-                                backgroundColor: const Color(0xFF004D40).withValues(alpha: 0.1),
+                                backgroundColor: const Color(0xFF004D40)
+                                    .withValues(alpha: 0.1),
                               );
                             }).toList(),
                           ),
@@ -157,13 +194,21 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                         children: [
                           Text(
                             '₹${(product.sellingPricePaise / 100).toStringAsFixed(2)}',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF990000)),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF990000),
+                            ),
                           ),
                           Text(
-                            hasCostAccess ? 'Cost: ₹${(product.costPricePaise / 100).toStringAsFixed(2)}' : 'Cost: [REDACTED]',
+                            hasCostAccess
+                                ? 'Cost: ₹${(product.costPricePaise / 100).toStringAsFixed(2)}'
+                                : 'Cost: [REDACTED]',
                             style: TextStyle(
                               fontSize: 12,
-                              color: hasCostAccess ? Colors.grey[700] : Colors.amber[900],
+                              color: hasCostAccess
+                                  ? Colors.grey[700]
+                                  : Colors.amber[900],
                             ),
                           ),
                         ],
@@ -226,46 +271,88 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(controller: skuCtrl, decoration: const InputDecoration(labelText: 'SKU (e.g. SKS-PANEL-400)')),
-              TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Product Name')),
+              TextField(
+                controller: skuCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'SKU (e.g. SKS-PANEL-400)',
+                ),
+              ),
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Product Name'),
+              ),
               DropdownButtonFormField<String>(
                 initialValue: category,
                 items: const [
-                  DropdownMenuItem(value: 'solarPanel', child: Text('Solar Panel')),
-                  DropdownMenuItem(value: 'solarInverter', child: Text('Inverter')),
-                  DropdownMenuItem(value: 'solarBattery', child: Text('Battery')),
+                  DropdownMenuItem(
+                    value: 'solarPanel',
+                    child: Text('Solar Panel'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'solarInverter',
+                    child: Text('Inverter'),
+                  ),
+                  DropdownMenuItem(
+                    value: 'solarBattery',
+                    child: Text('Battery'),
+                  ),
                   DropdownMenuItem(value: 'solarCable', child: Text('Cable')),
                   DropdownMenuItem(value: 'solarPump', child: Text('Pump')),
                 ],
                 onChanged: (val) => category = val!,
                 decoration: const InputDecoration(labelText: 'Category'),
               ),
-              TextField(controller: hsnCtrl, decoration: const InputDecoration(labelText: 'HSN Code')),
-              TextField(controller: priceCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Selling Price (₹)')),
-              TextField(controller: costCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Purchase Cost (₹)')),
+              TextField(
+                controller: hsnCtrl,
+                decoration: const InputDecoration(labelText: 'HSN Code'),
+              ),
+              TextField(
+                controller: priceCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Selling Price (₹)',
+                ),
+              ),
+              TextField(
+                controller: costCtrl,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Purchase Cost (₹)',
+                ),
+              ),
             ],
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF990000),
+            ),
             onPressed: () {
               if (skuCtrl.text.isNotEmpty && nameCtrl.text.isNotEmpty) {
                 setState(() {
-                  _mockProducts.add(Product(
-                    id: 'p_${DateTime.now().millisecondsSinceEpoch}',
-                    organizationId: 'org1',
-                    sku: skuCtrl.text,
-                    name: nameCtrl.text,
-                    categoryId: category,
-                    baseUnitId: 'Pcs',
-                    hsnCode: hsnCtrl.text,
-                    costPricePaise: ((double.tryParse(costCtrl.text) ?? 0) * 100).round(),
-                    sellingPricePaise: ((double.tryParse(priceCtrl.text) ?? 0) * 100).round(),
-                    createdAt: DateTime.now(),
-                    updatedAt: DateTime.now(),
-                  ));
+                  _mockProducts.add(
+                    Product(
+                      id: 'p_${DateTime.now().millisecondsSinceEpoch}',
+                      organizationId: 'org1',
+                      sku: skuCtrl.text,
+                      name: nameCtrl.text,
+                      categoryId: category,
+                      baseUnitId: 'Pcs',
+                      hsnCode: hsnCtrl.text,
+                      costPricePaise:
+                          ((double.tryParse(costCtrl.text) ?? 0) * 100).round(),
+                      sellingPricePaise:
+                          ((double.tryParse(priceCtrl.text) ?? 0) * 100)
+                              .round(),
+                      createdAt: DateTime.now(),
+                      updatedAt: DateTime.now(),
+                    ),
+                  );
                 });
                 Navigator.pop(context);
               }
