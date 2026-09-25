@@ -1,0 +1,17 @@
+{
+  "@@locale": "en",
+  "appTitle": "Solar Shop ERP",
+  "setupTitle": "Set up this installation",
+  "organizationLegalName": "Organization legal name",
+  "organizationDisplayName": "Display name",
+  "branchName": "Branch name",
+  "financialYear": "Financial year",
+  "saveSetup": "Create installation",
+  "language": "मराठी",
+  "loading": "Opening encrypted local data…",
+  "startupFailed": "The encrypted local data could not be opened. Existing data was not changed.",
+  "retry": "Retry",
+  "snapshot": "Create recovery snapshot",
+  "snapshotCreated": "Verified recovery snapshot created",
+  "singleAuthority": "This installation is the single write authority for this branch."
+}

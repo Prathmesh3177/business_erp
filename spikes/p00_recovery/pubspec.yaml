@@ -1,0 +1,7 @@
+name: p00_recovery_spike
+publish_to: none
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+dependencies:
+  cryptography: 2.9.0
+

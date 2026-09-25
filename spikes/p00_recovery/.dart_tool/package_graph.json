@@ -1,0 +1,56 @@
+{
+  "roots": [
+    "p00_recovery_spike"
+  ],
+  "packages": [
+    {
+      "name": "p00_recovery_spike",
+      "version": "0.0.0",
+      "dependencies": [
+        "cryptography"
+      ],
+      "devDependencies": []
+    },
+    {
+      "name": "cryptography",
+      "version": "2.9.0",
+      "dependencies": [
+        "collection",
+        "crypto",
+        "ffi",
+        "meta",
+        "typed_data"
+      ]
+    },
+    {
+      "name": "typed_data",
+      "version": "1.4.0",
+      "dependencies": [
+        "collection"
+      ]
+    },
+    {
+      "name": "crypto",
+      "version": "3.0.7",
+      "dependencies": [
+        "typed_data"
+      ]
+    },
+    {
+      "name": "collection",
+      "version": "1.19.1",
+      "dependencies": []
+    },
+    {
+      "name": "ffi",
+      "version": "2.2.0",
+      "dependencies": []
+    },
+    {
+      "name": "meta",
+      "version": "1.19.0",
+      "dependencies": []
+    }
+  ],
+  "configVersion": 1
+}

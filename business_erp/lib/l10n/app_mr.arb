@@ -1,0 +1,17 @@
+{
+  "@@locale": "mr",
+  "appTitle": "सोलर शॉप ईआरपी",
+  "setupTitle": "ही स्थापना तयार करा",
+  "organizationLegalName": "संस्थेचे कायदेशीर नाव",
+  "organizationDisplayName": "दर्शनी नाव",
+  "branchName": "शाखेचे नाव",
+  "financialYear": "आर्थिक वर्ष",
+  "saveSetup": "स्थापना तयार करा",
+  "language": "English",
+  "loading": "कूटबद्ध स्थानिक डेटा उघडत आहे…",
+  "startupFailed": "कूटबद्ध स्थानिक डेटा उघडता आला नाही. जुना डेटा बदललेला नाही.",
+  "retry": "पुन्हा प्रयत्न करा",
+  "snapshot": "पुनर्प्राप्ती प्रत तयार करा",
+  "snapshotCreated": "तपासलेली पुनर्प्राप्ती प्रत तयार झाली",
+  "singleAuthority": "या शाखेसाठी ही स्थापना एकमेव लेखन प्राधिकरण आहे."
+}

@@ -1,0 +1,665 @@
+{
+  "elements": {
+    "FoundationDatabase": {
+      "id": {
+        "library_uri": "package:erp_local_data/src/foundation_database.dart",
+        "name": "FoundationDatabase"
+      },
+      "declaration": {
+        "source_uri": "package:erp_local_data/src/foundation_database.dart",
+        "offset": 2113,
+        "name": "FoundationDatabase"
+      },
+      "references": [
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "organizations"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "branches"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "financial_periods"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "app_metadata"
+        }
+      ],
+      "type": "database",
+      "tables": [
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "organizations"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "branches"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "financial_periods"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "app_metadata"
+        }
+      ],
+      "views": [],
+      "includes": [],
+      "queries": [],
+      "schema_version": 1,
+      "daos": [],
+      "has_constructor_arg": false
+    },
+    "organizations": {
+      "id": {
+        "library_uri": "package:erp_local_data/src/foundation_database.dart",
+        "name": "organizations"
+      },
+      "declaration": {
+        "source_uri": "package:erp_local_data/src/foundation_database.dart",
+        "offset": 316,
+        "name": "Organizations"
+      },
+      "references": [],
+      "type": "table",
+      "columns": [
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "id",
+          "nameInDart": "id",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 363,
+            "name": "id"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "legal_name",
+          "nameInDart": "legalName",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 396,
+            "name": "legalName"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "display_name",
+          "nameInDart": "displayName",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 436,
+            "name": "displayName"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "int"
+          },
+          "nullable": false,
+          "nameInSql": "created_at_utc_ms",
+          "nameInDart": "createdAtUtcMs",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 477,
+            "name": "createdAtUtcMs"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        }
+      ],
+      "existing_data_class": null,
+      "table_constraints": [
+        {
+          "type": "primary_key",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "custom_parent_class": null,
+      "interfaces_for_row_class": [],
+      "fixed_entity_info_name": null,
+      "base_dart_name": "Organizations",
+      "row_class_name": "OrganizationRow",
+      "companion_class_name": null,
+      "without_rowid": false,
+      "strict": false,
+      "write_default_constraints": true,
+      "custom_constraints": [],
+      "attached_indices": []
+    },
+    "branches": {
+      "id": {
+        "library_uri": "package:erp_local_data/src/foundation_database.dart",
+        "name": "branches"
+      },
+      "declaration": {
+        "source_uri": "package:erp_local_data/src/foundation_database.dart",
+        "offset": 604,
+        "name": "Branches"
+      },
+      "references": [
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "organizations"
+        }
+      ],
+      "type": "table",
+      "columns": [
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "id",
+          "nameInDart": "id",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 646,
+            "name": "id"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "organization_id",
+          "nameInDart": "organizationId",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 679,
+            "name": "organizationId"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [
+            {
+              "type": "foreign_key",
+              "column": {
+                "table": {
+                  "library_uri": "package:erp_local_data/src/foundation_database.dart",
+                  "name": "organizations"
+                },
+                "name": "id"
+              },
+              "onUpdate": null,
+              "onDelete": "restrict",
+              "initiallyDeferred": false
+            }
+          ],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "name",
+          "nameInDart": "name",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 791,
+            "name": "name"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "time_zone",
+          "nameInDart": "timeZone",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 826,
+            "name": "timeZone"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "locale",
+          "nameInDart": "locale",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 865,
+            "name": "locale"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "int"
+          },
+          "nullable": false,
+          "nameInSql": "created_at_utc_ms",
+          "nameInDart": "createdAtUtcMs",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 901,
+            "name": "createdAtUtcMs"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        }
+      ],
+      "existing_data_class": null,
+      "table_constraints": [
+        {
+          "type": "primary_key",
+          "columns": [
+            "id"
+          ]
+        },
+        {
+          "type": "unique",
+          "columns": [
+            "id",
+            "organization_id"
+          ]
+        }
+      ],
+      "custom_parent_class": null,
+      "interfaces_for_row_class": [],
+      "fixed_entity_info_name": null,
+      "base_dart_name": "Branches",
+      "row_class_name": "BranchRow",
+      "companion_class_name": null,
+      "without_rowid": false,
+      "strict": false,
+      "write_default_constraints": true,
+      "custom_constraints": [],
+      "attached_indices": []
+    },
+    "financial_periods": {
+      "id": {
+        "library_uri": "package:erp_local_data/src/foundation_database.dart",
+        "name": "financial_periods"
+      },
+      "declaration": {
+        "source_uri": "package:erp_local_data/src/foundation_database.dart",
+        "offset": 1129,
+        "name": "FinancialPeriods"
+      },
+      "references": [
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "organizations"
+        },
+        {
+          "library_uri": "package:erp_local_data/src/foundation_database.dart",
+          "name": "branches"
+        }
+      ],
+      "type": "table",
+      "columns": [
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "id",
+          "nameInDart": "id",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1179,
+            "name": "id"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "organization_id",
+          "nameInDart": "organizationId",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1212,
+            "name": "organizationId"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [
+            {
+              "type": "foreign_key",
+              "column": {
+                "table": {
+                  "library_uri": "package:erp_local_data/src/foundation_database.dart",
+                  "name": "organizations"
+                },
+                "name": "id"
+              },
+              "onUpdate": null,
+              "onDelete": "restrict",
+              "initiallyDeferred": false
+            }
+          ],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "branch_id",
+          "nameInDart": "branchId",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1324,
+            "name": "branchId"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "starts_on",
+          "nameInDart": "startsOn",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1363,
+            "name": "startsOn"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "ends_on",
+          "nameInDart": "endsOn",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1402,
+            "name": "endsOn"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "bool"
+          },
+          "nullable": false,
+          "nameInSql": "locked",
+          "nameInDart": "locked",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1439,
+            "name": "locked"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": {
+            "elements": [
+              "const ",
+              {
+                "lexeme": "Constant",
+                "import_uri": "package:drift/src/runtime/query_builder/query_builder.dart"
+              },
+              "(false)"
+            ]
+          },
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "int"
+          },
+          "nullable": false,
+          "nameInSql": "created_at_utc_ms",
+          "nameInDart": "createdAtUtcMs",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1513,
+            "name": "createdAtUtcMs"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        }
+      ],
+      "existing_data_class": null,
+      "table_constraints": [
+        {
+          "type": "primary_key",
+          "columns": [
+            "id"
+          ]
+        }
+      ],
+      "custom_parent_class": null,
+      "interfaces_for_row_class": [],
+      "fixed_entity_info_name": null,
+      "base_dart_name": "FinancialPeriods",
+      "row_class_name": "FinancialPeriodRow",
+      "companion_class_name": null,
+      "without_rowid": false,
+      "strict": false,
+      "write_default_constraints": true,
+      "custom_constraints": [
+        "FOREIGN KEY (branch_id, organization_id) REFERENCES branches(id, organization_id) ON DELETE RESTRICT",
+        "CHECK (ends_on > starts_on)"
+      ],
+      "attached_indices": []
+    },
+    "app_metadata": {
+      "id": {
+        "library_uri": "package:erp_local_data/src/foundation_database.dart",
+        "name": "app_metadata"
+      },
+      "declaration": {
+        "source_uri": "package:erp_local_data/src/foundation_database.dart",
+        "offset": 1859,
+        "name": "AppMetadata"
+      },
+      "references": [],
+      "type": "table",
+      "columns": [
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "key",
+          "nameInDart": "key",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1904,
+            "name": "key"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        },
+        {
+          "sqlType": {
+            "builtin": "string"
+          },
+          "nullable": false,
+          "nameInSql": "value",
+          "nameInDart": "value",
+          "declaration": {
+            "source_uri": "package:erp_local_data/src/foundation_database.dart",
+            "offset": 1938,
+            "name": "value"
+          },
+          "typeConverter": null,
+          "clientDefaultCode": null,
+          "defaultArgument": null,
+          "overriddenJsonName": null,
+          "referenceName": null,
+          "documentationComment": null,
+          "constraints": [],
+          "customConstraints": null
+        }
+      ],
+      "existing_data_class": null,
+      "table_constraints": [
+        {
+          "type": "primary_key",
+          "columns": [
+            "key"
+          ]
+        }
+      ],
+      "custom_parent_class": null,
+      "interfaces_for_row_class": [],
+      "fixed_entity_info_name": null,
+      "base_dart_name": "AppMetadata",
+      "row_class_name": "AppMetadataRow",
+      "companion_class_name": null,
+      "without_rowid": false,
+      "strict": false,
+      "write_default_constraints": true,
+      "custom_constraints": [],
+      "attached_indices": []
+    }
+  },
+  "imports": [
+    "package:drift/drift.dart",
+    "package:drift/native.dart",
+    "package:erp_application/erp_application.dart",
+    "package:erp_domain/erp_domain.dart",
+    "package:sqlite3/sqlite3.dart"
+  ]
+}

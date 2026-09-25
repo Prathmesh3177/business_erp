@@ -1,0 +1,22 @@
+name: p00_flutter_dependency_resolution
+description: Disposable P00-only compatibility resolution; not production application code.
+publish_to: none
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  cryptography: 2.9.0
+  drift: 2.35.0
+  flutter_riverpod: 3.4.3
+  flutter_secure_storage: 11.2.0
+  go_router: 18.0.1
+  intl: 0.20.3
+  pdf: 3.13.1
+  pdf_text_shaper: 1.1.0
+  printing: 5.15.1
+  sqlite3: 3.6.0
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc

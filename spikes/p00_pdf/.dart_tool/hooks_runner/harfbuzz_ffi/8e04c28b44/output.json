@@ -1,0 +1,20 @@
+{
+  "assets": [
+    {
+      "encoding": {
+        "file": "D:\\Prathmesh\\ERP\\spikes\\p00_pdf\\.dart_tool\\hooks_runner\\shared\\harfbuzz_ffi\\build\\8e04c28b44\\harfbuzz_ffi.dll",
+        "id": "package:harfbuzz_ffi/src/ffi_bindings.g.dart",
+        "link_mode": {
+          "type": "dynamic_loading_bundle"
+        }
+      },
+      "type": "code_assets/code"
+    }
+  ],
+  "assets_for_linking": {},
+  "dependencies": [
+    "C:\\Users\\prathmeshb\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\harfbuzz_ffi-0.5.1\\third_party\\harfbuzz\\src\\harfbuzz-world.cc"
+  ],
+  "status": "success",
+  "timestamp": "2026-09-25 11:01:28.000"
+}

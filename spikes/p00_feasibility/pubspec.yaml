@@ -1,0 +1,16 @@
+name: p00_feasibility_spikes
+publish_to: none
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+
+dependencies:
+  cryptography: 2.9.0
+  pdf: 3.13.1
+  pdf_text_shaper: 1.1.0
+  sqlite3: 3.6.0
+
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc
+

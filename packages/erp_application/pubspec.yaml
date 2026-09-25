@@ -1,0 +1,13 @@
+name: erp_application
+description: Application commands and ports for Solar Shop ERP.
+publish_to: none
+version: 0.1.0
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+dependencies:
+  erp_domain:
+    path: ../erp_domain
+  uuid: 4.6.0
+dev_dependencies:
+  lints: 6.0.0
+  test: 1.32.0

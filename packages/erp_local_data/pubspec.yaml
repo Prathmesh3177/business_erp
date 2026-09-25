@@ -1,0 +1,23 @@
+name: erp_local_data
+description: Encrypted Drift persistence adapter for Solar Shop ERP.
+publish_to: none
+version: 0.1.0
+environment:
+  sdk: '>=3.13.0 <4.0.0'
+dependencies:
+  drift: 2.35.0
+  erp_application:
+    path: ../erp_application
+  erp_domain:
+    path: ../erp_domain
+  path: 1.9.1
+  sqlite3: 3.6.0
+dev_dependencies:
+  build_runner: 2.16.1
+  drift_dev: 2.35.0
+  lints: 6.0.0
+  test: 1.32.0
+hooks:
+  user_defines:
+    sqlite3:
+      source: sqlite3mc

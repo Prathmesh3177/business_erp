@@ -1,0 +1,18 @@
+Running `(cd C:\Users\prathmeshb\AppData\Local\Pub\Cache\hosted\pub.dev\harfbuzz_ffi-0.5.1\; APPDATA=C:\Users\prathmeshb\AppData\Roaming LOCALAPPDATA=C:\Users\prathmeshb\AppData\Local PATH=C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell;C:\Users\prathmeshb\.codex\tmp\arg0\codex-arg0DvJzcs;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\libheif\libheif\bin;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\jxrlib\jxrlib\bin;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\poppler\Library\bin;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\override;C:\Program Files\Java\jdk-11.0.30\bin;C:\Python314\Scripts\;C:\Python314\;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files\dotnet\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Google\Google Apps Sync\;C:\ProgramData\chocolatey\bin;C:\Users\prathmeshb\AppData\Local\nvm;C:\nvm4w\nodejs;C:\Program Files\Maven\apache-maven-3.9.14\bin;C:\Program Files\Git\cmd;C:\Program Files\Java\jdk-21\bin;C:\Program Files\MySQL\MySQL Server 8.4\bin;C:\Program Files\MySQL\MySQL8.0\bin;C:\Program Files\PuTTY\;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell;C:\Users\prathmeshb\AppData\Local\Microsoft\WindowsApps;C:\Users\prathmeshb\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\prathmeshb\AppData\Roaming\npm;C:\Users\prathmeshb\AppData\Local\Programs\cursor\resources\app\bin;C:\Users\prathmeshb\AppData\Local\Programs\Ollama;C:\Users\prathmeshb\.dotnet\tools;C:\Tools\FlutterSDK\flutter\bin;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin;C:\Users\prathmeshb\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\git\cmd;C:\Users\prathmeshb\AppData\Local\OpenAI\Codex\bin\a9b4d7dd6031a02d;C:\Users\prathmeshb\AppData\Local\OpenAI\Codex\bin\13995fba801849b0 PROCESSOR_ARCHITECTURE=AMD64 PROGRAMDATA=C:\ProgramData SYSTEMDRIVE=C: SYSTEMROOT=C:\WINDOWS TEMP=C:\Users\PRATHM~1\AppData\Local\Temp TMP=C:\Users\PRATHM~1\AppData\Local\Temp USERPROFILE=C:\Users\prathmeshb WINDIR=C:\WINDOWS C:\Tools\FlutterSDK\flutter\bin\cache\dart-sdk\bin\dart.exe --packages=D:\Prathmesh\ERP\spikes\p00_feasibility\.dart_tool\package_config.json D:\Prathmesh\ERP\spikes\p00_feasibility\.dart_tool\hooks_runner\harfbuzz_ffi\8e04c28b44\hook.dill --config=D:\Prathmesh\ERP\spikes\p00_feasibility\.dart_tool\hooks_runner\harfbuzz_ffi\8e04c28b44\input.json )`.
+INFO: Could not find files for the given pattern(s).
+
+
+Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35228 for x64
+
+
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+
+Copyright (C) Microsoft Corporation.  All rights reserved.
+
+
+
+Microsoft (R) C/C++ Optimizing Compiler Version 19.44.35228 for x64
+
+

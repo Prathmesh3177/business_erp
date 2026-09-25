@@ -1,0 +1,1 @@
+{"valid_import":true,"imports":[{"uri":"package:erp_application/erp_application.dart","transitive":false},{"uri":"package:erp_domain/erp_domain.dart","transitive":false},{"uri":"package:erp_local_data/erp_local_data.dart","transitive":false},{"uri":"package:sqlite3/sqlite3.dart","transitive":false},{"uri":"package:test/test.dart","transitive":false}],"elements":[]}
