@@ -1,6 +1,6 @@
 # P15 — Build quotations, installations and project inventory
 
-Release: V3. Prerequisites: P14.
+Release: V3. Prerequisites: P12 (P13/P14 cloud phases are deferred).
 
 Copy the entire block below into your coding assistant. Paths are relative to the repository root; this phase must leave documentation updated.
 
@@ -9,12 +9,12 @@ Implement P15: Build quotations, installations and project inventory for Solar S
 
 Work only on this phase and its necessary prerequisites. First inspect the repository, applicable AGENTS.md, docs/README.md, docs/tracking/project-status.md, work-log.md and known-issues.md. Inspect existing code before editing; preserve user changes. Confirm prerequisites using evidence, not a status label alone. If a hard prerequisite is missing, record the blocker and finish independent work; do not fake a dependency.
 
-Follow the documented module boundaries, atomic posting, fixed-point arithmetic, permission checks and single-branch-authority policy. Do not add product AI, OCR, chatbots, model APIs, embeddings or forecasting models. AI is only the coding assistant. Choose compatible versions from verified official documentation and commit lockfiles. Never claim an unavailable platform/hardware check passed.
+Follow the documented module boundaries, atomic posting, fixed-point arithmetic, permission checks and single-branch-authority policy. No AI/ML features are in scope for this application. Choose compatible versions from verified official documentation and commit lockfiles. Never claim an unavailable platform/hardware check passed. Use local SQLite database; cloud/Firebase migration is deferred.
 
 Implement in reviewable task increments. If the phase cannot fit one session, complete a coherent increment and leave an exact handoff; do not silently omit remaining scope. Run checks appropriate to real behavior and invariants, including failure paths. Do not use mocks as proof of database atomicity or actual printing.
 
 Read these additional design documents under docs/: 01-requirements.md, 03-data-model.md, 04-business-rules.md.
-Prerequisites: P14.
+Prerequisites: P12 (P13/P14 cloud phases are deferred).
 
 Implementation tasks:
 1. Build quotation revisions with solar BOM, product/service lines, installation charges, tax, validity, approval and accepted version. Acceptance creates a project/site but does not independently create revenue or stock issue.

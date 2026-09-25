@@ -1,8 +1,15 @@
 # P13 — Create cloud identity, storage and ingestion foundations
 
+> **⚠️ DEFERRED** — This phase is deferred until the local-database application is fully working and tested. Cloud/Firebase migration will be implemented after V1.5 local milestones are achieved. See [future-deferred-features.md](future-deferred-features.md) for details.
+
 Release: V2. Prerequisites: P12.
 
-Copy the entire block below into your coding assistant. Paths are relative to the repository root; this phase must leave documentation updated.
+---
+
+The original prompt content is preserved below for future implementation when the application is ready for cloud migration.
+
+<details>
+<summary>Original P13 prompt (click to expand)</summary>
 
 ```text
 Implement P13: Create cloud identity, storage and ingestion foundations for Solar Shop ERP.
@@ -36,3 +43,4 @@ After the work is done, write the results in docs before ending the session. Thi
 Finish with a concise summary of what changed, what passed, what remains blocked and the next prompt/subtask. A phase is Complete only when its acceptance gate is evidenced. Do not begin the next phase automatically.
 ```
 
+</details>

@@ -7,6 +7,7 @@ import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../../app/locale_controller.dart';
 import '../../l10n/strings.dart';
+import '../settings/backup_restore_dialog.dart';
 
 final class FoundationPage extends ConsumerWidget {
   const FoundationPage({super.key});
@@ -347,11 +348,93 @@ final class _ReadyView extends ConsumerWidget {
               runSpacing: 12,
               alignment: WrapAlignment.center,
               children: [
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/dashboard'),
+                  icon: const Icon(Icons.dashboard),
+                  label: const Text('Executive Dashboard'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004D40), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/reports'),
+                  icon: const Icon(Icons.analytics),
+                  label: const Text('Reports & BI'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/catalog'),
+                  icon: const Icon(Icons.inventory),
+                  label: const Text('Product Catalog'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004D40), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/parties'),
+                  icon: const Icon(Icons.people),
+                  label: const Text('Party Masters'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/accounting'),
+                  icon: const Icon(Icons.account_balance),
+                  label: const Text('Accounting & GST'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004D40), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/inventory'),
+                  icon: const Icon(Icons.inventory_2),
+                  label: const Text('Inventory & Serials'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF8B0000), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/sales'),
+                  icon: const Icon(Icons.point_of_sale),
+                  label: const Text('Counter POS & Sales'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/purchases'),
+                  icon: const Icon(Icons.add_shopping_cart),
+                  label: const Text('Purchases & Receipts'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004D40), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/finance'),
+                  icon: const Icon(Icons.payments),
+                  label: const Text('Finance, Returns & Expenses'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE65100), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/projects'),
+                  icon: const Icon(Icons.wb_sunny),
+                  label: const Text('Solar Projects & Quotations'),
+                ),
                 FilledButton.tonalIcon(
                   onPressed: () => _snapshot(context),
                   icon: const Icon(Icons.backup_outlined),
                   label: Text(strings.get('snapshot')),
                 ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004D40), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/warranty'),
+                  icon: const Icon(Icons.verified_user),
+                  label: const Text('Warranty & Reminders'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000), foregroundColor: Colors.white),
+                  onPressed: () => context.push('/mobile'),
+                  icon: const Icon(Icons.phone_android),
+                  label: const Text('Mobile Draft Workflows'),
+                ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF004D40), foregroundColor: Colors.white),
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (_) => const BackupRestoreDialog(),
+                  ),
+                  icon: const Icon(Icons.security),
+                  label: const Text('Backup & Recovery (ADR-013)'),
+                ),
+
                 if (session?.hasCapability(Capability.userManage) ?? false)
                   ElevatedButton.icon(
                     onPressed: () => context.push('/users'),

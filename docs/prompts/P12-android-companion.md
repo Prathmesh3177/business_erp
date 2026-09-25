@@ -9,7 +9,7 @@ Implement P12: Build Android workflows and V1.5 hardware support for Solar Shop 
 
 Work only on this phase and its necessary prerequisites. First inspect the repository, applicable AGENTS.md, docs/README.md, docs/tracking/project-status.md, work-log.md and known-issues.md. Inspect existing code before editing; preserve user changes. Confirm prerequisites using evidence, not a status label alone. If a hard prerequisite is missing, record the blocker and finish independent work; do not fake a dependency.
 
-Follow the documented module boundaries, atomic posting, fixed-point arithmetic, permission checks and single-branch-authority policy. Do not add product AI, OCR, chatbots, model APIs, embeddings or forecasting models. AI is only the coding assistant. Choose compatible versions from verified official documentation and commit lockfiles. Never claim an unavailable platform/hardware check passed.
+Follow the documented module boundaries, atomic posting, fixed-point arithmetic, permission checks and single-branch-authority policy. No AI/ML features are in scope for this application. Choose compatible versions from verified official documentation and commit lockfiles. Never claim an unavailable platform/hardware check passed. Use local SQLite database; cloud/Firebase migration is deferred.
 
 Implement in reviewable task increments. If the phase cannot fit one session, complete a coherent increment and leave an exact handoff; do not silently omit remaining scope. Run checks appropriate to real behavior and invariants, including failure paths. Do not use mocks as proof of database atomicity or actual printing.
 
@@ -18,7 +18,7 @@ Prerequisites: P11.
 
 Implementation tasks:
 1. Implement mobile-first navigation, camera capture/crop/compression, gallery/nameplate photos, barcode/serial scanning, stock/customer lookup and authorized draft workflows.
-2. Implement Android permission lifecycle, app resume/crash draft recovery and manual entry fallback. Use isolated demo/independent-business data until P14 pairing exists; do not copy the desktop DB to pretend synchronization works.
+2. Implement Android permission lifecycle, app resume/crash draft recovery and manual entry fallback. Use isolated local-only data; cloud synchronization is deferred to a future phase. Do not copy the desktop DB to pretend synchronization works.
 3. Add supported Bluetooth/network/USB OTG print adapters with capability detection and device tests. Add warranty active/expired/expiring views and deterministic local reminder queue/export with duplicate suppression.
 4. Record signed Android build, physical device/OS/plugin/printer versions, storage limits, denied permissions and offline UX. Keep untested transports disabled.
 

@@ -1,3 +1,10 @@
+export 'src/backup_envelope.dart';
+export 'src/barcode_scanner_listener.dart';
 export 'src/crypto_hasher.dart';
+export 'src/desktop_print_adapter.dart';
 export 'src/filesystem.dart';
+export 'src/mobile_camera_adapter.dart';
+export 'src/mobile_print_transports.dart';
+export 'src/pdf_invoice_renderer.dart';
 export 'src/secure_database_key.dart';
+export 'src/thermal_invoice_renderer.dart';

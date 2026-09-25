@@ -6,6 +6,13 @@ final class CommandContext {
   final UserSession session;
   final DateTime timestampUtc;
 
+  bool hasCapability(Capability capability) {
+    if (session.isLocked || session.isExpired(timestampUtc)) {
+      return false;
+    }
+    return session.hasCapability(capability);
+  }
+
   void requireCapability(Capability capability) {
     if (session.isLocked) {
       throw const LockedFailure(

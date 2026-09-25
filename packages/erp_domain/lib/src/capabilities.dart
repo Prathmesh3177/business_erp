@@ -13,6 +13,22 @@ enum Capability {
   inventoryManage(
     'inventory.manage',
     'View inventory and record stock movements',
+  ),
+  purchaseManage(
+    'purchase.manage',
+    'Create and post supplier purchase bills',
+  ),
+  financeManage(
+    'finance.manage',
+    'Record payments, customer/supplier returns and party allocations',
+  ),
+  expensesManage(
+    'expenses.manage',
+    'Capture operating expenses and manage expense vouchers',
+  ),
+  cashSessionManage(
+    'cash_session.manage',
+    'Open, balance and close cash register counter sessions',
   );
 
   const Capability(this.identifier, this.description);
@@ -62,6 +78,9 @@ final class Role {
       Capability.salesRead,
       Capability.partyManage,
       Capability.inventoryManage,
+      Capability.financeManage,
+      Capability.expensesManage,
+      Capability.cashSessionManage,
     },
     isSystem: true,
   );

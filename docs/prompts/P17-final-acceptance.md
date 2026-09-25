@@ -9,7 +9,7 @@ Implement P17: Complete V3 acceptance and operational handoff for Solar Shop ERP
 
 Work only on this phase and its necessary prerequisites. First inspect the repository, applicable AGENTS.md, docs/README.md, docs/tracking/project-status.md, work-log.md and known-issues.md. Inspect existing code before editing; preserve user changes. Confirm prerequisites using evidence, not a status label alone. If a hard prerequisite is missing, record the blocker and finish independent work; do not fake a dependency.
 
-Follow the documented module boundaries, atomic posting, fixed-point arithmetic, permission checks and single-branch-authority policy. Do not add product AI, OCR, chatbots, model APIs, embeddings or forecasting models. AI is only the coding assistant. Choose compatible versions from verified official documentation and commit lockfiles. Never claim an unavailable platform/hardware check passed.
+Follow the documented module boundaries, atomic posting, fixed-point arithmetic, permission checks and single-branch-authority policy. No AI/ML features are in scope for this application. Choose compatible versions from verified official documentation and commit lockfiles. Never claim an unavailable platform/hardware check passed. Use local SQLite database; cloud/Firebase migration is deferred.
 
 Implement in reviewable task increments. If the phase cannot fit one session, complete a coherent increment and leave an exact handoff; do not silently omit remaining scope. Run checks appropriate to real behavior and invariants, including failure paths. Do not use mocks as proof of database atomicity or actual printing.
 
@@ -17,14 +17,14 @@ Read these additional design documents under docs/: 01-requirements.md, 08-quali
 Prerequisites: P16.
 
 Implementation tasks:
-1. Audit R01–R22 against implemented screens/commands/tests. Close gaps and verify all non-AI supplied features are covered or explicitly blocked with reason. Search dependencies/UI/config for accidentally introduced AI features and remove them from scope.
+1. Audit R01–R22 against implemented screens/commands/tests. Close gaps and verify all supplied features are covered or explicitly blocked with reason.
 2. Run the full purchase-sale-return-recovery walkthrough plus outage/branch transfer, quotation-installation-invoice and warranty/AMC scenarios. Repeat only affected regression tests after fixes; provide final reconciliation and real platform/hardware evidence.
 3. Verify production migration/backup/fencing/upgrade runbooks, support diagnostics, dependency/security inventory, translated UI/invoice QA, performance targets and business acceptance.
 4. Produce release notes, user/admin training guides, supported platform/device matrix, rollout checklist and issue ownership. Do not mark a release complete while required signing, business review, restore or target-platform tests are missing.
 
 Expected artifacts: docs/releases/v3.md; docs/runbooks/user-guide.md; docs/runbooks/admin-guide.md; final acceptance record.
 Acceptance checks: V3 gate and all applicable T01–T24 satisfied with linked evidence; requirements traceability complete; clean-device installation and recovery succeed; no critical open issue or unsupported success claim.
-Exit gate: Complete non-AI ERP delivery with documented support handoff.
+Exit gate: Complete ERP delivery with documented support handoff.
 
 After the work is done, write the results in docs before ending the session. This is mandatory even if the work is partial or blocked:
 1. Update docs/tracking/project-status.md with the actual phase/subtask status and evidence links.

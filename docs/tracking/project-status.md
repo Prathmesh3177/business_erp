@@ -2,26 +2,27 @@
 
 Last updated: 2026-09-25.
 
-**P02 identity, authorization and auditing implementation is complete. PBKDF2-HMAC-SHA256 password hashing, capability RBAC (Admin, Counter), last-administrator safeguard, login throttling, recovery key reset, command-level authorization, append-only redacted audit logs, and Drift schema v2 migration pass.**
+**P15 Solar Projects & Quotations, Site Inventory, Work-in-Progress (1400 WIP), and Site Costing BI is complete.**
 
 | Phase | Status | Evidence / next action |
 |---|---|---|
 | P00 | Complete | [Platform matrix](../implementation/platform-matrix.md), [dependencies](../implementation/dependency-register.md), [business validation](../implementation/business-validation.md), [acceptance checklist](../implementation/p00-acceptance-checklist.md), [ADR-013](../adr/ADR-013-local-database-encryption-and-recovery.md) and [test evidence](test-evidence.md). Windows encryption/recovery/PDF paths passed; unavailable platforms/business/hardware are explicit blockers. |
 | P01 | Complete | [Development setup](../implementation/development-setup.md), [migration notes](../implementation/p01-migration-notes.md), [acceptance checklist](../implementation/p01-acceptance-checklist.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Domain, application, local data, and widget tests pass; analyzers/boundaries pass. Normal database fallback supported for Windows and macOS. |
 | P02 | Complete | [Security & permissions spec](../implementation/security-permissions.md), `tool/check_all.dart` and [test evidence](test-evidence.md). T08 command denial passes; PBKDF2 password hashing, last-admin safeguard, recovery key reset, audit redactor, Drift schema v2, login UI, idle lock modal, and user management UI pass. |
-| P03 | Not started | Catalog/parties |
-| P04 | Not started | Money/tax/accounts |
-| P05 | Not started | Inventory |
-| P06 | Not started | Purchases |
-| P07 | Not started | POS/sales |
-| P08 | Not started | Payments/returns/expenses |
-| P09 | Not started | Printing/scanning |
-| P10 | Not started | Reports |
-| P11 | Not started | V1 certification |
-| P12 | Not started | Android/V1.5 |
+| P03 | Complete | [Catalog & imports spec](../implementation/catalog-and-imports.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Solar attribute definitions, unit conversions, party masters with GSTIN validation, managed file attachments with SHA-256 deduplication, repeat-safe CSV master import, cost price masking for Counter staff, and Drift schema v3 migration pass. |
+| P04 | Complete | [Calculation fixtures](../implementation/calculation-fixtures.md), `tool/check_all.dart` and [test evidence](test-evidence.md). 64-bit paise Money engine, fixed-point UnitPrice/Quantity/TaxRate, Indian GST tax engine (intra-state vs inter-state, inclusive vs exclusive), proportional discount allocation via largest remainder algorithm, balanced double-entry journal invariant, Chart of Accounts, compact document sequence formatting, and Drift schema v4 migration pass. |
+| P05 | Complete | [Inventory & Valuation spec](../implementation/inventory-valuation.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Append-only stock movements, perpetual weighted-average cost engine per product/location, whole-unit serial uniqueness/lifecycle, active stock reservations, stock ledger rebuild with zero parity variance, Drift schema v5 migration, and Inventory UI pass. |
+| P06 | Complete | [Purchasing spec](../implementation/purchasing.md), `tool/check_all.dart` and [test evidence](test-evidence.md). External invoice capture, landed cost allocation (by value & by quantity), atomic UnitOfWork purchase posting, serial registration, balanced double-entry journals, duplicate invoice protection, supplier outstanding payables, Drift schema v6 migration, and Purchases UI pass. |
+| P07 | Complete | [Sales & POS spec](../implementation/sales-and-pos.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Counter POS UI, barcode item search, split tender allocation, hold/resume POS drafts, atomic UnitOfWork posting, serial sale state transition, warranty entitlement generation, revenue/GST and COGS double-entry journals, duplicate-click idempotency protection, customer credit limit enforcement, and Drift schema v7 migration pass. |
+| P08 | Complete | [Payments, Returns & Expenses spec](../implementation/payments-returns-expenses.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Cumulative return quantity limits, COGS reversal at original sale cost snapshot, purchase debit notes, expense vouchers, cash register counter session reconciliation & variance entry, party aging buckets, Drift schema v8 migration, and Finance UI pass. |
+| P09 | Complete | [Invoices, Printing & Barcodes spec](../implementation/printing-and-barcodes.md), [Hardware matrix](../implementation/hardware-matrix.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Frozen InvoiceViewModel, versioned PDF templates, A4 multi-page pagination, 58/80 mm thermal renderers, English/Marathi/bilingual labels, PrintJob queue & delivery tracking, audited reprint copy watermark, keyboard-wedge scanner listener, and InvoicePreviewDialog UI pass. |
+| P10 | Complete | [Report Definitions & BI spec](../implementation/report-definitions.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Sales Summary, GSTR-1 & GSTR-3B summaries, Stock Valuation, Party Ageing, Financial Trial Balance, Deterministic Reorder Point Alerts, CSV anti-formula-injection, Reports & Dashboard UI pass. |
+| P11 | Complete | [ADR-013](../adr/ADR-013-local-database-encryption-and-recovery.md), [Backup & Restore Runbook](../runbooks/backup-restore.md), [Release & Upgrade Runbook](../runbooks/release-and-upgrade.md), [V1 Release Certification](../releases/v1.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Password-protected portable recovery envelope (.erpa), PBKDF2/AES-256-GCM crypto, SHA-256 integrity verification, staged fault-tolerant restore with pre-restore safety copy (`.pre_restore_safety.bak`), overdue backup warning badge (> 24 hours), post-restore COA & document sequence reconciliation, and V1 hardening pass. |
+| P12 | Complete | [Hardware Matrix](../implementation/hardware-matrix.md), [V1.5 Release Certification](../releases/v1.5.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Mobile-first navigation shell, persistent "Isolated Mobile Data Mode" banner, `MobileCameraAdapter` image compression & SHA-256 hashing, `AppLifecycleDraftHandler` draft recovery, `WarrantyPage` UI, `GenerateWarrantyRemindersUseCase` duplicate-suppressed reminder queue, formula-sanitized CSV export, Bluetooth SPP/LE, Wi-Fi Network TCP, and USB OTG print capability detection pass. |
+
 | P13 | Not started | Cloud foundations |
 | P14 | Not started | Sync/branches/V2 |
-| P15 | Not started | Projects |
+| P15 | Complete | [Projects & Site Costing spec](../implementation/projects-and-costing.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Solar quotation revision lifecycle, site creation on acceptance without double-posting, material issuance/return to site WIP asset account `1400 Work In Progress`, final project invoicing with WIP to COGS transfer, Drift schema v9 migration, and Solar Projects UI pass. |
 | P16 | Not started | Service/AMC |
 | P17 | Not started | V3 acceptance |
 

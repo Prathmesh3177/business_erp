@@ -1,8 +1,15 @@
 # P14 — Deliver branch authority, synchronization and V2
 
+> **⚠️ DEFERRED** — This phase is deferred until the cloud platform (P13) is implemented. Multi-branch synchronization requires cloud infrastructure that is not yet in place. See [future-deferred-features.md](future-deferred-features.md) for details.
+
 Release: V2 gate. Prerequisites: P13.
 
-Copy the entire block below into your coding assistant. Paths are relative to the repository root; this phase must leave documentation updated.
+---
+
+The original prompt content is preserved below for future implementation when cloud infrastructure is ready.
+
+<details>
+<summary>Original P14 prompt (click to expand)</summary>
 
 ```text
 Implement P14: Deliver branch authority, synchronization and V2 for Solar Shop ERP.
@@ -36,3 +43,4 @@ After the work is done, write the results in docs before ending the session. Thi
 Finish with a concise summary of what changed, what passed, what remains blocked and the next prompt/subtask. A phase is Complete only when its acceptance gate is evidenced. Do not begin the next phase automatically.
 ```
 
+</details>
