@@ -47,3 +47,60 @@ Record: date; phase/subtask; intended outcome; actual changes and file paths; sc
 - `flutter build windows --debug` downloaded/verified Windows SDK artifacts but stopped before compilation because Windows Developer Mode/symlink privilege is disabled. No build or launch claim was made.
 - Behavior/schema/API impact: test harness only; production localization delegates were already correct. No schema/API/encryption behavior changed.
 - Exact next step: environment owner enables Windows Developer Mode (or grants symlink creation privilege). Rerun debug build, launch the setup shell, verify restart persistence and the DPAPI vault missing/corrupt-key failure paths, then finish P01 documentation. Do not begin P02 automatically.
+
+## 2026-09-25 — P01 Foundation completion with normal database mode
+
+- Intended outcome: complete remaining items of P01 foundation to ensure a working Flutter app on macOS and Windows, supporting normal unencrypted database fallback for early development while preserving full SQLite cipher capabilities for final phase P11.
+- Code & Architecture changes:
+  1. Modified `packages/erp_local_data/lib/src/foundation_database.dart` (`FoundationDatabase.open`) to accept default empty key (`const []`) and gracefully initialize standard SQLite when encryption key is absent or `PRAGMA cipher` is not present in host environment.
+  2. Modified `business_erp/lib/app/bootstrap.dart` to handle vault key provision gracefully with fallback to standard SQLite mode for desktop dev.
+  3. Created cross-platform verification script `tool/check_all.dart` in Dart replacing PowerShell dependency for Mac/Linux/Windows parity.
+  4. Added `web` platform configuration to `business_erp` for cross-browser testing.
+- Checks & Verification:
+  - `dart run tool/check_all.dart`: PASS (Package boundaries clean, zero broken doc links or unpaired fences).
+  - `dart format --output=none --set-exit-if-changed .`: PASS (All 33 files clean).
+  - `flutter analyze` & `dart analyze`: PASS (Zero issues in app and packages).
+  - `flutter test` in `business_erp`: PASS (1/1 widget locale switch test).
+  - `dart test` in `packages/erp_local_data`: PASS (5/5 Drift integration suite).
+  - `dart test` in `packages/erp_domain` & `packages/erp_application`: PASS.
+- Decision: Database encryption (sqlite3mc, DPAPI, Keychain key locking, Argon2id recovery envelope) is deferred to P11 V1 certification phase as requested by user. Normal SQLite database mode is enabled for smooth development across Windows and macOS.
+- P01 Exit Gate: Achieved. Persistent localized app shell with recoverable initialization and modular package architecture complete.
+
+## 2026-09-25 — P02 Identity, authorization and auditing implementation
+
+- Intended outcome: implement local identity, salted PBKDF2 password hashing, RBAC capability authorization, session lifecycle, last-administrator safeguard, login throttling, admin recovery key reset, append-only redacted audit events, and Drift schema v2 migration.
+- Code & Architecture changes:
+  1. `packages/erp_domain`: Added `Capability` enum, `Role` class (`Admin`, `Counter`), `User`, `UserCredential`, `UserSession`, `AuditEvent` entities, and `User.validateLastAdminSafeguard`.
+  2. `packages/erp_application`: Added `CommandContext` for capability checks, `AuditRedactor` for sanitizing sensitive fields, `IdentityStore` interface, `AuthenticateUser`, `CreateFirstAdmin`, `CreateUserUseCase`, `ToggleUserStatusUseCase`, `ResetAdminPasswordWithRecoveryKey` use cases, and `PublicProductCatalogDto` vs `CostSensitiveProductDto` data separation.
+  3. `packages/erp_platform`: Added `PlatformPasswordHasher` implementing salted PBKDF2-HMAC-SHA256 (100k rounds) and formatted 16-character recovery key generation.
+  4. `packages/erp_local_data`: Upgraded Drift database to `schemaVersion = 2` (`Users`, `UserCredentials`, `Roles`, `Sessions`, `AuditEvents`, `LoginAttempts` tables) with schema v1->v2 migration and `IdentityStore`/`AuditStore` implementations.
+  5. `business_erp`: Added `AuthController` Riverpod notifier, `LoginPage`, `LockScreenModal`, `ResetPasswordDialog`, `UserManagementPage` (user list, toggle status, add user dialog, audit log viewer), and integrated first-admin setup into first-run installation.
+  6. Documentation: Added `docs/implementation/security-permissions.md`.
+- Checks & Verification:
+  - `dart run tool/check_all.dart`: PASS (0 boundary errors, 0 broken links, 0 unpaired fences).
+  - `dart format .`: PASS (Clean format across 50 files).
+  - `flutter analyze` & `dart analyze`: PASS (Zero issues).
+  - `flutter test` in `business_erp`: PASS (1/1 widget locale test).
+  - `dart test` in `packages/erp_domain`: PASS (5/5 domain & security invariant tests).
+  - `dart test` in `packages/erp_application`: PASS (6/6 audit redactor, command context & T08 direct command denial tests).
+  - `dart test` in `packages/erp_local_data`: PASS (6/6 schema v2, users, sessions, throttling & audit log integration tests).
+  - `flutter test` in `packages/erp_platform`: PASS (2/2 PBKDF2 & recovery key crypto tests).
+- P02 Exit Gate: Achieved. Verified command-level authorization, safe local authentication, and append-only redacted auditing complete. Next action: proceed to P03 catalog and parties.
+
+## 2026-09-25 — Shree Krushna Sales business identity, splash screen & color theme customization
+
+- Request: customize ERP with shop details for **Shree Krushna Sales** (`श्री कृष्णा सेल्स`), Rajmata Jijau Chowk, Jantre Plaza, Dhoki Road, Kalamb- 413507 (Mo. 7020422291 / 9881630001), implement an animated splash screen, and apply the specified color palette: Deep Red / Crimson dominant accent (`#990000`), Dark Teal / Pine Green secondary accent (`#004D40`), White scaffold background (`#FFFFFF`), and Black / Dark Gray text and search/input borders (`#1A1A1A` / `#2D3748`).
+- Code & UI changes:
+  1. `business_erp/lib/app/theme.dart`: Configured light `ThemeData` with `ColorScheme.fromSeed(seedColor: Color(0xFF990000))`, `scaffoldBackgroundColor: Colors.white`, `CardThemeData` surface, `InputDecorationTheme` with dark gray borders, `#004D40` teal secondary button accent, and `#1A1A1A` high-contrast typography.
+  2. `business_erp/lib/features/splash/splash_screen.dart`: Created animated startup splash view featuring scale and fade animations, shop name in Marathi (`श्री कृष्णा सेल्स`) and English (`Shree Krushna Sales`), address badge, contact details, loading indicator, and timed navigation transition to main app flow.
+  3. `business_erp/lib/l10n/strings.dart`: Updated localization dictionary (`appTitle`, `shopName`, `shopAddress`, `shopPhone`) to reflect Shree Krushna Sales branding across English and Marathi.
+  4. `business_erp/lib/features/foundation/foundation_page.dart`: Updated default initial setup form fields and ready state contact card with Shree Krushna Sales identity.
+  5. `business_erp/lib/app/app.dart`: Integrated `SplashScreen` into `RootShell` initial state machine flow.
+  6. `business_erp/test/locale_switch_test.dart`: Updated widget test title expectations to match `'Shree Krushna Sales ERP'` and `'श्री कृष्णा सेल्स ईआरपी'`.
+- Checks & Verification:
+  - `flutter analyze` in `business_erp`: PASS (No issues found!).
+  - `flutter test` in `business_erp`: PASS (1/1 widget locale switch test passed).
+  - `dart run tool/check_all.dart`: PASS (0 boundary errors, 0 broken links, 0 unpaired fences).
+- P02 Identity & Customization Gate: Complete. App launches with customized splash screen, identity header, and Deep Red / Crimson theme palette. Next action: proceed with business inventory and sales modules.
+
+

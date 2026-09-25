@@ -1,6 +1,0 @@
-{
-  "elements": {},
-  "imports": [
-    "package:erp_local_data/src/foundation_database.dart"
-  ]
-}

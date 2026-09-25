@@ -1,0 +1,78 @@
+# =====================================================================
+# Root .gitignore for Flutter / Dart Monorepo (Business ERP)
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# Dart & Flutter Build Outputs and Ephemeral Files
+# ---------------------------------------------------------------------
+**/.dart_tool/
+**/build/
+**/.pub/
+**/.pub-cache/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/doc/api/
+**/coverage/
+.widget_preview/
+migrate_working_dir/
+
+# Symbolication & Obfuscation
+app.*.symbols
+app.*.map.json
+
+# ---------------------------------------------------------------------
+# Operating System Junk Files
+# ---------------------------------------------------------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ---------------------------------------------------------------------
+# IDE & Editor Settings
+# ---------------------------------------------------------------------
+.vscode/
+.idea/
+*.iml
+*.ipr
+*.iws
+.history/
+*.swp
+*.atom/
+
+# ---------------------------------------------------------------------
+# Temporary & Local Database Files
+# ---------------------------------------------------------------------
+tmp/
+*.log
+*.tmp
+*.sqlite
+*.sqlite3
+*.db
+
+# ---------------------------------------------------------------------
+# Platform Specific Build Artifacts
+# ---------------------------------------------------------------------
+# Android
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/captures/
+**/android/.externalNativeBuild/
+
+# macOS / iOS
+**/ios/Flutter/.last_build_id
+**/ios/Pods/
+**/ios/Runner.xcworkspace/
+**/macOS/Pods/
+**/macOS/Runner.xcworkspace/
+
+# Windows
+**/windows/flutter/ephemeral/
+**/windows/out/

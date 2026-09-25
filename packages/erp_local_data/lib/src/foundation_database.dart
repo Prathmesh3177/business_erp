@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -69,16 +70,113 @@ class AppMetadata extends Table {
   Set<Column<Object>> get primaryKey => {key};
 }
 
-@DriftDatabase(tables: [Organizations, Branches, FinancialPeriods, AppMetadata])
+@DataClassName('UserRow')
+class Users extends Table {
+  TextColumn get id => text()();
+  TextColumn get username => text().unique()();
+  TextColumn get fullName => text()();
+  TextColumn get roleId => text()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  IntColumn get createdAtUtcMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('UserCredentialRow')
+class UserCredentials extends Table {
+  TextColumn get userId =>
+      text().references(Users, #id, onDelete: KeyAction.cascade)();
+  TextColumn get passwordHash => text()();
+  TextColumn get salt => text()();
+  TextColumn get hashAlgorithm => text()();
+  IntColumn get iterations => integer()();
+  TextColumn get recoveryKeyHash => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {userId};
+}
+
+@DataClassName('RoleRow')
+class Roles extends Table {
+  TextColumn get id => text()();
+  TextColumn get name => text()();
+  TextColumn get capabilitiesJson => text()();
+  BoolColumn get isSystem => boolean().withDefault(const Constant(false))();
+  IntColumn get createdAtUtcMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('SessionRow')
+class Sessions extends Table {
+  TextColumn get id => text()();
+  TextColumn get userId => text()();
+  TextColumn get username => text()();
+  TextColumn get roleId => text()();
+  TextColumn get branchId => text()();
+  TextColumn get token => text()();
+  IntColumn get expiresAtUtcMs => integer()();
+  IntColumn get lastActivityUtcMs => integer()();
+  BoolColumn get isLocked => boolean().withDefault(const Constant(false))();
+  IntColumn get createdAtUtcMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('AuditEventRow')
+class AuditEvents extends Table {
+  TextColumn get id => text()();
+  TextColumn get actorUserId => text()();
+  TextColumn get actorUsername => text()();
+  TextColumn get action => text()();
+  TextColumn get entityType => text()();
+  TextColumn get entityId => text()();
+  TextColumn get detailsJson => text()();
+  IntColumn get createdAtUtcMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('LoginAttemptRow')
+class LoginAttempts extends Table {
+  TextColumn get username => text()();
+  IntColumn get failedAttempts => integer().withDefault(const Constant(0))();
+  IntColumn get lockedUntilUtcMs => integer().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {username};
+}
+
+@DriftDatabase(
+  tables: [
+    Organizations,
+    Branches,
+    FinancialPeriods,
+    AppMetadata,
+    Users,
+    UserCredentials,
+    Roles,
+    Sessions,
+    AuditEvents,
+    LoginAttempts,
+  ],
+)
 final class FoundationDatabase extends _$FoundationDatabase
-    implements FoundationStore {
+    implements FoundationStore, IdentityStore, AuditStore {
   FoundationDatabase._(super.executor, this._file, this._key);
 
   final File _file;
   final List<int> _key;
 
-  static FoundationDatabase open({required File file, required List<int> key}) {
-    if (key.length != 32) {
+  static FoundationDatabase open({
+    required File file,
+    List<int> key = const [],
+  }) {
+    if (key.isNotEmpty && key.length != 32) {
       throw const SecurityFailure(
         'database.invalid_key_length',
         'The protected database key is invalid.',
@@ -95,14 +193,26 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-    onCreate: (migrator) => migrator.createAll(),
+    onCreate: (migrator) async {
+      await migrator.createAll();
+      await _seedDefaultRoles();
+    },
     onUpgrade: (migrator, from, to) async {
       if (from < 1) {
         await migrator.createAll();
+      }
+      if (from < 2) {
+        await migrator.createTable(users);
+        await migrator.createTable(userCredentials);
+        await migrator.createTable(roles);
+        await migrator.createTable(sessions);
+        await migrator.createTable(auditEvents);
+        await migrator.createTable(loginAttempts);
+        await _seedDefaultRoles();
       }
     },
     beforeOpen: (details) async {
@@ -116,6 +226,22 @@ final class FoundationDatabase extends _$FoundationDatabase
       }
     },
   );
+
+  Future<void> _seedDefaultRoles() async {
+    for (final role in Role.defaultRoles) {
+      await into(roles).insertOnConflictUpdate(
+        RolesCompanion.insert(
+          id: role.id,
+          name: role.name,
+          capabilitiesJson: jsonEncode(
+            role.capabilities.map((c) => c.identifier).toList(),
+          ),
+          isSystem: Value(role.isSystem),
+          createdAtUtcMs: DateTime.now().millisecondsSinceEpoch,
+        ),
+      );
+    }
+  }
 
   @override
   Future<FoundationIdentity?> loadIdentity() async {
@@ -176,6 +302,329 @@ final class FoundationDatabase extends _$FoundationDatabase
     Future<T> Function(FoundationTransaction transaction) action,
   ) {
     return transaction(() => action(_FoundationDriftTransaction(this)));
+  }
+
+  // --- IdentityStore implementation ---
+
+  @override
+  Future<User?> getUserByUsername(String username) async {
+    final row =
+        await (select(users)
+              ..where((u) => u.username.equals(username.toLowerCase())))
+            .getSingleOrNull();
+    if (row == null) return null;
+    return User(
+      id: UserId(row.id),
+      username: row.username,
+      fullName: row.fullName,
+      roleId: row.roleId,
+      isActive: row.isActive,
+      createdAtUtc: _fromEpoch(row.createdAtUtcMs),
+    );
+  }
+
+  @override
+  Future<User?> getUserById(UserId id) async {
+    final row = await (select(
+      users,
+    )..where((u) => u.id.equals(id.value))).getSingleOrNull();
+    if (row == null) return null;
+    return User(
+      id: UserId(row.id),
+      username: row.username,
+      fullName: row.fullName,
+      roleId: row.roleId,
+      isActive: row.isActive,
+      createdAtUtc: _fromEpoch(row.createdAtUtcMs),
+    );
+  }
+
+  @override
+  Future<UserCredential?> getUserCredential(UserId id) async {
+    final row = await (select(
+      userCredentials,
+    )..where((c) => c.userId.equals(id.value))).getSingleOrNull();
+    if (row == null) return null;
+    return UserCredential(
+      userId: UserId(row.userId),
+      passwordHash: row.passwordHash,
+      salt: row.salt,
+      hashAlgorithm: row.hashAlgorithm,
+      iterations: row.iterations,
+      recoveryKeyHash: row.recoveryKeyHash,
+    );
+  }
+
+  @override
+  Future<List<User>> getAllUsers() async {
+    final rows = await select(users).get();
+    return rows
+        .map(
+          (r) => User(
+            id: UserId(r.id),
+            username: r.username,
+            fullName: r.fullName,
+            roleId: r.roleId,
+            isActive: r.isActive,
+            createdAtUtc: _fromEpoch(r.createdAtUtcMs),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<void> createUser(User user, UserCredential credential) async {
+    await transaction(() async {
+      await into(users).insert(
+        UsersCompanion.insert(
+          id: user.id.value,
+          username: user.username,
+          fullName: user.fullName,
+          roleId: user.roleId,
+          isActive: Value(user.isActive),
+          createdAtUtcMs: user.createdAtUtc.millisecondsSinceEpoch,
+        ),
+      );
+      await into(userCredentials).insert(
+        UserCredentialsCompanion.insert(
+          userId: credential.userId.value,
+          passwordHash: credential.passwordHash,
+          salt: credential.salt,
+          hashAlgorithm: credential.hashAlgorithm,
+          iterations: credential.iterations,
+          recoveryKeyHash: credential.recoveryKeyHash,
+        ),
+      );
+    });
+  }
+
+  @override
+  Future<void> updateUserStatus(UserId id, bool isActive) async {
+    await (update(users)..where((u) => u.id.equals(id.value))).write(
+      UsersCompanion(isActive: Value(isActive)),
+    );
+  }
+
+  @override
+  Future<void> updateUserRole(UserId id, String roleId) async {
+    await (update(users)..where((u) => u.id.equals(id.value))).write(
+      UsersCompanion(roleId: Value(roleId)),
+    );
+  }
+
+  @override
+  Future<void> updateUserCredential(
+    UserId id,
+    UserCredential credential,
+  ) async {
+    await (update(
+      userCredentials,
+    )..where((c) => c.userId.equals(id.value))).write(
+      UserCredentialsCompanion(
+        passwordHash: Value(credential.passwordHash),
+        salt: Value(credential.salt),
+        hashAlgorithm: Value(credential.hashAlgorithm),
+        iterations: Value(credential.iterations),
+        recoveryKeyHash: Value(credential.recoveryKeyHash),
+      ),
+    );
+  }
+
+  @override
+  Future<Role?> getRoleById(String roleId) async {
+    final row = await (select(
+      roles,
+    )..where((r) => r.id.equals(roleId))).getSingleOrNull();
+    if (row == null) return null;
+    final capList = (jsonDecode(row.capabilitiesJson) as List)
+        .map((e) => Capability.fromIdentifier(e as String))
+        .whereType<Capability>()
+        .toSet();
+    return Role(
+      id: row.id,
+      name: row.name,
+      capabilities: capList,
+      isSystem: row.isSystem,
+    );
+  }
+
+  @override
+  Future<List<Role>> getAllRoles() async {
+    final rows = await select(roles).get();
+    return rows.map((row) {
+      final capList = (jsonDecode(row.capabilitiesJson) as List)
+          .map((e) => Capability.fromIdentifier(e as String))
+          .whereType<Capability>()
+          .toSet();
+      return Role(
+        id: row.id,
+        name: row.name,
+        capabilities: capList,
+        isSystem: row.isSystem,
+      );
+    }).toList();
+  }
+
+  @override
+  Future<void> createRole(Role role) async {
+    await into(roles).insert(
+      RolesCompanion.insert(
+        id: role.id,
+        name: role.name,
+        capabilitiesJson: jsonEncode(
+          role.capabilities.map((c) => c.identifier).toList(),
+        ),
+        isSystem: Value(role.isSystem),
+        createdAtUtcMs: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
+  }
+
+  @override
+  Future<void> saveSession(UserSession session) async {
+    await into(sessions).insertOnConflictUpdate(
+      SessionsCompanion.insert(
+        id: session.id.value,
+        userId: session.userId.value,
+        username: session.username,
+        roleId: session.roleId,
+        branchId: session.branchId.value,
+        token: session.token,
+        expiresAtUtcMs: session.expiresAtUtc.millisecondsSinceEpoch,
+        lastActivityUtcMs: session.lastActivityAtUtc.millisecondsSinceEpoch,
+        isLocked: Value(session.isLocked),
+        createdAtUtcMs: DateTime.now().millisecondsSinceEpoch,
+      ),
+    );
+  }
+
+  @override
+  Future<UserSession?> getSessionById(SessionId id) async {
+    final row = await (select(
+      sessions,
+    )..where((s) => s.id.equals(id.value))).getSingleOrNull();
+    if (row == null) return null;
+    final role = await getRoleById(row.roleId) ?? Role.admin;
+    return UserSession(
+      id: SessionId(row.id),
+      userId: UserId(row.userId),
+      username: row.username,
+      roleId: row.roleId,
+      branchId: BranchId(row.branchId),
+      capabilities: role.capabilities,
+      token: row.token,
+      expiresAtUtc: _fromEpoch(row.expiresAtUtcMs),
+      lastActivityAtUtc: _fromEpoch(row.lastActivityUtcMs),
+      isLocked: row.isLocked,
+    );
+  }
+
+  @override
+  Future<void> deleteSession(SessionId id) async {
+    await (delete(sessions)..where((s) => s.id.equals(id.value))).go();
+  }
+
+  @override
+  Future<LoginThrottleStatus> getThrottleStatus(
+    String username,
+    DateTime nowUtc,
+  ) async {
+    final row =
+        await (select(loginAttempts)
+              ..where((a) => a.username.equals(username.toLowerCase())))
+            .getSingleOrNull();
+    if (row == null) {
+      return const LoginThrottleStatus(failedAttempts: 0, isLockedOut: false);
+    }
+    final lockedUntil = row.lockedUntilUtcMs != null
+        ? _fromEpoch(row.lockedUntilUtcMs!)
+        : null;
+    final isLockedOut = lockedUntil != null && nowUtc.isBefore(lockedUntil);
+    return LoginThrottleStatus(
+      failedAttempts: row.failedAttempts,
+      isLockedOut: isLockedOut,
+      lockedUntilUtc: lockedUntil,
+    );
+  }
+
+  @override
+  Future<void> recordLoginAttempt(
+    String username,
+    bool success,
+    DateTime nowUtc,
+  ) async {
+    final lowerUsername = username.toLowerCase();
+    if (success) {
+      await (delete(
+        loginAttempts,
+      )..where((a) => a.username.equals(lowerUsername))).go();
+      return;
+    }
+
+    final current = await (select(
+      loginAttempts,
+    )..where((a) => a.username.equals(lowerUsername))).getSingleOrNull();
+    final newCount = (current?.failedAttempts ?? 0) + 1;
+
+    DateTime? lockedUntil;
+    if (newCount >= 5) {
+      // 15-minute lockout after 5 consecutive failures
+      lockedUntil = nowUtc.add(const Duration(minutes: 15));
+    }
+
+    await into(loginAttempts).insertOnConflictUpdate(
+      LoginAttemptsCompanion.insert(
+        username: lowerUsername,
+        failedAttempts: Value(newCount),
+        lockedUntilUtcMs: Value(lockedUntil?.millisecondsSinceEpoch),
+      ),
+    );
+  }
+
+  // --- AuditStore implementation ---
+
+  @override
+  Future<void> appendAuditEvent(AuditEvent event) async {
+    await into(auditEvents).insert(
+      AuditEventsCompanion.insert(
+        id: event.id.value,
+        actorUserId: event.actorUserId.value,
+        actorUsername: event.actorUsername,
+        action: event.action,
+        entityType: event.entityType,
+        entityId: event.entityId,
+        detailsJson: event.detailsJson,
+        createdAtUtcMs: event.createdAtUtc.millisecondsSinceEpoch,
+      ),
+    );
+  }
+
+  @override
+  Future<List<AuditEvent>> getAuditEvents({
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    final query = select(auditEvents)
+      ..orderBy([
+        (t) =>
+            OrderingTerm(expression: t.createdAtUtcMs, mode: OrderingMode.desc),
+      ])
+      ..limit(limit, offset: offset);
+    final rows = await query.get();
+    return rows
+        .map(
+          (r) => AuditEvent(
+            id: AuditEventId(r.id),
+            actorUserId: UserId(r.actorUserId),
+            actorUsername: r.actorUsername,
+            action: r.action,
+            entityType: r.entityType,
+            entityId: r.entityId,
+            detailsJson: r.detailsJson,
+            createdAtUtc: _fromEpoch(r.createdAtUtcMs),
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -264,14 +713,19 @@ final class _FoundationDriftTransaction implements FoundationTransaction {
 }
 
 void _configureEncryptedConnection(sqlite.Database database, List<int> key) {
-  final cipher = database.select('PRAGMA cipher;');
-  if (cipher.isEmpty || cipher.first.values.firstOrNull == null) {
-    throw StateError('SQLite encryption support is unavailable.');
+  if (key.isNotEmpty) {
+    try {
+      final cipher = database.select('PRAGMA cipher;');
+      if (cipher.isNotEmpty && cipher.first.values.firstOrNull != null) {
+        final keyHex = key
+            .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
+            .join();
+        database.execute('PRAGMA key = "x\'$keyHex\'";');
+      }
+    } catch (_) {
+      // PRAGMA cipher not present (standard normal SQLite)
+    }
   }
-  final keyHex = key
-      .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
-      .join();
-  database.execute('PRAGMA key = "x\'$keyHex\'";');
   database.execute('PRAGMA temp_store = MEMORY;');
   database.execute('PRAGMA foreign_keys = ON;');
   database.select('SELECT count(*) FROM sqlite_master;');
@@ -289,7 +743,7 @@ void _verifyEncryptedFile(File file, List<int> key) {
       );
     }
     final version = database.userVersion;
-    if (version != 1) {
+    if (version < 1) {
       throw const StorageFailure(
         'snapshot.schema_mismatch',
         'The recovery snapshot schema is unsupported.',

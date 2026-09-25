@@ -111,6 +111,79 @@ void main() {
     );
     await restored.close();
   });
+
+  test('IdentityStore and AuditStore persist users, sessions, throttling and audit events', () async {
+    final directory = Directory.systemTemp.createTempSync('solar-erp-id-test-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final file = File(
+      '${directory.path}${Platform.pathSeparator}foundation.db',
+    );
+    final db = FoundationDatabase.open(file: file, key: key);
+
+    // 1. Verify default roles seeded
+    final roles = await db.getAllRoles();
+    expect(roles.length, greaterThanOrEqualTo(2));
+    expect(roles.any((r) => r.id == Role.adminRoleId), isTrue);
+    expect(roles.any((r) => r.id == Role.counterRoleId), isTrue);
+
+    // 2. Create user and credential
+    final user = User(
+      id: const UserId('u-101'),
+      username: 'salesrep',
+      fullName: 'Sales Person',
+      roleId: Role.counterRoleId,
+      isActive: true,
+      createdAtUtc: DateTime.utc(2026, 9, 25),
+    );
+    final cred = const UserCredential(
+      userId: UserId('u-101'),
+      passwordHash: 'hash123',
+      salt: 'salt123',
+      hashAlgorithm: 'pbkdf2_sha256',
+      iterations: 100000,
+      recoveryKeyHash: 'rec123',
+    );
+
+    await db.createUser(user, cred);
+
+    final fetched = await db.getUserByUsername('salesrep');
+    expect(fetched?.fullName, equals('Sales Person'));
+    expect(fetched?.roleId, equals(Role.counterRoleId));
+
+    final fetchedCred = await db.getUserCredential(user.id);
+    expect(fetchedCred?.passwordHash, equals('hash123'));
+
+    // 3. Throttle recording
+    final now = DateTime.utc(2026, 9, 25, 12);
+    for (var i = 0; i < 5; i++) {
+      await db.recordLoginAttempt('salesrep', false, now);
+    }
+    final status = await db.getThrottleStatus('salesrep', now);
+    expect(status.isLockedOut, isTrue);
+
+    await db.recordLoginAttempt('salesrep', true, now);
+    final statusAfterSuccess = await db.getThrottleStatus('salesrep', now);
+    expect(statusAfterSuccess.isLockedOut, isFalse);
+
+    // 4. Audit Event logging
+    final auditEvent = AuditEvent(
+      id: const AuditEventId('aud-1'),
+      actorUserId: user.id,
+      actorUsername: user.username,
+      action: 'user.created',
+      entityType: 'User',
+      entityId: user.id.value,
+      detailsJson: '{"key":"value"}',
+      createdAtUtc: now,
+    );
+
+    await db.appendAuditEvent(auditEvent);
+    final auditLogs = await db.getAuditEvents();
+    expect(auditLogs.length, equals(1));
+    expect(auditLogs.first.action, equals('user.created'));
+
+    await db.close();
+  });
 }
 
 Future<FoundationIdentity> _initialize(FoundationStore store) {

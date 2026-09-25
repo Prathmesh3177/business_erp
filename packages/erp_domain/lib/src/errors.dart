@@ -24,3 +24,15 @@ final class StorageFailure extends ErpFailure {
 final class SecurityFailure extends ErpFailure {
   const SecurityFailure(super.code, super.safeMessage);
 }
+
+final class AuthenticationFailure extends ErpFailure {
+  const AuthenticationFailure(super.code, super.safeMessage);
+}
+
+final class AuthorizationFailure extends ErpFailure {
+  const AuthorizationFailure(super.code, super.safeMessage);
+}
+
+final class LockedFailure extends ErpFailure {
+  const LockedFailure(super.code, super.safeMessage, {super.retryable});
+}

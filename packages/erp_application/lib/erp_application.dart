@@ -1,3 +1,9 @@
+export 'src/audit_logger.dart';
+export 'src/command_context.dart';
 export 'src/configuration.dart';
+export 'src/dto.dart';
 export 'src/foundation.dart';
+export 'src/identity_store.dart';
+export 'src/identity_use_cases.dart';
 export 'src/logging.dart';
+export 'src/password_hasher.dart';

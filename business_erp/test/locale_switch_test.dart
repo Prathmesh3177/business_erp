@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('locale controller switches English to Marathi', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: _LocaleProbe()));
-    expect(find.text('Solar Shop ERP'), findsOneWidget);
+    expect(find.text('Shree Krushna Sales ERP'), findsOneWidget);
     await tester.tap(find.byType(TextButton));
     await tester.pump();
-    expect(find.text('सोलर शॉप ईआरपी'), findsOneWidget);
+    expect(find.text('श्री कृष्णा सेल्स ईआरपी'), findsOneWidget);
   });
 }
 
