@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:business_erp/app/theme.dart';
+
 final class _DummyReportStore implements ReportStore {
   @override
   Future<SalesReportSummary> getSalesReport(
@@ -75,8 +77,7 @@ final class _DummyReportStore implements ReportStore {
     String organizationId, {
     String? branchId,
     String? categoryId,
-  }) async =>
-      [];
+  }) async => [];
 
   @override
   Future<List<ReorderAlertItem>> getReorderAlerts(
@@ -84,15 +85,13 @@ final class _DummyReportStore implements ReportStore {
     String? branchId,
     int leadTimeDays = 7,
     double defaultSafetyStock = 5.0,
-  }) async =>
-      [];
+  }) async => [];
 
   @override
   Future<List<PartyAgeingBucket>> getPartyAgeingReport(
     String organizationId, {
     required bool isCustomer,
-  }) async =>
-      [];
+  }) async => [];
 
   @override
   Future<FinancialSummaryReport> getFinancialSummary(
@@ -129,15 +128,13 @@ final class _DummyReportStore implements ReportStore {
 }
 
 void main() {
-  testWidgets('DashboardPage renders KPI cards and reorder section', (WidgetTester tester) async {
+  testWidgets('DashboardPage renders KPI cards and reorder section', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          reportStoreProvider.overrideWithValue(_DummyReportStore()),
-        ],
-        child: const MaterialApp(
-          home: DashboardPage(),
-        ),
+        overrides: [reportStoreProvider.overrideWithValue(_DummyReportStore())],
+        child: MaterialApp(theme: buildSolarTheme(), home: DashboardPage()),
       ),
     );
     await tester.pumpAndSettle();
@@ -149,15 +146,13 @@ void main() {
     expect(find.text('Outstanding Receivables'), findsOneWidget);
   });
 
-  testWidgets('ReportsPage renders tab bar and filter bar', (WidgetTester tester) async {
+  testWidgets('ReportsPage renders tab bar and filter bar', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          reportStoreProvider.overrideWithValue(_DummyReportStore()),
-        ],
-        child: const MaterialApp(
-          home: ReportsPage(),
-        ),
+        overrides: [reportStoreProvider.overrideWithValue(_DummyReportStore())],
+        child: MaterialApp(theme: buildSolarTheme(), home: ReportsPage()),
       ),
     );
     await tester.pumpAndSettle();
@@ -167,5 +162,38 @@ void main() {
     expect(find.text('GST Returns'), findsOneWidget);
     expect(find.text('Stock Valuation'), findsOneWidget);
     expect(find.text('Party Ageing'), findsOneWidget);
+  });
+
+  testWidgets('Dashboard preserves a usable KPI grid at production viewports', (
+    WidgetTester tester,
+  ) async {
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    for (final size in const [
+      Size(1920, 1080),
+      Size(1366, 768),
+      Size(375, 812),
+    ]) {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1;
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            reportStoreProvider.overrideWithValue(_DummyReportStore()),
+          ],
+          child: MaterialApp(
+            theme: buildSolarTheme(),
+            home: const DashboardPage(),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'viewport $size should not overflow',
+      );
+      expect(find.text("Today's Sales"), findsOneWidget);
+    }
   });
 }

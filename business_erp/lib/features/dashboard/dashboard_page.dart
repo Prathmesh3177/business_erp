@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
+import '../../app/theme.dart';
+import '../common/erp_ui.dart';
 import '../reports/reports_page.dart';
 
 final class DashboardPage extends ConsumerStatefulWidget {
@@ -34,14 +36,19 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
       final orgId = runtime?.identity?.organization.id.value ?? 'org_1';
 
       final contextUseCase = CommandContext(
-        session: session ??
+        session:
+            session ??
             UserSession(
               id: const SessionId('sess_guest'),
               userId: const UserId('user_guest'),
               username: 'guest',
               roleId: 'admin',
               branchId: const BranchId('branch_1'),
-              capabilities: {Capability.salesCreate, Capability.inventoryManage, Capability.costDataRead},
+              capabilities: {
+                Capability.salesCreate,
+                Capability.inventoryManage,
+                Capability.costDataRead,
+              },
               token: 'tok_guest',
               expiresAtUtc: DateTime.now().add(const Duration(hours: 1)),
               lastActivityAtUtc: DateTime.now(),
@@ -76,8 +83,6 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Executive Dashboard & BI Overview'),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -109,56 +114,65 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
   }
 
   Widget _buildKpiGrid(ThemeData theme, DashboardMetrics? metrics) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final isWide = constraints.maxWidth > 800;
-      final crossAxisCount = isWide ? 4 : 2;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 800;
+        final isCompact = constraints.maxWidth < ErpBreakpoints.compact;
+        final crossAxisCount = isWide ? 4 : 2;
 
-      return GridView.count(
-        crossAxisCount: crossAxisCount,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 2.2,
-        children: [
-          _KpiCard(
-            title: "Today's Sales",
-            value: '₹${metrics?.todaySales.inRupees.toStringAsFixed(2) ?? "0.00"}',
-            icon: Icons.point_of_sale,
-            color: Colors.deepOrange,
-          ),
-          _KpiCard(
-            title: "Today's Collections",
-            value: '₹${metrics?.todayCollections.inRupees.toStringAsFixed(2) ?? "0.00"}',
-            icon: Icons.account_balance_wallet,
-            color: Colors.green,
-          ),
-          _KpiCard(
-            title: 'Low Stock Items',
-            value: '${metrics?.lowStockCount ?? 0} Alert(s)',
-            icon: Icons.warning_amber_rounded,
-            color: Colors.amber.shade800,
-          ),
-          _KpiCard(
-            title: 'Outstanding Receivables',
-            value: '₹${metrics?.totalReceivables.inRupees.toStringAsFixed(2) ?? "0.00"}',
-            icon: Icons.trending_up,
-            color: Colors.blue.shade700,
-          ),
-        ],
-      );
-    });
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          // Compact cards need room for a two-line label and the monetary value.
+          childAspectRatio: isCompact ? 1.3 : 2.2,
+          children: [
+            _KpiCard(
+              title: "Today's Sales",
+              value:
+                  '₹${metrics?.todaySales.inRupees.toStringAsFixed(2) ?? "0.00"}',
+              icon: Icons.point_of_sale,
+              color: SolarColors.crimson,
+            ),
+            _KpiCard(
+              title: "Today's Collections",
+              value:
+                  '₹${metrics?.todayCollections.inRupees.toStringAsFixed(2) ?? "0.00"}',
+              icon: Icons.account_balance_wallet,
+              color: Colors.green,
+            ),
+            _KpiCard(
+              title: 'Low Stock Items',
+              value: '${metrics?.lowStockCount ?? 0} Alert(s)',
+              icon: Icons.warning_amber_rounded,
+              color: Colors.amber.shade800,
+            ),
+            _KpiCard(
+              title: 'Outstanding Receivables',
+              value:
+                  '₹${metrics?.totalReceivables.inRupees.toStringAsFixed(2) ?? "0.00"}',
+              icon: Icons.trending_up,
+              color: Colors.blue.shade700,
+            ),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildQuickActionToolbar(BuildContext context) {
     return Card(
-      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Quick Access Navigation', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+            const Text(
+              'Quick Access Navigation',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
             const SizedBox(height: 12),
             Wrap(
               spacing: 12,
@@ -197,11 +211,13 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
     );
   }
 
-  Widget _buildReorderAlertsSection(ThemeData theme, DashboardMetrics? metrics) {
+  Widget _buildReorderAlertsSection(
+    ThemeData theme,
+    DashboardMetrics? metrics,
+  ) {
     final alerts = metrics?.recentReorderAlerts ?? [];
 
     return Card(
-      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -218,16 +234,19 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 Chip(
-                  label: const Text('Formula: (AvgDaily * LeadTime) + SafetyStock'),
+                  label: const Text(
+                    'Formula: (AvgDaily * LeadTime) + SafetyStock',
+                  ),
                   backgroundColor: Colors.grey.shade200,
                 ),
               ],
             ),
             const SizedBox(height: 12),
             if (alerts.isEmpty)
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 16),
-                child: Center(child: Text('All stock levels are optimal. No reorder alerts.')),
+              const ErpEmptyState(
+                icon: Icons.inventory_2_outlined,
+                title: 'Stock levels are healthy',
+                message: 'No reorder alerts need attention.',
               )
             else
               ListView.separated(
@@ -251,7 +270,10 @@ final class _DashboardPageState extends ConsumerState<DashboardPage> {
                     ),
                     trailing: Text(
                       'Suggest Order: +${alert.suggestedOrderQuantity.toStringAsFixed(1)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.deepOrange),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: SolarColors.deepRed,
+                      ),
                     ),
                   );
                 },
@@ -279,7 +301,6 @@ class _KpiCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 2,
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(
@@ -298,13 +319,20 @@ class _KpiCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: TextStyle(color: Colors.grey.shade700, fontSize: 12)),
+                  Text(
+                    title,
+                    style: TextStyle(color: Colors.grey.shade700, fontSize: 12),
+                  ),
                   const SizedBox(height: 4),
                   FittedBox(
                     fit: BoxFit.scaleDown,
                     child: Text(
                       value,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: color),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        color: color,
+                      ),
                     ),
                   ),
                 ],

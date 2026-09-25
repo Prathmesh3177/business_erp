@@ -1,5 +1,12 @@
 # Release notes
 
+## 2026-09-25 - P19 UI/UX redesign increment (not a release)
+
+- Added neutral/slate/crimson Material 3 tokens, consistent cards/forms/buttons/dialogs, status/empty/table primitives, scrollable workflow tabs, responsive report filters/tables, and a compact touch-oriented POS flow below 840dp.
+- No schema, API, migration, installation, recovery, GST, authorization or posting behavior changed.
+- `flutter analyze`, all eight existing widget tests, and repository documentation/boundary checks pass. Automated dashboard layouts pass 1920×1080, 1366×768 and 375×812 viewports.
+- This is not a visual release certification: manual accessibility, 200% text scaling, physical mobile/tablet and desktop navigation-rail checks remain open in O17.
+
 ## 2026-09-25 - P01 foundation increment (no product release)
 
 - Added pure domain/application packages, encrypted Drift local data, platform vault/filesystem adapters, Riverpod/GoRouter shell, English/Marathi catalogs, first-run organization/branch/financial-year setup and a manual snapshot action.
@@ -18,4 +25,3 @@
 - Installation impact for later phases: native C/C++ build tools are required for sqlite3mc/HarfBuzz; Android needs JDK 17+ and Android SDK; macOS needs Xcode; a licensed Devanagari TTF and notices must ship with the app.
 - Recovery impact for later phases: start the first production database encrypted; preserve versioned KDF/cipher metadata in backup archives; P11 must still prove clean-device restore, wrong key, corruption and disk-full behavior.
 - Unsupported: macOS, Android, cloud sign-in, OS-vault integration and all physical printers/scanners remain unverified. The generated Android release configuration still uses a debug key and generated app identifiers.
-

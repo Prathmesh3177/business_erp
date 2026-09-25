@@ -1,56 +1,170 @@
 import 'package:flutter/material.dart';
 
-ThemeData buildSolarTheme() {
-  const primaryCrimson = Color(0xFF990000);
-  const darkTeal = Color(0xFF004D40);
-  const darkGrayText = Color(0xFF1A1A1A);
-  const borderGray = Color(0xFF2D3748);
+/// Visual tokens for the ERP. Keep feature code semantic (primary, error,
+/// surface) instead of embedding brand colours in workflow widgets.
+abstract final class SolarColors {
+  static const canvas = Color(0xFFF8F9FA);
+  static const surface = Color(0xFFFFFFFF);
+  static const slate50 = Color(0xFFF1F5F9);
+  static const slate100 = Color(0xFFE2E8F0);
+  static const slate300 = Color(0xFFCBD5E1);
+  static const slate500 = Color(0xFF64748B);
+  static const charcoal = Color(0xFF1E293B);
+  static const crimson = Color(0xFFDC2626);
+  static const deepRed = Color(0xFFB91C1C);
+  static const success = Color(0xFF15803D);
+  static const warning = Color(0xFFB45309);
+  static const info = Color(0xFF0369A1);
+}
 
+ThemeData buildSolarTheme() {
+  const radius = Radius.circular(10);
+  const outline = OutlineInputBorder(
+    borderRadius: BorderRadius.all(radius),
+    borderSide: BorderSide(color: SolarColors.slate300),
+  );
   final scheme = ColorScheme.fromSeed(
-    seedColor: primaryCrimson,
-    primary: primaryCrimson,
+    seedColor: SolarColors.crimson,
+    primary: SolarColors.crimson,
     onPrimary: Colors.white,
-    secondary: darkTeal,
+    secondary: SolarColors.info,
     onSecondary: Colors.white,
-    surface: Colors.white,
-    onSurface: darkGrayText,
+    surface: SolarColors.surface,
+    onSurface: SolarColors.charcoal,
+    error: SolarColors.deepRed,
     brightness: Brightness.light,
   );
 
   return ThemeData(
     useMaterial3: true,
     colorScheme: scheme,
-    scaffoldBackgroundColor: Colors.white,
-    cardTheme: CardThemeData(
-      color: Colors.white,
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: const BorderSide(color: Color(0xFFE2E8F0)),
+    scaffoldBackgroundColor: SolarColors.canvas,
+    dividerColor: SolarColors.slate100,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: SolarColors.surface,
+      foregroundColor: SolarColors.charcoal,
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+      scrolledUnderElevation: 1,
+      titleTextStyle: TextStyle(
+        color: SolarColors.charcoal,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
       ),
     ),
-    appBarTheme: const AppBarTheme(
-      backgroundColor: primaryCrimson,
-      foregroundColor: Colors.white,
+    cardTheme: const CardThemeData(
+      color: SolarColors.surface,
       elevation: 0,
-      centerTitle: false,
+      shadowColor: Color(0x160F172A),
+      surfaceTintColor: Colors.transparent,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+        side: BorderSide(color: SolarColors.slate100),
+      ),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+      ),
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        backgroundColor: SolarColors.crimson,
+        foregroundColor: Colors.white,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+      ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        foregroundColor: SolarColors.charcoal,
+        side: const BorderSide(color: SolarColors.slate300),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+        ),
+      ),
     ),
     inputDecorationTheme: const InputDecorationTheme(
       filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(borderSide: BorderSide(color: borderGray)),
-      enabledBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: borderGray),
-      ),
+      fillColor: SolarColors.surface,
+      contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+      border: outline,
+      enabledBorder: outline,
       focusedBorder: OutlineInputBorder(
-        borderSide: BorderSide(color: primaryCrimson, width: 2),
+        borderRadius: BorderRadius.all(radius),
+        borderSide: BorderSide(color: SolarColors.crimson, width: 2),
       ),
-      labelStyle: TextStyle(color: darkGrayText),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(radius),
+        borderSide: BorderSide(color: SolarColors.deepRed),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.all(radius),
+        borderSide: BorderSide(color: SolarColors.deepRed, width: 2),
+      ),
+      floatingLabelBehavior: FloatingLabelBehavior.auto,
+      labelStyle: TextStyle(color: SolarColors.slate500),
+      helperStyle: TextStyle(color: SolarColors.slate500),
+      errorStyle: TextStyle(
+        color: SolarColors.deepRed,
+        fontWeight: FontWeight.w600,
+      ),
+    ),
+    tabBarTheme: const TabBarThemeData(
+      labelColor: SolarColors.crimson,
+      unselectedLabelColor: SolarColors.slate500,
+      indicatorColor: SolarColors.crimson,
+      indicatorSize: TabBarIndicatorSize.label,
+      dividerColor: SolarColors.slate100,
+    ),
+    dataTableTheme: const DataTableThemeData(
+      headingRowColor: WidgetStatePropertyAll(SolarColors.slate50),
+      dataRowMinHeight: 52,
+      dataRowMaxHeight: 64,
+      headingTextStyle: TextStyle(
+        fontWeight: FontWeight.w700,
+        color: SolarColors.charcoal,
+      ),
+      dividerThickness: 1,
+    ),
+    dialogTheme: const DialogThemeData(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      surfaceTintColor: Colors.transparent,
+    ),
+    snackBarTheme: const SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+      ),
     ),
     textTheme: const TextTheme(
-      bodyLarge: TextStyle(color: darkGrayText),
-      bodyMedium: TextStyle(color: darkGrayText),
-      titleLarge: TextStyle(color: darkGrayText, fontWeight: FontWeight.bold),
+      headlineSmall: TextStyle(
+        color: SolarColors.charcoal,
+        fontWeight: FontWeight.w700,
+      ),
+      titleLarge: TextStyle(
+        color: SolarColors.charcoal,
+        fontWeight: FontWeight.w700,
+      ),
+      titleMedium: TextStyle(
+        color: SolarColors.charcoal,
+        fontWeight: FontWeight.w600,
+      ),
+      bodyLarge: TextStyle(color: SolarColors.charcoal),
+      bodyMedium: TextStyle(color: SolarColors.charcoal),
+      bodySmall: TextStyle(color: SolarColors.slate500),
     ),
   );
 }

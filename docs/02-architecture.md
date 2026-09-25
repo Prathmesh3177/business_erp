@@ -83,6 +83,8 @@ Within domain/application/data packages group by bounded module: identity, organ
 
 UI cannot import DAOs. Domain cannot import Flutter, Drift, HTTP or Firebase. Application owns cross-module transactions. Repositories receive the same transaction/session context; no independently committed stock or payment writes. Tests enforce package boundaries. There is one production implementation of each financial formula.
 
+P19 keeps presentation tokens and responsive widgets in `business_erp/lib/app/theme.dart` and `business_erp/lib/features/common/erp_ui.dart`. They are Flutter-only components with no dependency on local data or domain behavior. Breakpoint decisions remain view concerns; route/use-case permission enforcement is unchanged.
+
 ## Command contract
 
 `PostSale(commandId, expectedDraftVersion, actorContext, branchId, draftId)` returns the persisted document ID/number/totals or a typed error. Actor context is supplied by a verified session, never trusted from request JSON. Within one database transaction: enforce role/branch/period, detect duplicate command, reload current draft/stock/credit/config, calculate, allocate number, write invoice and allocations, append stock and journal entries, update projections, append audit and outbox, store result. Commit before PDF creation, printing or networking. Repeating the same ID and payload returns the original result; changing the payload for that ID rejects it.

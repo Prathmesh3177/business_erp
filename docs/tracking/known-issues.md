@@ -19,5 +19,6 @@
 | O15 | Windows Developer Mode/symlink privilege is disabled | Flutter cannot assemble plugin symlinks, so Windows build/launch and live DPAPI vault checks are blocked | Environment owner + implementation / P01 | Open: enable Developer Mode or grant symlink privilege, then rerun debug build/launch. |
 
 | O16 | V3 Enterprise ERP System Delivery & Operational Handoff | Full V3 release certification across P00-P16 | Implementation / P17 | Closed: V3 ERP delivery complete, 100% test pass rates across domain/use-case/database/widget test suites, operational runbooks and release certification verified. |
+| O17 | P19 visual certification is incomplete | Automated dashboard viewport tests pass, but 200% text scale, screen-reader/keyboard review, real mobile/tablet hardware and a desktop navigation rail have not been manually verified | Implementation + UX reviewer / P19 | Open; see [design system](../design/ui-ux-design-system.md). |
 
 Append issues with reproduction, affected phase, severity, workaround, owner and resolution evidence. Close with evidence rather than deleting history. An accepted limitation must remain visible in release notes when relevant.

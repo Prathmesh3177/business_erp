@@ -31,10 +31,11 @@ These are development instructions for an AI coding assistant; they do not intro
 | [P16](P16-service-amc.md) | Build warranty, technician, service and AMC workflows | V3 |
 | [P17](P17-final-acceptance.md) | Complete V3 acceptance and operational handoff | V3 gate |
 | [P18](P18-production-readiness.md) | Final production readiness check (Mac & Windows) | Production gate |
+| [P19](P19-ui-ux-redesign.md) | Overhaul application UI/UX into a modern responsive enterprise design | Design overhaul |
 
 ## Mandatory documentation in every prompt
 
-After work, update status; append the work log; record actual test evidence; record/resolve known issues; update the relevant design/schema/workflow/API documentation; and document migrations/recovery/release impacts. This is repeated inside **all 19 copy-ready prompts**, so the requirement is not lost when an individual prompt is used in a fresh session.
+After work, update status; append the work log; record actual test evidence; record/resolve known issues; update the relevant design/schema/workflow/API documentation; and document migrations/recovery/release impacts. This is repeated inside **all 20 copy-ready prompts**, so the requirement is not lost when an individual prompt is used in a fresh session.
 
 ## Resuming an interrupted phase
 

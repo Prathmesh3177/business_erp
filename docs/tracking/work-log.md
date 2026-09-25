@@ -364,8 +364,23 @@ Record: date; phase/subtask; intended outcome; actual changes and file paths; sc
   - `dart run tool/check_all.dart`: PASS (0 boundary errors, 0 broken links, 0 unpaired fences).
 - P18 Exit Gate: Achieved. Final production readiness gate verified across Windows and macOS with proven calculations, database integrity, and operational resilience.
 
+## 2026-09-25 — P19 UI/UX design-system increment
 
+- Intended outcome: establish the modern visual foundation and a verified responsive increment without changing ERP business behavior.
+- Prerequisite evidence: P18 release certification and its GST/boundary evidence existed. P19 work was limited to Flutter presentation code and documentation; no domain, application, local-data, schema, GST, permission, atomic-posting or branch-authority code changed.
+- Changed `business_erp/lib/app/theme.dart` to introduce white/slate/charcoal/crimson tokens, rounded surfaces, focus/error field treatments, 48dp buttons, tab/table/dialog/snackbar styles. Added `lib/features/common/erp_ui.dart` with breakpoint, section-card, status-badge, empty-state and responsive-table primitives.
+- Updated Dashboard, POS, Reports, Inventory, Projects and Service views to inherit the system. POS changes from a split catalog/cart workspace to a touch-sized sequential flow below 840dp; reports wrap filters and table content scrolls horizontally. Added viewport regression coverage in `business_erp/test/reports_dashboard_test.dart`.
+- Checks: `flutter analyze` passed with 0 issues; `flutter test` passed 8/8 widget tests; responsive dashboard rendering at 1920×1080, 1366×768 and 375×812 passed with no rendering exception; `dart run tool/check_all.dart` passed package-boundary and documentation checks.
+- Documentation: added `docs/design/ui-ux-design-system.md`; updated docs index, requirements, architecture, UX, status, known issues, release notes and test evidence. Installation, migration and recovery impacts are none.
+- Exit status: P19 is **In progress**, not complete. Automated layout evidence does not cover manual accessibility/200% text-scale checks, physical device validation, desktop navigation rail or every remaining feature screen; these are O17.
+- Exact next step: add the desktop navigation rail and refactor Finance/settings/remaining table views to the primitives; run manual keyboard, screen-reader and 200% text-scale review on the three target viewports before considering the P19 exit gate.
 
+## 2026-09-25 — P19 Foundation launcher overflow correction
+
+- Diagnosed the supplied `RenderFlex` overflow: `_ReadyView` in `business_erp/lib/features/foundation/foundation_page.dart` rendered a multi-row module launcher inside a centered, non-scrollable `Column` with only 496dp available height.
+- Replaced that outer layout with a padded `SingleChildScrollView` and minimum-height constraint, preserving centered content when it fits and enabling vertical access to every action when it does not. No domain, persistence, permission, posting, schema, migration, installation or recovery behavior changed.
+- Verification: `flutter analyze` passed with 0 issues and `flutter test` passed 8/8 widget tests on macOS darwin-arm64 / Flutter 3.47.5.
+- Exact next step: add a direct ready-screen small-height/text-scale widget regression test once an `AppRuntime` test fixture is available; continue the P19 manual accessibility and physical-device review tracked in O17.
 
 
 

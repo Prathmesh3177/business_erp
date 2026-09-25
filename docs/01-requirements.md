@@ -44,6 +44,10 @@ Run a solar shop reliably without internet, retain traceable financial and stock
 
 V3 release scope is 100% complete and verified. All operational requirements R01 through R22 have passed automated domain, use case, database, platform, and Flutter widget test suites.
 
+## P19 presentation-system increment
+
+P19 adds presentation-only acceptance criteria: neutral canvas/surface tokens, crimson primary emphasis, semantic status badges, 48dp controls, responsive tables/tabs, and no layout exception at desktop (1920×1080 and 1366×768) or compact (375×812) dashboard test viewports. It must not modify fixed-point arithmetic, GST, authorization, posting, branch authority, or schema contracts. Production visual certification additionally requires manual accessibility and real-device review; see the [design system](design/ui-ux-design-system.md).
+
 ## Report inventory
 
 Sales: day/week/month/year, product/category/customer/counter, tax, payment method and returns. Inventory: on-hand/available/reserved, ledger, low/out-of-stock, valuation, dead stock, movement and adjustments. Purchasing: supplier/product/month and returns. Finance: expenses, gross/operating profit, receivable/payable ageing, cash, UPI, card clearing and credit. V2 adds branch consolidation with replication timestamps; V3 adds project budget/actual/margin, technician workload, warranties, service due and AMC expiry.

@@ -11,6 +11,7 @@ Design baseline: 24 September 2026. Status: proposed implementation baseline. Us
 | [05 Sync and cloud](05-sync-and-cloud.md) | Authority, protocol, conflicts and branch transfers |
 | [06 Security and operations](06-security-and-operations.md) | Access control, encryption, backup, restore and releases |
 | [07 UX and printing](07-ux-and-printing.md) | Screens, wireframes, localization and hardware |
+| [UI/UX design system](design/ui-ux-design-system.md) | P19 tokens, responsive primitives and validation scope |
 | [08 Quality gates](08-quality-gates.md) | Acceptance scenarios, performance and release evidence |
 | [09 Roadmap](09-roadmap.md) | Dependency-ordered implementation phases |
 | [10 Decisions and risks](10-decisions-and-risks.md) | ADRs, tradeoffs, open decisions and sources |

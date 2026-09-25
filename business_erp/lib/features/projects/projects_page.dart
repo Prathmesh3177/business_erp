@@ -6,14 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 
-final projectQuotationsProvider = FutureProvider.autoDispose<List<QuotationHeader>>((ref) async {
-  final runtime = await ref.watch(runtimeProvider.future);
-  final store = runtime.database;
-  final identity = runtime.identity!;
-  return store.listQuotations(identity.organization.id.value);
-});
+final projectQuotationsProvider =
+    FutureProvider.autoDispose<List<QuotationHeader>>((ref) async {
+      final runtime = await ref.watch(runtimeProvider.future);
+      final store = runtime.database;
+      final identity = runtime.identity!;
+      return store.listQuotations(identity.organization.id.value);
+    });
 
-final projectsListProvider = FutureProvider.autoDispose<List<SolarProject>>((ref) async {
+final projectsListProvider = FutureProvider.autoDispose<List<SolarProject>>((
+  ref,
+) async {
   final runtime = await ref.watch(runtimeProvider.future);
   final store = runtime.database;
   final identity = runtime.identity!;
@@ -48,13 +51,9 @@ final class _ProjectsPageState extends ConsumerState<ProjectsPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Solar Projects & Quotations'),
-        backgroundColor: const Color(0xFFE65100),
-        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
+          isScrollable: true,
           tabs: const [
             Tab(icon: Icon(Icons.description), text: 'Quotations'),
             Tab(icon: Icon(Icons.solar_power), text: 'Solar Projects'),
@@ -83,23 +82,30 @@ final class _QuotationsTabView extends ConsumerWidget {
 
     return Scaffold(
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: const Color(0xFFE65100),
         onPressed: () => _showCreateQuotationDialog(context, ref),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('New Solar Quotation', style: TextStyle(color: Colors.white)),
+        icon: const Icon(Icons.add),
+        label: const Text('New Solar Quotation'),
       ),
       body: quotationsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error loading quotations: $err')),
+        error: (err, stack) =>
+            Center(child: Text('Error loading quotations: $err')),
         data: (quotations) {
           if (quotations.isEmpty) {
             return const Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.description_outlined, size: 64, color: Colors.grey),
+                  Icon(
+                    Icons.description_outlined,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
                   SizedBox(height: 16),
-                  Text('No solar quotations recorded yet.', style: TextStyle(color: Colors.grey)),
+                  Text(
+                    'No solar quotations recorded yet.',
+                    style: TextStyle(color: Colors.grey),
+                  ),
                 ],
               ),
             );
@@ -116,8 +122,12 @@ final class _QuotationsTabView extends ConsumerWidget {
                     backgroundColor: _statusColor(q.status),
                     child: const Icon(Icons.description, color: Colors.white),
                   ),
-                  title: Text('${q.quotationNumber} (Rev ${q.revisionNumber}) - ${q.customerName}'),
-                  subtitle: Text('Grand Total: ${q.grandTotalPaise} | Status: ${q.status.name.toUpperCase()}'),
+                  title: Text(
+                    '${q.quotationNumber} (Rev ${q.revisionNumber}) - ${q.customerName}',
+                  ),
+                  subtitle: Text(
+                    'Grand Total: ${q.grandTotalPaise} | Status: ${q.status.name.toUpperCase()}',
+                  ),
                   trailing: q.status == QuotationStatus.draft
                       ? FilledButton.tonal(
                           onPressed: () => _approveQuotation(context, ref, q),
@@ -125,7 +135,8 @@ final class _QuotationsTabView extends ConsumerWidget {
                         )
                       : Chip(
                           label: Text(q.status.name.toUpperCase()),
-                          backgroundColor: _statusColor(q.status).withValues(alpha: 0.2),
+                          backgroundColor: _statusColor(q.status)
+                              .withValues(alpha: 0.2),
                         ),
                 ),
               );
@@ -151,7 +162,10 @@ final class _QuotationsTabView extends ConsumerWidget {
     }
   }
 
-  Future<void> _showCreateQuotationDialog(BuildContext context, WidgetRef ref) async {
+  Future<void> _showCreateQuotationDialog(
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final customerCtrl = TextEditingController(text: 'Residential Customer');
     final installationCtrl = TextEditingController(text: '500000'); // ₹5000
     final validDaysCtrl = TextEditingController(text: '15');
@@ -170,13 +184,17 @@ final class _QuotationsTabView extends ConsumerWidget {
             const SizedBox(height: 12),
             TextField(
               controller: installationCtrl,
-              decoration: const InputDecoration(labelText: 'Installation Charges (in Paise)'),
+              decoration: const InputDecoration(
+                labelText: 'Installation Charges (in Paise)',
+              ),
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 12),
             TextField(
               controller: validDaysCtrl,
-              decoration: const InputDecoration(labelText: 'Validity Period (Days)'),
+              decoration: const InputDecoration(
+                labelText: 'Validity Period (Days)',
+              ),
               keyboardType: TextInputType.number,
             ),
           ],
@@ -193,7 +211,10 @@ final class _QuotationsTabView extends ConsumerWidget {
                 final runtime = await ref.read(runtimeProvider.future);
                 final store = runtime.database;
                 final identity = runtime.identity!;
-                final cmdCtx = CommandContext(session: _getEffectiveSession(ref), timestampUtc: DateTime.now());
+                final cmdCtx = CommandContext(
+                  session: _getEffectiveSession(ref),
+                  timestampUtc: DateTime.now(),
+                );
                 final useCase = CreateQuotationUseCase(
                   projectStore: store,
                   accountingStore: store,
@@ -205,8 +226,12 @@ final class _QuotationsTabView extends ConsumerWidget {
                   branchId: identity.branch.id.value,
                   customerPartyId: 'cust_demo',
                   customerName: customerCtrl.text,
-                  validUntil: DateTime.now().add(Duration(days: int.parse(validDaysCtrl.text))),
-                  installationChargesPaise: Money.fromPaise(int.parse(installationCtrl.text)),
+                  validUntil: DateTime.now().add(
+                    Duration(days: int.parse(validDaysCtrl.text)),
+                  ),
+                  installationChargesPaise: Money.fromPaise(
+                    int.parse(installationCtrl.text),
+                  ),
                   lineInputs: [
                     QuotationLineInput(
                       productId: 'prod_panel_540',
@@ -236,11 +261,18 @@ final class _QuotationsTabView extends ConsumerWidget {
     );
   }
 
-  Future<void> _approveQuotation(BuildContext context, WidgetRef ref, QuotationHeader quotation) async {
+  Future<void> _approveQuotation(
+    BuildContext context,
+    WidgetRef ref,
+    QuotationHeader quotation,
+  ) async {
     try {
       final runtime = await ref.read(runtimeProvider.future);
       final store = runtime.database;
-      final cmdCtx = CommandContext(session: _getEffectiveSession(ref), timestampUtc: DateTime.now());
+      final cmdCtx = CommandContext(
+        session: _getEffectiveSession(ref),
+        timestampUtc: DateTime.now(),
+      );
       final useCase = ApproveQuotationUseCase(
         projectStore: store,
         accountingStore: store,
@@ -256,7 +288,11 @@ final class _QuotationsTabView extends ConsumerWidget {
       ref.invalidate(projectsListProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Quotation Approved! Solar Project site created successfully.')),
+          const SnackBar(
+            content: Text(
+              'Quotation Approved! Solar Project site created successfully.',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -271,17 +307,18 @@ final class _QuotationsTabView extends ConsumerWidget {
 
 UserSession _getEffectiveSession(WidgetRef ref) {
   final session = ref.read(authProvider);
-  return session ?? UserSession(
-    id: const SessionId('sess_admin'),
-    userId: const UserId('usr_admin'),
-    username: 'admin',
-    roleId: Role.adminRoleId,
-    branchId: const BranchId('br_1'),
-    capabilities: Capability.values.toSet(),
-    token: 'tok_admin',
-    expiresAtUtc: DateTime.now().add(const Duration(hours: 8)),
-    lastActivityAtUtc: DateTime.now(),
-  );
+  return session ??
+      UserSession(
+        id: const SessionId('sess_admin'),
+        userId: const UserId('usr_admin'),
+        username: 'admin',
+        roleId: Role.adminRoleId,
+        branchId: const BranchId('br_1'),
+        capabilities: Capability.values.toSet(),
+        token: 'tok_admin',
+        expiresAtUtc: DateTime.now().add(const Duration(hours: 8)),
+        lastActivityAtUtc: DateTime.now(),
+      );
 }
 
 final class _ProjectsTabView extends ConsumerWidget {
@@ -293,7 +330,8 @@ final class _ProjectsTabView extends ConsumerWidget {
 
     return projectsAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (err, stack) => Center(child: Text('Error loading projects: $err')),
+      error: (err, stack) =>
+          Center(child: Text('Error loading projects: $err')),
       data: (projects) {
         if (projects.isEmpty) {
           return const Center(
@@ -302,7 +340,10 @@ final class _ProjectsTabView extends ConsumerWidget {
               children: [
                 Icon(Icons.solar_power_outlined, size: 64, color: Colors.grey),
                 SizedBox(height: 16),
-                Text('No active solar projects found. Accept a quotation to create a project site.', style: TextStyle(color: Colors.grey)),
+                Text(
+                  'No active solar projects found. Accept a quotation to create a project site.',
+                  style: TextStyle(color: Colors.grey),
+                ),
               ],
             ),
           );
@@ -325,7 +366,10 @@ final class _ProjectsTabView extends ConsumerWidget {
                       children: [
                         Text(
                           '${p.projectNumber} - ${p.name}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
                         Chip(
                           label: Text(p.status.name.toUpperCase()),
@@ -334,14 +378,25 @@ final class _ProjectsTabView extends ConsumerWidget {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Text('Customer: ${p.customerName} | Site: ${p.siteAddress}'),
+                    Text(
+                      'Customer: ${p.customerName} | Site: ${p.siteAddress}',
+                    ),
                     const Divider(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _metricColumn('WIP Balance (Account 1400)', p.wipBalancePaise.toString()),
-                        _metricColumn('Budget Materials', p.budgetMaterialsPaise.toString()),
-                        _metricColumn('Actual Materials', p.actualMaterialsPaise.toString()),
+                        _metricColumn(
+                          'WIP Balance (Account 1400)',
+                          p.wipBalancePaise.toString(),
+                        ),
+                        _metricColumn(
+                          'Budget Materials',
+                          p.budgetMaterialsPaise.toString(),
+                        ),
+                        _metricColumn(
+                          'Actual Materials',
+                          p.actualMaterialsPaise.toString(),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -349,19 +404,28 @@ final class _ProjectsTabView extends ConsumerWidget {
                       spacing: 8,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () => _showIssueMaterialsDialog(context, ref, p),
+                          onPressed: () =>
+                              _showIssueMaterialsDialog(context, ref, p),
                           icon: const Icon(Icons.outbox),
-                          label: const Text('Issue Site Materials (WIP 1400 Dr)'),
+                          label: const Text(
+                            'Issue Site Materials (WIP 1400 Dr)',
+                          ),
                         ),
                         OutlinedButton.icon(
-                          onPressed: () => _showReturnMaterialsDialog(context, ref, p),
+                          onPressed: () =>
+                              _showReturnMaterialsDialog(context, ref, p),
                           icon: const Icon(Icons.inbox),
-                          label: const Text('Return Unused Materials (WIP 1400 Cr)'),
+                          label: const Text(
+                            'Return Unused Materials (WIP 1400 Cr)',
+                          ),
                         ),
                         if (p.status != ProjectStatus.completed)
                           FilledButton.icon(
-                            style: FilledButton.styleFrom(backgroundColor: Colors.green),
-                            onPressed: () => _postProjectInvoice(context, ref, p),
+                            style: FilledButton.styleFrom(
+                              backgroundColor: Colors.green,
+                            ),
+                            onPressed: () =>
+                                _postProjectInvoice(context, ref, p),
                             icon: const Icon(Icons.check_circle),
                             label: const Text('Complete & Post Final Invoice'),
                           ),
@@ -382,12 +446,19 @@ final class _ProjectsTabView extends ConsumerWidget {
       children: [
         Text(title, style: const TextStyle(fontSize: 11, color: Colors.grey)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+        Text(
+          value,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        ),
       ],
     );
   }
 
-  Future<void> _showIssueMaterialsDialog(BuildContext context, WidgetRef ref, SolarProject project) async {
+  Future<void> _showIssueMaterialsDialog(
+    BuildContext context,
+    WidgetRef ref,
+    SolarProject project,
+  ) async {
     final locationCtrl = TextEditingController(text: 'loc_main');
     final qtyCtrl = TextEditingController(text: '5');
 
@@ -400,7 +471,9 @@ final class _ProjectsTabView extends ConsumerWidget {
           children: [
             TextField(
               controller: locationCtrl,
-              decoration: const InputDecoration(labelText: 'From Storage Location ID'),
+              decoration: const InputDecoration(
+                labelText: 'From Storage Location ID',
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -411,14 +484,20 @@ final class _ProjectsTabView extends ConsumerWidget {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () async {
               Navigator.of(context).pop();
               try {
                 final runtime = await ref.read(runtimeProvider.future);
                 final db = runtime.database;
-                final cmdCtx = CommandContext(session: _getEffectiveSession(ref), timestampUtc: DateTime.now());
+                final cmdCtx = CommandContext(
+                  session: _getEffectiveSession(ref),
+                  timestampUtc: DateTime.now(),
+                );
                 final useCase = IssueProjectMaterialsUseCase(
                   projectStore: db,
                   inventoryStore: db,
@@ -443,14 +522,18 @@ final class _ProjectsTabView extends ConsumerWidget {
                 ref.invalidate(projectsListProvider);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Materials issued to site! Stock reduced and 1400 WIP debited.')),
+                    const SnackBar(
+                      content: Text(
+                        'Materials issued to site! Stock reduced and 1400 WIP debited.',
+                      ),
+                    ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Issue failed: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Issue failed: $e')));
                 }
               }
             },
@@ -461,7 +544,11 @@ final class _ProjectsTabView extends ConsumerWidget {
     );
   }
 
-  Future<void> _showReturnMaterialsDialog(BuildContext context, WidgetRef ref, SolarProject project) async {
+  Future<void> _showReturnMaterialsDialog(
+    BuildContext context,
+    WidgetRef ref,
+    SolarProject project,
+  ) async {
     final locationCtrl = TextEditingController(text: 'loc_main');
     final qtyCtrl = TextEditingController(text: '1');
 
@@ -474,25 +561,35 @@ final class _ProjectsTabView extends ConsumerWidget {
           children: [
             TextField(
               controller: locationCtrl,
-              decoration: const InputDecoration(labelText: 'To Storage Location ID'),
+              decoration: const InputDecoration(
+                labelText: 'To Storage Location ID',
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: qtyCtrl,
-              decoration: const InputDecoration(labelText: 'Returned Panel Quantity'),
+              decoration: const InputDecoration(
+                labelText: 'Returned Panel Quantity',
+              ),
               keyboardType: TextInputType.number,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             onPressed: () async {
               Navigator.of(context).pop();
               try {
                 final runtime = await ref.read(runtimeProvider.future);
                 final db = runtime.database;
-                final cmdCtx = CommandContext(session: _getEffectiveSession(ref), timestampUtc: DateTime.now());
+                final cmdCtx = CommandContext(
+                  session: _getEffectiveSession(ref),
+                  timestampUtc: DateTime.now(),
+                );
                 final useCase = ReturnProjectMaterialsUseCase(
                   projectStore: db,
                   inventoryStore: db,
@@ -511,14 +608,18 @@ final class _ProjectsTabView extends ConsumerWidget {
                 ref.invalidate(projectsListProvider);
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Unused materials returned! Stock restored and 1400 WIP credited.')),
+                    const SnackBar(
+                      content: Text(
+                        'Unused materials returned! Stock restored and 1400 WIP credited.',
+                      ),
+                    ),
                   );
                 }
               } catch (e) {
                 if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Return failed: $e')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('Return failed: $e')));
                 }
               }
             },
@@ -529,11 +630,18 @@ final class _ProjectsTabView extends ConsumerWidget {
     );
   }
 
-  Future<void> _postProjectInvoice(BuildContext context, WidgetRef ref, SolarProject project) async {
+  Future<void> _postProjectInvoice(
+    BuildContext context,
+    WidgetRef ref,
+    SolarProject project,
+  ) async {
     try {
       final runtime = await ref.read(runtimeProvider.future);
       final db = runtime.database;
-      final cmdCtx = CommandContext(session: _getEffectiveSession(ref), timestampUtc: DateTime.now());
+      final cmdCtx = CommandContext(
+        session: _getEffectiveSession(ref),
+        timestampUtc: DateTime.now(),
+      );
       final useCase = PostProjectInvoiceUseCase(
         projectStore: db,
         accountingStore: db,
@@ -551,7 +659,11 @@ final class _ProjectsTabView extends ConsumerWidget {
       ref.invalidate(projectsListProvider);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Project Invoice posted successfully! WIP transferred to COGS.')),
+          const SnackBar(
+            content: Text(
+              'Project Invoice posted successfully! WIP transferred to COGS.',
+            ),
+          ),
         );
       }
     } catch (e) {
@@ -576,7 +688,9 @@ final class _BudgetReportTabView extends ConsumerWidget {
       error: (err, stack) => Center(child: Text('Error loading report: $err')),
       data: (projects) {
         if (projects.isEmpty) {
-          return const Center(child: Text('No solar projects available for BI reporting.'));
+          return const Center(
+            child: Text('No solar projects available for BI reporting.'),
+          );
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16),
@@ -584,8 +698,13 @@ final class _BudgetReportTabView extends ConsumerWidget {
           itemBuilder: (context, index) {
             final p = projects[index];
             final db = ref.watch(runtimeProvider).asData!.value.database;
-            final cmdCtx = CommandContext(session: _getEffectiveSession(ref), timestampUtc: DateTime.now());
-            final reportUseCase = GenerateProjectBudgetReportUseCase(projectStore: db);
+            final cmdCtx = CommandContext(
+              session: _getEffectiveSession(ref),
+              timestampUtc: DateTime.now(),
+            );
+            final reportUseCase = GenerateProjectBudgetReportUseCase(
+              projectStore: db,
+            );
             return FutureBuilder<ProjectBudgetReport?>(
               future: reportUseCase.execute(cmdCtx, projectId: p.id),
               builder: (context, snapshot) {
@@ -603,25 +722,52 @@ final class _BudgetReportTabView extends ConsumerWidget {
                       children: [
                         Text(
                           '${r.projectNumber} - ${r.projectName}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
                         ),
-                        Text('Customer: ${r.customerName} | Status: ${r.status.name.toUpperCase()}'),
+                        Text(
+                          'Customer: ${r.customerName} | Status: ${r.status.name.toUpperCase()}',
+                        ),
                         const Divider(height: 24),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _reportTile('Total Budget', r.totalBudgetPaise.toString(), Colors.blue),
-                            _reportTile('Actual Material Cost', r.actualMaterialsPaise.toString(), Colors.orange),
-                            _reportTile('Actual Expenses', r.actualExpensesPaise.toString(), Colors.purple),
-                            _reportTile('WIP Balance (1400)', r.wipBalancePaise.toString(), Colors.brown),
-                            _reportTile('Invoiced Sales', r.invoicedPaise.toString(), Colors.teal),
+                            _reportTile(
+                              'Total Budget',
+                              r.totalBudgetPaise.toString(),
+                              Colors.blue,
+                            ),
+                            _reportTile(
+                              'Actual Material Cost',
+                              r.actualMaterialsPaise.toString(),
+                              Colors.orange,
+                            ),
+                            _reportTile(
+                              'Actual Expenses',
+                              r.actualExpensesPaise.toString(),
+                              Colors.purple,
+                            ),
+                            _reportTile(
+                              'WIP Balance (1400)',
+                              r.wipBalancePaise.toString(),
+                              Colors.brown,
+                            ),
+                            _reportTile(
+                              'Invoiced Sales',
+                              r.invoicedPaise.toString(),
+                              Colors.teal,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: r.marginPercentage >= 0 ? Colors.green.shade50 : Colors.red.shade50,
+                            color: r.marginPercentage >= 0
+                                ? Colors.green.shade50
+                                : Colors.red.shade50,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Row(
@@ -631,14 +777,18 @@ final class _BudgetReportTabView extends ConsumerWidget {
                                 'Estimated Gross Profit: ${r.estimatedGrossProfitPaise}',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: r.marginPercentage >= 0 ? Colors.green.shade900 : Colors.red.shade900,
+                                  color: r.marginPercentage >= 0
+                                      ? Colors.green.shade900
+                                      : Colors.red.shade900,
                                 ),
                               ),
                               Text(
                                 'Gross Margin: ${r.marginPercentage.toStringAsFixed(1)}%',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: r.marginPercentage >= 0 ? Colors.green.shade900 : Colors.red.shade900,
+                                  color: r.marginPercentage >= 0
+                                      ? Colors.green.shade900
+                                      : Colors.red.shade900,
                                 ),
                               ),
                             ],
@@ -659,9 +809,19 @@ final class _BudgetReportTabView extends ConsumerWidget {
   Widget _reportTile(String label, String value, Color color) {
     return Column(
       children: [
-        Text(label, style: TextStyle(fontSize: 11, color: Colors.grey.shade700)),
+        Text(
+          label,
+          style: TextStyle(fontSize: 11, color: Colors.grey.shade700),
+        ),
         const SizedBox(height: 4),
-        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: color)),
+        Text(
+          value,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 12,
+            color: color,
+          ),
+        ),
       ],
     );
   }

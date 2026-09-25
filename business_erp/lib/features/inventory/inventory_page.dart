@@ -34,14 +34,9 @@ final class _InventoryPageState extends ConsumerState<InventoryPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inventory & Serial Control'),
-        backgroundColor: const Color(0xFF990000),
-        foregroundColor: Colors.white,
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
-          indicatorWeight: 3,
+          isScrollable: true,
           tabs: const [
             Tab(icon: Icon(Icons.inventory_2), text: 'Stock Balances'),
             Tab(icon: Icon(Icons.history), text: 'Movements'),
@@ -89,7 +84,10 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
     final runtime = await ref.read(runtimeProvider.future);
     final orgId = runtime.identity?.organization.id.value ?? 'default_org';
     final balList = await runtime.database.getAllStockBalances(orgId);
-    final prodList = await runtime.database.searchProducts(orgId, includeInactive: true);
+    final prodList = await runtime.database.searchProducts(
+      orgId,
+      includeInactive: true,
+    );
 
     if (mounted) {
       setState(() {
@@ -107,15 +105,23 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
     final session = ref.read(authProvider);
 
     if (session != null) {
-      final commandContext = CommandContext(session: session, timestampUtc: DateTime.now());
-      final rebuilt = await RebuildStockLedgerUseCase(runtime.database).execute(commandContext, organizationId: orgId);
+      final commandContext = CommandContext(
+        session: session,
+        timestampUtc: DateTime.now(),
+      );
+      final rebuilt = await RebuildStockLedgerUseCase(runtime.database)
+          .execute(commandContext, organizationId: orgId);
       if (mounted) {
         setState(() {
           _balances = rebuilt;
           _rebuilding = false;
         });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Stock ledger rebuilt successfully with zero parity variance!')),
+          const SnackBar(
+            content: Text(
+              'Stock ledger rebuilt successfully with zero parity variance!',
+            ),
+          ),
         );
       }
     }
@@ -127,7 +133,10 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final totalValuationRupees = _balances.fold<double>(0.0, (sum, b) => sum + b.valueInRupees);
+    final totalValuationRupees = _balances.fold<double>(
+      0.0,
+      (sum, b) => sum + b.valueInRupees,
+    );
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -143,21 +152,33 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                   Text(
                     'Stock Valuations (${_balances.length} Positions)',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF004D40),
-                        ),
+                      fontWeight: FontWeight.bold,
+                      color: const Color(0xFF004D40),
+                    ),
                   ),
                   Text(
                     'Total Valuation: ₹${totalValuationRupees.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF990000)),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF990000),
+                    ),
                   ),
                 ],
               ),
               FilledButton.icon(
-                style: FilledButton.styleFrom(backgroundColor: const Color(0xFF004D40)),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF004D40),
+                ),
                 onPressed: _rebuilding ? null : _rebuildLedger,
                 icon: _rebuilding
-                    ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
                     : const Icon(Icons.refresh),
                 label: const Text('Rebuild Stock Ledger'),
               ),
@@ -166,12 +187,15 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
           const SizedBox(height: 16),
           Expanded(
             child: _balances.isEmpty
-                ? const Center(child: Text('No stock balance positions recorded yet.'))
+                ? const Center(
+                    child: Text('No stock balance positions recorded yet.'),
+                  )
                 : Card(
                     elevation: 2,
                     child: ListView.separated(
                       itemCount: _balances.length,
-                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1),
                       itemBuilder: (context, index) {
                         final b = _balances[index];
                         final prod = _products.firstWhere(
@@ -214,7 +238,10 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                               ),
                               Text(
                                 'Val: ₹${b.valueInRupees.toStringAsFixed(2)} (Avg: ₹${(b.weightedAverageUnitCostMicroRupees / 1000000.0).toStringAsFixed(2)})',
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF990000)),
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF990000),
+                                ),
                               ),
                             ],
                           ),
@@ -275,9 +302,9 @@ final class _StockMovementsTabState extends ConsumerState<_StockMovementsTab> {
           Text(
             'Append-Only Movement Audit Log (${_movements.length})',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF004D40),
-                ),
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF004D40),
+            ),
           ),
           const SizedBox(height: 12),
           Expanded(
@@ -293,13 +320,17 @@ final class _StockMovementsTabState extends ConsumerState<_StockMovementsTab> {
                         child: ListTile(
                           leading: Icon(
                             isPositive ? Icons.add_circle : Icons.remove_circle,
-                            color: isPositive ? const Color(0xFF004D40) : const Color(0xFF990000),
+                            color: isPositive
+                                ? const Color(0xFF004D40)
+                                : const Color(0xFF990000),
                           ),
                           title: Text(
                             '${m.movementKind.name.toUpperCase()} — Product: ${m.productId}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          subtitle: Text('Doc: ${m.documentId} • Location: ${m.locationId} • ${m.createdAt.toLocal().toString().split(".")[0]}'),
+                          subtitle: Text(
+                            'Doc: ${m.documentId} • Location: ${m.locationId} • ${m.createdAt.toLocal().toString().split(".")[0]}',
+                          ),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -308,7 +339,9 @@ final class _StockMovementsTabState extends ConsumerState<_StockMovementsTab> {
                                 '${isPositive ? "+" : ""}${m.quantityInUnits.toStringAsFixed(2)} Units',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: isPositive ? const Color(0xFF004D40) : const Color(0xFF990000),
+                                  color: isPositive
+                                      ? const Color(0xFF004D40)
+                                      : const Color(0xFF990000),
                                 ),
                               ),
                               Text(
@@ -351,7 +384,11 @@ final class _SerialsTabState extends ConsumerState<_SerialsTab> {
     // Fetch serials
     final query = _searchController.text.trim();
     if (query.isNotEmpty) {
-      final found = await runtime.database.getSerialByNumber(orgId, 'prod_panel_1', query);
+      final found = await runtime.database.getSerialByNumber(
+        orgId,
+        'prod_panel_1',
+        query,
+      );
       if (mounted) {
         setState(() {
           _serials = found != null ? [found] : [];
@@ -359,7 +396,10 @@ final class _SerialsTabState extends ConsumerState<_SerialsTab> {
         });
       }
     } else {
-      final list = await runtime.database.getSerialsForProduct(orgId, 'prod_panel_1');
+      final list = await runtime.database.getSerialsForProduct(
+        orgId,
+        'prod_panel_1',
+      );
       if (mounted) {
         setState(() {
           _serials = list;
@@ -393,7 +433,10 @@ final class _SerialsTabState extends ConsumerState<_SerialsTab> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF990000),
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 16,
+                  ),
                 ),
                 onPressed: _searchSerials,
                 icon: const Icon(Icons.search),
@@ -414,18 +457,32 @@ final class _SerialsTabState extends ConsumerState<_SerialsTab> {
                         final s = _serials[index];
                         return Card(
                           child: ListTile(
-                            leading: const Icon(Icons.qr_code, color: Color(0xFF004D40)),
+                            leading: const Icon(
+                              Icons.qr_code,
+                              color: Color(0xFF004D40),
+                            ),
                             title: Text(
                               s.serialNumber,
-                              style: const TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
                             ),
-                            subtitle: Text('Product: ${s.productId} • Location: ${s.locationId ?? "N/A"}'),
+                            subtitle: Text(
+                              'Product: ${s.productId} • Location: ${s.locationId ?? "N/A"}',
+                            ),
                             trailing: Chip(
                               label: Text(
                                 s.state.name.toUpperCase(),
-                                style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
-                              backgroundColor: s.state == SerialState.inStock ? const Color(0xFF004D40) : const Color(0xFF990000),
+                              backgroundColor: s.state == SerialState.inStock
+                                  ? const Color(0xFF004D40)
+                                  : const Color(0xFF990000),
                             ),
                           ),
                         );
@@ -445,10 +502,12 @@ final class _AdjustmentsAndTransfersTab extends ConsumerStatefulWidget {
   const _AdjustmentsAndTransfersTab();
 
   @override
-  ConsumerState<_AdjustmentsAndTransfersTab> createState() => _AdjustmentsAndTransfersTabState();
+  ConsumerState<_AdjustmentsAndTransfersTab> createState() =>
+      _AdjustmentsAndTransfersTabState();
 }
 
-final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsAndTransfersTab> {
+final class _AdjustmentsAndTransfersTabState
+    extends ConsumerState<_AdjustmentsAndTransfersTab> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -459,9 +518,9 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
           Text(
             'Inventory Management Actions',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: const Color(0xFF004D40),
-                ),
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF004D40),
+            ),
           ),
           const SizedBox(height: 24),
           Wrap(
@@ -517,24 +576,45 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: prodController, decoration: const InputDecoration(labelText: 'Product ID')),
+            TextField(
+              controller: prodController,
+              decoration: const InputDecoration(labelText: 'Product ID'),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: qtyController, decoration: const InputDecoration(labelText: 'Quantity (Units)')),
+            TextField(
+              controller: qtyController,
+              decoration: const InputDecoration(labelText: 'Quantity (Units)'),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: valController, decoration: const InputDecoration(labelText: 'Total Valuation (₹)')),
+            TextField(
+              controller: valController,
+              decoration: const InputDecoration(
+                labelText: 'Total Valuation (₹)',
+              ),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF990000)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF990000),
+            ),
             onPressed: () async {
               final runtime = await ref.read(runtimeProvider.future);
               final session = ref.read(authProvider);
               if (session != null) {
-                final commandContext = CommandContext(session: session, timestampUtc: DateTime.now());
-                final orgId = runtime.identity?.organization.id.value ?? 'default_org';
-                final branchId = runtime.identity?.branch.id.value ?? 'main_branch';
+                final commandContext = CommandContext(
+                  session: session,
+                  timestampUtc: DateTime.now(),
+                );
+                final orgId =
+                    runtime.identity?.organization.id.value ?? 'default_org';
+                final branchId =
+                    runtime.identity?.branch.id.value ?? 'main_branch';
 
                 final qty = double.tryParse(qtyController.text) ?? 1.0;
                 final val = double.tryParse(valController.text) ?? 1000.0;
@@ -556,7 +636,9 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
                 if (dialogCtx.mounted) {
                   Navigator.of(dialogCtx).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Opening stock posted successfully!')),
+                    const SnackBar(
+                      content: Text('Opening stock posted successfully!'),
+                    ),
                   );
                 }
               }
@@ -571,7 +653,9 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
   Future<void> _showAdjustmentDialog(BuildContext context) async {
     final prodController = TextEditingController(text: 'prod_panel_1');
     final deltaQtyController = TextEditingController(text: '-1');
-    final reasonController = TextEditingController(text: 'Physical audit count discrepancy');
+    final reasonController = TextEditingController(
+      text: 'Physical audit count discrepancy',
+    );
 
     await showDialog<void>(
       context: context,
@@ -580,26 +664,51 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: prodController, decoration: const InputDecoration(labelText: 'Product ID')),
+            TextField(
+              controller: prodController,
+              decoration: const InputDecoration(labelText: 'Product ID'),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: deltaQtyController, decoration: const InputDecoration(labelText: 'Quantity Delta (+ for Surplus, - for Shrinkage)')),
+            TextField(
+              controller: deltaQtyController,
+              decoration: const InputDecoration(
+                labelText: 'Quantity Delta (+ for Surplus, - for Shrinkage)',
+              ),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: reasonController, decoration: const InputDecoration(labelText: 'Reason for Adjustment')),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Reason for Adjustment',
+              ),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF004D40)),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF004D40),
+            ),
             onPressed: () async {
               final runtime = await ref.read(runtimeProvider.future);
               final session = ref.read(authProvider);
               if (session != null) {
-                final commandContext = CommandContext(session: session, timestampUtc: DateTime.now());
-                final orgId = runtime.identity?.organization.id.value ?? 'default_org';
-                final branchId = runtime.identity?.branch.id.value ?? 'main_branch';
+                final commandContext = CommandContext(
+                  session: session,
+                  timestampUtc: DateTime.now(),
+                );
+                final orgId =
+                    runtime.identity?.organization.id.value ?? 'default_org';
+                final branchId =
+                    runtime.identity?.branch.id.value ?? 'main_branch';
 
-                final deltaQty = ((double.tryParse(deltaQtyController.text) ?? 0) * 1000000).round();
+                final deltaQty =
+                    ((double.tryParse(deltaQtyController.text) ?? 0) * 1000000)
+                        .round();
 
                 await PostStockAdjustmentUseCase(
                   inventoryStore: runtime.database,
@@ -618,7 +727,9 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
                 if (dialogCtx.mounted) {
                   Navigator.of(dialogCtx).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Stock adjustment posted successfully!')),
+                    const SnackBar(
+                      content: Text('Stock adjustment posted successfully!'),
+                    ),
                   );
                 }
               }
@@ -641,22 +752,38 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: prodController, decoration: const InputDecoration(labelText: 'Product ID')),
+            TextField(
+              controller: prodController,
+              decoration: const InputDecoration(labelText: 'Product ID'),
+            ),
             const SizedBox(height: 12),
-            TextField(controller: qtyController, decoration: const InputDecoration(labelText: 'Transfer Quantity (Units)')),
+            TextField(
+              controller: qtyController,
+              decoration: const InputDecoration(
+                labelText: 'Transfer Quantity (Units)',
+              ),
+            ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.of(dialogCtx).pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('Cancel'),
+          ),
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: Colors.indigo),
             onPressed: () async {
               final runtime = await ref.read(runtimeProvider.future);
               final session = ref.read(authProvider);
               if (session != null) {
-                final commandContext = CommandContext(session: session, timestampUtc: DateTime.now());
-                final orgId = runtime.identity?.organization.id.value ?? 'default_org';
-                final branchId = runtime.identity?.branch.id.value ?? 'main_branch';
+                final commandContext = CommandContext(
+                  session: session,
+                  timestampUtc: DateTime.now(),
+                );
+                final orgId =
+                    runtime.identity?.organization.id.value ?? 'default_org';
+                final branchId =
+                    runtime.identity?.branch.id.value ?? 'main_branch';
 
                 final qty = double.tryParse(qtyController.text) ?? 1.0;
 
@@ -673,7 +800,9 @@ final class _AdjustmentsAndTransfersTabState extends ConsumerState<_AdjustmentsA
                 if (dialogCtx.mounted) {
                   Navigator.of(dialogCtx).pop();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Stock transfer completed successfully!')),
+                    const SnackBar(
+                      content: Text('Stock transfer completed successfully!'),
+                    ),
                   );
                 }
               }

@@ -2,7 +2,7 @@
 
 Last updated: 2026-09-25.
 
-**P18 Final production readiness check on Mac and Windows is complete.**
+**P19 UI/UX redesign is in progress; P18 remains the completed functional prerequisite.**
 
 | Phase | Status | Evidence / next action |
 |---|---|---|
@@ -25,5 +25,6 @@ Last updated: 2026-09-25.
 | P16 | Complete | [Service & AMC spec](../implementation/service-warranty-amc.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Service job tickets with warranty & AMC coverage evaluation, technician assignment, visit recording with spares stock deduction, serial component replacement lineage tracking, AMC contract creation & renewal, visit limit and contract expiry reminders, Drift schema v10 migration, and Service & AMC UI pass. |
 | P17 | Complete | [V3 Release Certification](../releases/v3.md), [User Guide](../runbooks/user-guide.md), [Admin Guide](../runbooks/admin-guide.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Audit R01–R22 requirements traceability complete (100%), full test suites passing across domain/use-case/database/widget tests, release notes, user & admin training guides, supported platform matrix, and operational handoff verified. |
 | P18 | Complete | [Production Readiness Certification](../releases/production-readiness.md), `tool/check_all.dart` and [test evidence](test-evidence.md). Cross-platform operating system paths, GST-inclusive back-calculation precision, counter discount recalculation, image compression/placeholder engine, SQLite integrity checks, and update data preservation verified. |
+| P19 | In progress | [Design system](../design/ui-ux-design-system.md), `flutter analyze`, widget layout tests and [test evidence](test-evidence.md). Tokens, shared primitives, responsive dashboard/POS/reports and scrollable workflow tabs are implemented. Manual accessibility/real-device review, desktop navigation rail and remaining feature-view refactors are not yet evidenced. |
 
 Allowed states: Not started, In progress, Blocked, Implemented awaiting verification, Complete. Update a phase with real evidence links, actual scope and remaining work. Missing environment/hardware checks cannot be labeled complete.

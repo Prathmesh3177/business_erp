@@ -2,7 +2,7 @@
 
 ## Design system
 
-Use a restrained solar-business identity: warm amber accent, dark neutral text, light neutral surfaces, clear semantic success/warning/error states. Pick accessible contrast and visible keyboard focus; color never carries meaning alone. Use scalable type, 44–48 logical-pixel touch targets, consistent spacing and tabular numeric alignment. Monetary values use Indian grouping and INR; edits accept a clearly defined decimal syntax and never parse formatted currency with string hacks.
+Use the [P19 design system](design/ui-ux-design-system.md): crisp `#F8F9FA` canvases, white surfaces, slate borders and `#1E293B` text. Crimson `#DC2626` is reserved for intentional primary actions, focus and selected navigation; semantic success/warning/error colors never carry state alone. Use scalable type, visible keyboard focus, 48 logical-pixel touch targets, consistent spacing and tabular numeric alignment. Monetary values use Indian grouping and INR; edits accept a clearly defined decimal syntax and never parse formatted currency with string hacks.
 
 English and Marathi ARB messages include validation, empty states, errors, menus, reports and print labels. Bundle a licensed Devanagari-capable TTF and verify shaping in app, PDF and rasterized thermal output. P00 proved HarfBuzz-shaped Marathi PDF output with an OFL Noto Sans Devanagari TTF; the host Nirmala TTC was incompatible with the selected PDF parser and must not be a runtime dependency. Persist stable codes, not translated labels. Preserve entered customer/product names; do not machine-translate user data. Invoice language is a separate per-document preference.
 
