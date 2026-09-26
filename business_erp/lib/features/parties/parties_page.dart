@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/bootstrap.dart';
 import '../common/erp_shell.dart';
+import 'party_detail_page.dart';
 
 final class PartiesPage extends ConsumerStatefulWidget {
   const PartiesPage({super.key});
@@ -12,7 +13,8 @@ final class PartiesPage extends ConsumerStatefulWidget {
   ConsumerState<PartiesPage> createState() => _PartiesPageState();
 }
 
-final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTickerProviderStateMixin {
+final class _PartiesPageState extends ConsumerState<PartiesPage>
+    with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _searchQuery = '';
   List<Party> _parties = [];
@@ -43,7 +45,10 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
       if (mounted) {
         setState(() => _loading = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading parties: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error loading parties: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -87,8 +92,13 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
                     decoration: InputDecoration(
                       hintText: 'Search Party by Name, GSTIN...',
                       prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
                     ),
                     onChanged: (val) => setState(() => _searchQuery = val),
                   ),
@@ -110,9 +120,11 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
   Widget _buildPartyList({required bool isCustomer}) {
     final filtered = _parties.where((p) {
       final matchesRole = isCustomer ? p.isCustomer : p.isSupplier;
-      final matchesQuery = _searchQuery.isEmpty ||
+      final matchesQuery =
+          _searchQuery.isEmpty ||
           p.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          (p.gstin?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+          (p.gstin?.toLowerCase().contains(_searchQuery.toLowerCase()) ??
+              false);
       return matchesRole && matchesQuery;
     }).toList();
 
@@ -135,18 +147,39 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
           final party = filtered[index];
           return Card(
             child: ListTile(
+              onTap: isCustomer
+                  ? () => Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => PartyDetailPage(partyId: party.id),
+                      ),
+                    )
+                  : null,
               leading: CircleAvatar(
                 backgroundColor: const Color(0xFF004D40).withValues(alpha: 0.1),
-                child: Icon(isCustomer ? Icons.person : Icons.business, color: const Color(0xFF004D40)),
+                child: Icon(
+                  isCustomer ? Icons.person : Icons.business,
+                  color: const Color(0xFF004D40),
+                ),
               ),
-              title: Text(party.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: Text('GSTIN: ${party.gstin ?? 'Unregistered'} | Terms: ${party.paymentTermsDays} Days'),
+              title: Text(
+                party.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(
+                'GSTIN: ${party.gstin ?? 'Unregistered'} | Terms: ${party.paymentTermsDays} Days',
+              ),
               trailing: isCustomer
                   ? Text(
                       'Limit: ₹${(party.creditLimitPaise / 100).toStringAsFixed(0)}',
-                      style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF990000)),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF990000),
+                      ),
                     )
-                  : const Chip(label: Text('Supplier'), backgroundColor: Colors.amber),
+                  : const Chip(
+                      label: Text('Supplier'),
+                      backgroundColor: Colors.amber,
+                    ),
             ),
           );
         },
@@ -172,22 +205,46 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Party Legal Name *')),
-                TextField(controller: phoneCtrl, decoration: const InputDecoration(labelText: 'Phone Number')),
-                TextField(controller: cityCtrl, decoration: const InputDecoration(labelText: 'City')),
-                TextField(controller: gstinCtrl, decoration: const InputDecoration(labelText: 'GSTIN (15 Alphanumeric)')),
-                TextField(controller: creditCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Credit Limit (₹)')),
+                TextField(
+                  controller: nameCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Party Legal Name *',
+                  ),
+                ),
+                TextField(
+                  controller: phoneCtrl,
+                  decoration: const InputDecoration(labelText: 'Phone Number'),
+                ),
+                TextField(
+                  controller: cityCtrl,
+                  decoration: const InputDecoration(labelText: 'City'),
+                ),
+                TextField(
+                  controller: gstinCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'GSTIN (15 Alphanumeric)',
+                  ),
+                ),
+                TextField(
+                  controller: creditCtrl,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                    labelText: 'Credit Limit (₹)',
+                  ),
+                ),
                 Row(
                   children: [
                     Checkbox(
                       value: isCustomer,
-                      onChanged: (val) => setDlgState(() => isCustomer = val ?? true),
+                      onChanged: (val) =>
+                          setDlgState(() => isCustomer = val ?? true),
                     ),
                     const Text('Customer'),
                     const SizedBox(width: 16),
                     Checkbox(
                       value: isSupplier,
-                      onChanged: (val) => setDlgState(() => isSupplier = val ?? false),
+                      onChanged: (val) =>
+                          setDlgState(() => isSupplier = val ?? false),
                     ),
                     const Text('Supplier'),
                   ],
@@ -197,20 +254,32 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF990000)),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF990000),
+            ),
             onPressed: () async {
-              if (nameCtrl.text.trim().isEmpty || (!isCustomer && !isSupplier)) {
+              if (nameCtrl.text.trim().isEmpty ||
+                  (!isCustomer && !isSupplier)) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Name is required & select at least one role.')),
+                  const SnackBar(
+                    content: Text(
+                      'Name is required & select at least one role.',
+                    ),
+                  ),
                 );
                 return;
               }
               try {
                 final runtime = await ref.read(runtimeProvider.future);
-                final orgId = runtime.identity?.organization.id.value ?? 'default_org';
-                final partyId = 'party_${DateTime.now().millisecondsSinceEpoch}';
+                final orgId =
+                    runtime.identity?.organization.id.value ?? 'default_org';
+                final partyId =
+                    'party_${DateTime.now().millisecondsSinceEpoch}';
                 final cleanGstin = gstinCtrl.text.trim().toUpperCase();
 
                 final newParty = Party(
@@ -220,7 +289,8 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
                   isCustomer: isCustomer,
                   isSupplier: isSupplier,
                   gstin: cleanGstin.isEmpty ? null : cleanGstin,
-                  creditLimitPaise: ((double.tryParse(creditCtrl.text) ?? 0) * 100).round(),
+                  creditLimitPaise:
+                      ((double.tryParse(creditCtrl.text) ?? 0) * 100).round(),
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
                 );
@@ -229,7 +299,9 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
                   id: 'addr_$partyId',
                   partyId: partyId,
                   addressLine1: 'Main Market',
-                  city: cityCtrl.text.trim().isEmpty ? 'Kalamb' : cityCtrl.text.trim(),
+                  city: cityCtrl.text.trim().isEmpty
+                      ? 'Kalamb'
+                      : cityCtrl.text.trim(),
                   state: 'Maharashtra',
                   pincode: '413507',
                   stateCode: '27',
@@ -254,14 +326,19 @@ final class _PartiesPageState extends ConsumerState<PartiesPage> with SingleTick
                 _loadParties(); // Refresh from database
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Party "${newParty.name}" saved successfully!'),
+                    content: Text(
+                      'Party "${newParty.name}" saved successfully!',
+                    ),
                     backgroundColor: Colors.green[800],
                   ),
                 );
               } catch (e) {
                 if (!mounted || !dialogContext.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                  SnackBar(
+                    content: Text('Error: $e'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               }
             },

@@ -12,6 +12,7 @@ import '../features/finance/finance_page.dart';
 import '../features/foundation/foundation_page.dart';
 import '../features/inventory/inventory_page.dart';
 import '../features/parties/parties_page.dart';
+import '../features/parties/party_detail_page.dart';
 import '../features/purchases/purchases_page.dart';
 import '../features/projects/projects_page.dart';
 import '../features/reports/reports_page.dart';
@@ -64,6 +65,13 @@ final _router = GoRouter(
       builder: (context, state) => const _RoleGuard(
         capability: Capability.partyManage,
         child: PartiesPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/parties/:partyId',
+      builder: (context, state) => _RoleGuard(
+        capability: Capability.partyManage,
+        child: PartyDetailPage(partyId: state.pathParameters['partyId']!),
       ),
     ),
     GoRoute(
