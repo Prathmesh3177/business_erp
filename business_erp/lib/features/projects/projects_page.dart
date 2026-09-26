@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../common/erp_shell.dart';
+import '../sales/quotation_page.dart';
 
 final projectQuotationsProvider =
     FutureProvider.autoDispose<List<QuotationHeader>>((ref) async {
@@ -65,7 +66,7 @@ final class _ProjectsPageState extends ConsumerState<ProjectsPage>
       body: TabBarView(
         controller: _tabController,
         children: const [
-          _QuotationsTabView(),
+          QuotationPage(),
           _ProjectsTabView(),
           _BudgetReportTabView(),
         ],
@@ -74,6 +75,9 @@ final class _ProjectsPageState extends ConsumerState<ProjectsPage>
   }
 }
 
+// Retained temporarily while the project-specific quotation flow is migrated
+// to the reusable sales quotation workspace.
+// ignore: unused_element
 final class _QuotationsTabView extends ConsumerWidget {
   const _QuotationsTabView();
 

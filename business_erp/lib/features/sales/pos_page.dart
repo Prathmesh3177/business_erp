@@ -11,6 +11,7 @@ import '../common/erp_shell.dart';
 import '../common/indian_currency_formatter.dart';
 import '../printing/invoice_preview_dialog.dart';
 import '../printing/tax_invoice_widget.dart';
+import 'quotation_sale_draft.dart';
 
 final class PosPage extends ConsumerStatefulWidget {
   const PosPage({super.key});
@@ -90,15 +91,17 @@ class _PosCartItem {
     this.gstRate = 12.0,
     this.unit = 'unit_pcs',
     String hsnCode = '85414011',
-  })  : qtyController = TextEditingController(
-          text: qty % 1 == 0 ? qty.toInt().toString() : qty.toString(),
-        ),
-        priceController = TextEditingController(
-          text: unitPriceRupees.toStringAsFixed(2),
-        ),
-        discountController = TextEditingController(text: '0.00'),
-        serialsController = TextEditingController(),
-        hsnController = TextEditingController(text: hsnCode.isEmpty ? '85414011' : hsnCode);
+  }) : qtyController = TextEditingController(
+         text: qty % 1 == 0 ? qty.toInt().toString() : qty.toString(),
+       ),
+       priceController = TextEditingController(
+         text: unitPriceRupees.toStringAsFixed(2),
+       ),
+       discountController = TextEditingController(text: '0.00'),
+       serialsController = TextEditingController(),
+       hsnController = TextEditingController(
+         text: hsnCode.isEmpty ? '85414011' : hsnCode,
+       );
 
   Product product;
   final TextEditingController qtyController;
@@ -125,14 +128,16 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
   List<Product> _allProducts = [];
   List<Party> _customers = [];
   Party? _selectedCustomer;
-  String _customerAddress = 'Buria Road, Jagadhri-135003, Distt. Yamuna Nagar, Haryana';
+  String _customerAddress =
+      'Buria Road, Jagadhri-135003, Distt. Yamuna Nagar, Haryana';
   String _customerPhone = '9881630001';
   String _customerGstin = '';
 
   // Invoice Meta
   DateTime _invoiceDate = DateTime.now();
   String _invoiceNo = '20';
-  String _gstType = 'registered'; // 'registered', 'without_gst', 'consumer', 'interstate'
+  String _gstType =
+      'registered'; // 'registered', 'without_gst', 'consumer', 'interstate'
   String _priceList = 'Default Price';
   String _selectedLocationId = 'loc_default_sellable';
   String? _ewayBillNo;
@@ -181,6 +186,7 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
     final prods = await runtime.database.searchProducts(orgId);
     final custs = await runtime.database.searchParties(orgId, isCustomer: true);
     final sales = await runtime.database.listSales(organizationId: orgId);
+    final quotationDraft = takeStagedQuotationForSale();
 
     if (mounted) {
       setState(() {
@@ -197,6 +203,34 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
           _customerAddress = 'Shop No. 3 Village & Post Office Damupura, Tehsil Jagadhri-135001, Distt. Yamuna Nagar';
           _customerPhone = '9881630001';
           _customerGstin = '06ALFPC3114K1ZJ';
+        }
+        if (quotationDraft != null) {
+          final matchingCustomers = custs.where(
+            (customer) => customer.id == quotationDraft.customerPartyId,
+          );
+          _selectedCustomer = matchingCustomers.isEmpty
+              ? null
+              : matchingCustomers.first;
+          _cart.addAll(
+            quotationDraft.lines.map((line) {
+              final matchingProducts = prods.where(
+                (candidate) => candidate.id == line.productId,
+              );
+              final product = matchingProducts.isEmpty
+                  ? null
+                  : matchingProducts.first;
+              if (product == null) return null;
+              return _PosCartItem(
+                product: product,
+                qty: line.quantity.inUnits,
+                unitPriceRupees: line.unitPrice.inRupees,
+                gstRate: line.taxSnapshot.totalTax.paise == 0
+                    ? 0
+                    : product.defaultTaxRateBps / 100,
+                hsnCode: line.hsnCode,
+              );
+            }).whereType<_PosCartItem>(),
+          );
         }
       });
     }
@@ -222,7 +256,8 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
         setState(() {
           if (addrs.isNotEmpty) {
             final a = addrs.first;
-            _customerAddress = '${a.addressLine1}, ${a.city}-${a.pincode}, ${a.state}';
+            _customerAddress =
+                '${a.addressLine1}, ${a.city}-${a.pincode}, ${a.state}';
           } else {
             _customerAddress = 'Kalamb, Maharashtra - 413507';
           }
@@ -259,7 +294,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             qty: 1.0,
             unitPriceRupees: product.sellingPricePaise / 100.0,
             gstRate: _isWithGst ? (product.defaultTaxRateBps / 100.0) : 0.0,
-            unit: product.baseUnitId.isNotEmpty ? product.baseUnitId : 'unit_pcs',
+            unit: product.baseUnitId.isNotEmpty
+                ? product.baseUnitId
+                : 'unit_pcs',
             hsnCode: product.hsnCode.isNotEmpty ? product.hsnCode : '85414011',
           ),
         );
@@ -291,11 +328,13 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
       _cart.fold(0.0, (sum, item) => sum + item.discountRupees);
 
   double get _totalDiscountRupees {
-    final pctDiscount = (_itemsSubtotalRupees * _overallDiscountPercent) / 100.0;
+    final pctDiscount =
+        (_itemsSubtotalRupees * _overallDiscountPercent) / 100.0;
     return _itemsLineDiscountRupees + _overallDiscountAmount + pctDiscount;
   }
 
-  double get _taxableSubtotalRupees => _itemsSubtotalRupees - _totalDiscountRupees;
+  double get _taxableSubtotalRupees =>
+      _itemsSubtotalRupees - _totalDiscountRupees;
 
   double get _taxTotalRupees {
     if (!_isWithGst) return 0.0;
@@ -305,12 +344,17 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
     });
   }
 
-  double get _cgstRupees => _gstType == 'interstate' ? 0.0 : (_taxTotalRupees / 2.0);
-  double get _sgstRupees => _gstType == 'interstate' ? 0.0 : (_taxTotalRupees / 2.0);
+  double get _cgstRupees =>
+      _gstType == 'interstate' ? 0.0 : (_taxTotalRupees / 2.0);
+  double get _sgstRupees =>
+      _gstType == 'interstate' ? 0.0 : (_taxTotalRupees / 2.0);
   double get _igstRupees => _gstType == 'interstate' ? _taxTotalRupees : 0.0;
 
   double get _grandTotalRupees =>
-      _itemsSubtotalRupees - _totalDiscountRupees + _additionalCharges + _taxTotalRupees;
+      _itemsSubtotalRupees -
+      _totalDiscountRupees +
+      _additionalCharges +
+      _taxTotalRupees;
 
   // Convert cart to TaxInvoiceItemData for the Live Bill Preview
   List<TaxInvoiceItemData> get _previewItems {
@@ -369,8 +413,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                         border: OutlineInputBorder(),
                         isDense: true,
                       ),
-                      validator: (val) =>
-                          (val == null || val.trim().isEmpty) ? 'Name is required' : null,
+                      validator: (val) => (val == null || val.trim().isEmpty)
+                          ? 'Name is required'
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -382,8 +427,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                         border: OutlineInputBorder(),
                         isDense: true,
                       ),
-                      validator: (val) =>
-                          (val == null || val.trim().isEmpty) ? 'Contact number is required' : null,
+                      validator: (val) => (val == null || val.trim().isEmpty)
+                          ? 'Contact number is required'
+                          : null,
                     ),
                     const SizedBox(height: 12),
                     TextFormField(
@@ -472,9 +518,11 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                 final scaffoldMessenger = ScaffoldMessenger.of(context);
                 try {
                   final runtime = await ref.read(runtimeProvider.future);
-                  final orgId = runtime.identity?.organization.id.value ?? 'default_org';
+                  final orgId =
+                      runtime.identity?.organization.id.value ?? 'default_org';
 
-                  final partyId = 'cust_${DateTime.now().millisecondsSinceEpoch}';
+                  final partyId =
+                      'cust_${DateTime.now().millisecondsSinceEpoch}';
                   final cleanGstin = gstinCtrl.text.trim().toUpperCase();
 
                   final newParty = Party(
@@ -492,10 +540,18 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                   final newAddr = PartyAddress(
                     id: 'addr_$partyId',
                     partyId: partyId,
-                    addressLine1: streetCtrl.text.trim().isEmpty ? 'Main Market' : streetCtrl.text.trim(),
-                    city: cityCtrl.text.trim().isEmpty ? 'Kalamb' : cityCtrl.text.trim(),
-                    state: stateCtrl.text.trim().isEmpty ? 'Maharashtra' : stateCtrl.text.trim(),
-                    pincode: pincodeCtrl.text.trim().isEmpty ? '413507' : pincodeCtrl.text.trim(),
+                    addressLine1: streetCtrl.text.trim().isEmpty
+                        ? 'Main Market'
+                        : streetCtrl.text.trim(),
+                    city: cityCtrl.text.trim().isEmpty
+                        ? 'Kalamb'
+                        : cityCtrl.text.trim(),
+                    state: stateCtrl.text.trim().isEmpty
+                        ? 'Maharashtra'
+                        : stateCtrl.text.trim(),
+                    pincode: pincodeCtrl.text.trim().isEmpty
+                        ? '413507'
+                        : pincodeCtrl.text.trim(),
                     stateCode: '27',
                   );
 
@@ -513,18 +569,24 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                   );
 
                   // Refresh customer list & select this customer
-                  final custs = await runtime.database.searchParties(orgId, isCustomer: true);
+                  final custs = await runtime.database.searchParties(
+                    orgId,
+                    isCustomer: true,
+                  );
                   if (mounted) {
                     setState(() {
                       _customers = custs;
                       _selectedCustomer = newParty;
-                      _customerAddress = '${newAddr.addressLine1}, ${newAddr.city}-${newAddr.pincode}, ${newAddr.state}';
+                      _customerAddress =
+                          '${newAddr.addressLine1}, ${newAddr.city}-${newAddr.pincode}, ${newAddr.state}';
                       _customerPhone = newContact.phone;
                       _customerGstin = newParty.gstin ?? '';
                     });
                     scaffoldMessenger.showSnackBar(
                       SnackBar(
-                        content: Text('Customer "${newParty.name}" saved successfully!'),
+                        content: Text(
+                          'Customer "${newParty.name}" saved successfully!',
+                        ),
                         backgroundColor: Colors.green[800],
                       ),
                     );
@@ -588,35 +650,51 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                     const SizedBox(height: 12),
                     Expanded(
                       child: filtered.isEmpty
-                          ? const Center(child: Text('No matching products found.'))
+                          ? const Center(
+                              child: Text('No matching products found.'),
+                            )
                           : ListView.builder(
                               itemCount: filtered.length,
                               itemBuilder: (c, i) {
                                 final prod = filtered[i];
                                 final price = prod.sellingPricePaise / 100.0;
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(vertical: 4),
+                                  margin: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                  ),
                                   child: ListTile(
                                     leading: CircleAvatar(
-                                      backgroundColor: const Color(0xFFD32F2F).withValues(alpha: 0.1),
-                                      child: const Icon(Icons.solar_power, color: Color(0xFFD32F2F)),
+                                      backgroundColor: const Color(0xFFD32F2F)
+                                          .withValues(alpha: 0.1),
+                                      child: const Icon(
+                                        Icons.solar_power,
+                                        color: Color(0xFFD32F2F),
+                                      ),
                                     ),
                                     title: Row(
                                       children: [
                                         Expanded(
                                           child: Text(
                                             prod.name,
-                                            style: const TextStyle(fontWeight: FontWeight.bold),
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
                                         if (prod.isMadeToOrder) ...[
                                           const SizedBox(width: 6),
                                           Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                              vertical: 2,
+                                            ),
                                             decoration: BoxDecoration(
                                               color: const Color(0xFFE8F5E9),
-                                              borderRadius: BorderRadius.circular(4),
-                                              border: Border.all(color: const Color(0xFF2E7D32)),
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                              border: Border.all(
+                                                color: const Color(0xFF2E7D32),
+                                              ),
                                             ),
                                             child: const Text(
                                               'Made to Order',
@@ -647,15 +725,25 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                                         const SizedBox(width: 8),
                                         FilledButton(
                                           style: FilledButton.styleFrom(
-                                            backgroundColor: const Color(0xFFD32F2F),
-                                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                                            backgroundColor: const Color(
+                                              0xFFD32F2F,
+                                            ),
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                            ),
                                           ),
                                           onPressed: () {
                                             _addToCart(prod);
-                                            ScaffoldMessenger.of(context).showSnackBar(
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
                                               SnackBar(
-                                                content: Text('Added "${prod.name}" to bill'),
-                                                duration: const Duration(milliseconds: 700),
+                                                content: Text(
+                                                  'Added "${prod.name}" to bill',
+                                                ),
+                                                duration: const Duration(
+                                                  milliseconds: 700,
+                                                ),
                                               ),
                                             );
                                           },
@@ -686,8 +774,12 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
 
   // Dialog: Add Discount
   void _showAddDiscountDialog() {
-    final pctCtrl = TextEditingController(text: _overallDiscountPercent.toString());
-    final amtCtrl = TextEditingController(text: _overallDiscountAmount.toString());
+    final pctCtrl = TextEditingController(
+      text: _overallDiscountPercent.toString(),
+    );
+    final amtCtrl = TextEditingController(
+      text: _overallDiscountAmount.toString(),
+    );
 
     showDialog(
       context: context,
@@ -726,7 +818,8 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             FilledButton(
               onPressed: () {
                 setState(() {
-                  _overallDiscountPercent = double.tryParse(pctCtrl.text) ?? 0.0;
+                  _overallDiscountPercent =
+                      double.tryParse(pctCtrl.text) ?? 0.0;
                   _overallDiscountAmount = double.tryParse(amtCtrl.text) ?? 0.0;
                 });
                 Navigator.pop(ctx);
@@ -741,7 +834,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
 
   // Dialog: Add Additional Charges
   void _showAddChargesDialog() {
-    final chargesCtrl = TextEditingController(text: _additionalCharges.toString());
+    final chargesCtrl = TextEditingController(
+      text: _additionalCharges.toString(),
+    );
 
     showDialog(
       context: context,
@@ -787,19 +882,27 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 color: const Color(0xFFF2F4F7),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text(
                       'Full Page Invoice Preview (A4 Standard Print)',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Row(
                       children: [
                         FilledButton.icon(
-                          style: FilledButton.styleFrom(backgroundColor: const Color(0xFFD32F2F)),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFFD32F2F),
+                          ),
                           icon: const Icon(Icons.print),
                           label: const Text('Print Now'),
                           onPressed: () {
@@ -837,17 +940,20 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
 
   // Construct TaxInvoiceWidget with current state
   Widget _buildTaxInvoiceWidget() {
-    final customerName = _selectedCustomer?.name ?? 'Counter Cash Customer (Guest)';
+    final customerName =
+        _selectedCustomer?.name ?? 'Counter Cash Customer (Guest)';
 
     return TaxInvoiceWidget(
       sellerName: 'Shree Krushna Sales (2024-25)',
-      sellerAddress: 'Rajmata Jijau Chowk, Jantre Plaza, Dhoki Road, Kalamb - 413507',
+      sellerAddress:
+          'Rajmata Jijau Chowk, Jantre Plaza, Dhoki Road, Kalamb - 413507',
       sellerPhone: '7020422291 / 9881630001',
       sellerGstin: _isWithGst ? '27AAAAA0000A1Z5' : null,
       sellerState: 'Maharashtra',
       sellerStateCode: '27',
       invoiceNo: _invoiceNo,
-      invoiceDate: '${_invoiceDate.day}-${_getMonthName(_invoiceDate.month)}-${_invoiceDate.year}',
+      invoiceDate:
+          '${_invoiceDate.day}-${_getMonthName(_invoiceDate.month)}-${_invoiceDate.year}',
       ewayBillNo: _ewayBillNo,
       deliveryNote: _deliveryNote,
       paymentMode: 'Cash / UPI / Bank',
@@ -869,7 +975,20 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
   }
 
   String _getMonthName(int month) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     return months[(month - 1).clamp(0, 11)];
   }
 
@@ -881,7 +1000,8 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
       originalSaleId: 'sale_${DateTime.now().millisecondsSinceEpoch}',
       sellerLegalName: 'Shree Krushna Sales',
       sellerDisplayName: 'Shree Krushna Sales (2024-25)',
-      sellerAddress: 'Rajmata Jijau Chowk, Jantre Plaza, Dhoki Road, Kalamb - 413507',
+      sellerAddress:
+          'Rajmata Jijau Chowk, Jantre Plaza, Dhoki Road, Kalamb - 413507',
       sellerPhone: '7020422291 / 9881630001',
       sellerGstin: _isWithGst ? '27AAAAA0000A1Z5' : null,
       sellerStateCode: '27-Maharashtra',
@@ -910,7 +1030,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
           lineTotalPaise: Money.fromRupees(i.taxableSubtotal + taxAmt),
           serials: i.serialsController.text.trim().isEmpty
               ? []
-              : i.serialsController.text.split(',').map((s) => s.trim()).toList(),
+              : i.serialsController.text
+                    .split(',')
+                    .map((s) => s.trim())
+                    .toList(),
         );
       }).toList(),
       subtotalPaise: Money.fromRupees(_itemsSubtotalRupees),
@@ -934,7 +1057,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
   Future<void> _holdDraft() async {
     if (_cart.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Cart is empty. Cannot hold empty draft.')),
+        const SnackBar(
+          content: Text('Cart is empty. Cannot hold empty draft.'),
+        ),
       );
       return;
     }
@@ -985,7 +1110,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error holding draft: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error holding draft: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -995,7 +1123,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
   void _showTenderModal() {
     if (_cart.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please add items to cart before proceeding.')),
+        const SnackBar(
+          content: Text('Please add items to cart before proceeding.'),
+        ),
       );
       return;
     }
@@ -1040,7 +1170,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                       children: [
                         const Text(
                           'Payment Allocation & Complete Bill',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         IconButton(
                           icon: const Icon(Icons.close),
@@ -1054,7 +1187,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                       children: [
                         const Text(
                           'Grand Total Payable:',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         Text(
                           formatIndianCurrency(_grandTotalRupees),
@@ -1125,7 +1261,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                     Container(
                       padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
-                        color: balanceDue <= 0 ? Colors.green[50] : Colors.orange[50],
+                        color: balanceDue <= 0
+                            ? Colors.green[50]
+                            : Colors.orange[50],
                         borderRadius: BorderRadius.circular(8),
                         border: Border.all(
                           color: balanceDue <= 0 ? Colors.green : Colors.orange,
@@ -1135,7 +1273,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            balanceDue <= 0 ? 'Fully Paid / Change:' : 'Remaining Balance Due:',
+                            balanceDue <= 0
+                                ? 'Fully Paid / Change:'
+                                : 'Remaining Balance Due:',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
@@ -1143,7 +1283,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: balanceDue <= 0 ? Colors.green[900] : Colors.orange[900],
+                              color: balanceDue <= 0
+                                  ? Colors.green[900]
+                                  : Colors.orange[900],
                             ),
                           ),
                         ],
@@ -1168,12 +1310,17 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                               },
                         icon: const Icon(Icons.print),
                         label: Text(
-                          _submitting ? 'Generating Invoice...' : 'Generate & Print Bill',
+                          _submitting
+                              ? 'Generating Invoice...'
+                              : 'Generate & Print Bill',
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFD32F2F),
                           foregroundColor: Colors.white,
-                          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          textStyle: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -1214,18 +1361,26 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
       final lineInputs = _cart.map((c) {
         final serialsList = c.serialsController.text.trim().isEmpty
             ? <String>[]
-            : c.serialsController.text.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toList();
+            : c.serialsController.text
+                  .split(',')
+                  .map((s) => s.trim())
+                  .where((s) => s.isNotEmpty)
+                  .toList();
 
         return SaleLineInput(
           productId: c.product.id,
           productName: c.product.name,
           sku: c.product.sku,
-          hsnCode: c.hsnController.text.isNotEmpty ? c.hsnController.text : c.product.hsnCode,
+          hsnCode: c.hsnController.text.isNotEmpty
+              ? c.hsnController.text
+              : c.product.hsnCode,
           baseUnit: c.unit,
           quantity: Quantity.fromUnits(c.qty),
           unitPrice: UnitPrice.fromRupees(c.unitPrice),
           lineDiscount: Money.fromRupees(c.discountRupees),
-          taxRate: _isWithGst ? TaxRate.fromPercentage(c.gstRate) : TaxRate.zero,
+          taxRate: _isWithGst
+              ? TaxRate.fromPercentage(c.gstRate)
+              : TaxRate.zero,
           serials: serialsList,
           isMadeToOrder: c.product.isMadeToOrder,
         );
@@ -1233,26 +1388,58 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
 
       final tenderLines = <TenderLine>[];
       if (cashPaise > 0) {
-        tenderLines.add(TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(cashPaise)));
+        tenderLines.add(
+          TenderLine(
+            method: TenderMethod.cash,
+            amountPaise: Money.fromPaise(cashPaise),
+          ),
+        );
       }
       if (upiPaise > 0) {
-        tenderLines.add(TenderLine(method: TenderMethod.upi, amountPaise: Money.fromPaise(upiPaise)));
+        tenderLines.add(
+          TenderLine(
+            method: TenderMethod.upi,
+            amountPaise: Money.fromPaise(upiPaise),
+          ),
+        );
       }
       if (cardPaise > 0) {
-        tenderLines.add(TenderLine(method: TenderMethod.card, amountPaise: Money.fromPaise(cardPaise)));
+        tenderLines.add(
+          TenderLine(
+            method: TenderMethod.card,
+            amountPaise: Money.fromPaise(cardPaise),
+          ),
+        );
       }
       if (bankPaise > 0) {
-        tenderLines.add(TenderLine(method: TenderMethod.bankTransfer, amountPaise: Money.fromPaise(bankPaise)));
+        tenderLines.add(
+          TenderLine(
+            method: TenderMethod.bankTransfer,
+            amountPaise: Money.fromPaise(bankPaise),
+          ),
+        );
       }
       if (creditPaise > 0) {
-        tenderLines.add(TenderLine(method: TenderMethod.customerCredit, amountPaise: Money.fromPaise(creditPaise)));
+        tenderLines.add(
+          TenderLine(
+            method: TenderMethod.customerCredit,
+            amountPaise: Money.fromPaise(creditPaise),
+          ),
+        );
       }
 
       if (tenderLines.isEmpty) {
-        tenderLines.add(TenderLine(method: TenderMethod.cash, amountPaise: Money.fromRupees(_grandTotalRupees)));
+        tenderLines.add(
+          TenderLine(
+            method: TenderMethod.cash,
+            amountPaise: Money.fromRupees(_grandTotalRupees),
+          ),
+        );
       }
 
-      final supplyType = _gstType == 'interstate' ? TaxSupplyType.interState : TaxSupplyType.intraState;
+      final supplyType = _gstType == 'interstate'
+          ? TaxSupplyType.interState
+          : TaxSupplyType.intraState;
 
       final useCase = PostSaleUseCase(
         salesStore: runtime.database,
@@ -1280,7 +1467,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Sale Posted Successfully! Invoice #${saleHeader.id.substring(0, 8)}'),
+            content: Text(
+              'Sale Posted Successfully! Invoice #${saleHeader.id.substring(0, 8)}',
+            ),
             backgroundColor: Colors.green[800],
           ),
         );
@@ -1292,7 +1481,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error completing sale: $e'), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text('Error completing sale: $e'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } finally {
@@ -1346,7 +1538,11 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                 ),
               ),
 
-              const VerticalDivider(width: 1, thickness: 1, color: Color(0xFFE0E0E0)),
+              const VerticalDivider(
+                width: 1,
+                thickness: 1,
+                color: Color(0xFFE0E0E0),
+              ),
 
               // Right Column: Live Bill Preview & Settings Tab (~42%)
               Expanded(
@@ -1412,14 +1608,20 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                     value: _selectedCustomer,
                     hint: const Text(
                       'Select Customer *',
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
                     ),
                     items: [
                       const DropdownMenuItem<Party?>(
                         value: null,
                         child: Text(
                           'Counter Cash Customer (Guest)',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                       ..._customers.map(
@@ -1427,7 +1629,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                           value: c,
                           child: Text(
                             c.name,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -1493,14 +1698,24 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Invoice Date', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                    const Text(
+                      'Invoice Date',
+                      style: TextStyle(fontSize: 9, color: Colors.grey),
+                    ),
                     Row(
                       children: [
-                        const Icon(Icons.calendar_today, size: 12, color: Colors.black54),
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 12,
+                          color: Colors.black54,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           '${_invoiceDate.day}-${_getMonthName(_invoiceDate.month)}-${_invoiceDate.year}',
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -1523,10 +1738,16 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Invoice No.', style: TextStyle(fontSize: 9, color: Colors.grey)),
+                  const Text(
+                    'Invoice No.',
+                    style: TextStyle(fontSize: 9, color: Colors.grey),
+                  ),
                   Text(
                     _invoiceNo,
-                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -1556,19 +1777,35 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             items: const [
               DropdownMenuItem(
                 value: 'registered',
-                child: Text('With GST (Tax Invoice)', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis),
+                child: Text(
+                  'With GST (Tax Invoice)',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               DropdownMenuItem(
                 value: 'without_gst',
-                child: Text('Without GST (Cash Bill)', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis),
+                child: Text(
+                  'Without GST (Cash Bill)',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               DropdownMenuItem(
                 value: 'consumer',
-                child: Text('Consumer / Unreg', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis),
+                child: Text(
+                  'Consumer / Unreg',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               DropdownMenuItem(
                 value: 'interstate',
-                child: Text('Inter-State (IGST)', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis),
+                child: Text(
+                  'Inter-State (IGST)',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ],
             onChanged: (val) {
@@ -1576,7 +1813,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                 _gstType = val!;
                 // Update item rates
                 for (final item in _cart) {
-                  item.gstRate = _isWithGst ? (item.product.defaultTaxRateBps / 100.0) : 0.0;
+                  item.gstRate = _isWithGst
+                      ? (item.product.defaultTaxRateBps / 100.0)
+                      : 0.0;
                 }
               });
             },
@@ -1597,9 +1836,30 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             ),
             items: const [
-              DropdownMenuItem(value: 'Default Price', child: Text('Default Price', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis)),
-              DropdownMenuItem(value: 'Wholesale', child: Text('Wholesale', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis)),
-              DropdownMenuItem(value: 'Dealer', child: Text('Dealer', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis)),
+              DropdownMenuItem(
+                value: 'Default Price',
+                child: Text(
+                  'Default Price',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'Wholesale',
+                child: Text(
+                  'Wholesale',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'Dealer',
+                child: Text(
+                  'Dealer',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
             onChanged: (val) => setState(() => _priceList = val!),
           ),
@@ -1619,8 +1879,22 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             ),
             items: const [
-              DropdownMenuItem(value: 'loc_default_sellable', child: Text('Main Warehouse', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis)),
-              DropdownMenuItem(value: 'loc_default_quarantine', child: Text('Quarantine Store', style: TextStyle(fontSize: 11), overflow: TextOverflow.ellipsis)),
+              DropdownMenuItem(
+                value: 'loc_default_sellable',
+                child: Text(
+                  'Main Warehouse',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              DropdownMenuItem(
+                value: 'loc_default_quarantine',
+                child: Text(
+                  'Quarantine Store',
+                  style: TextStyle(fontSize: 11),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
             ],
             onChanged: (val) => setState(() => _selectedLocationId = val!),
           ),
@@ -1639,11 +1913,16 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             backgroundColor: const Color(0xFFD32F2F),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: _showAddProductsDialog,
           icon: const Icon(Icons.add, size: 18),
-          label: const Text('Add Products', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+          label: const Text(
+            'Add Products',
+            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+          ),
         ),
         const SizedBox(width: 8),
 
@@ -1651,10 +1930,15 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
         OutlinedButton(
           style: OutlinedButton.styleFrom(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
           ),
           onPressed: () => _searchController.clear(),
-          child: const Text('Search by Barcode (F2)', style: TextStyle(fontSize: 11)),
+          child: const Text(
+            'Search by Barcode (F2)',
+            style: TextStyle(fontSize: 11),
+          ),
         ),
         const SizedBox(width: 8),
 
@@ -1667,12 +1951,19 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               hintStyle: const TextStyle(fontSize: 12),
               prefixIcon: const Icon(Icons.search, size: 20),
               suffixIcon: IconButton(
-                icon: const Icon(Icons.qr_code_scanner, color: Color(0xFFD32F2F), size: 20),
+                icon: const Icon(
+                  Icons.qr_code_scanner,
+                  color: Color(0xFFD32F2F),
+                  size: 20,
+                ),
                 onPressed: () {},
               ),
               border: const OutlineInputBorder(),
               isDense: true,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 10,
+                vertical: 8,
+              ),
             ),
             onChanged: (val) => setState(() {}),
           ),
@@ -1702,266 +1993,470 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   // Table Header
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-              border: Border(bottom: BorderSide(color: Colors.grey.shade300)),
-            ),
-            child: const Row(
-              children: [
-                SizedBox(width: 24, child: Text('#', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
-                Expanded(flex: 4, child: Text('Product', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
-                Expanded(flex: 2, child: Text('HSN/SAC', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
-                SizedBox(width: 70, child: Text('Qty', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center)),
-                SizedBox(width: 80, child: Text('Rate (₹)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center)),
-                SizedBox(width: 48, child: Text('Per', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
-                SizedBox(width: 58, child: Text('GST %', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11))),
-                SizedBox(width: 85, child: Text('Amount (₹)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.right)),
-                SizedBox(width: 55, child: Text('Action', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11), textAlign: TextAlign.center)),
-              ],
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(6),
+                      ),
+                      border: Border(
+                        bottom: BorderSide(color: Colors.grey.shade300),
+                      ),
+                    ),
+                    child: const Row(
+                      children: [
+                        SizedBox(
+                          width: 24,
+                          child: Text(
+                            '#',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Text(
+                            'Product',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: Text(
+                            'HSN/SAC',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 70,
+                          child: Text(
+                            'Qty',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 80,
+                          child: Text(
+                            'Rate (₹)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 48,
+                          child: Text(
+                            'Per',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 58,
+                          child: Text(
+                            'GST %',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 85,
+                          child: Text(
+                            'Amount (₹)',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.right,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 55,
+                          child: Text(
+                            'Action',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  // Items List
+                  if (_cart.isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 36.0),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 40,
+                              color: Colors.grey.shade400,
+                            ),
+                            const SizedBox(height: 8),
+                            const Text(
+                              'No items in bill. Search product or tap "+ Add Products".',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _cart.length,
+                      separatorBuilder: (c, i) =>
+                          Divider(height: 1, color: Colors.grey.shade200),
+                      itemBuilder: (context, idx) {
+                        final item = _cart[idx];
+                        final lineAmount = item.qty * item.unitPrice;
+
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 6,
+                          ),
+                          child: Row(
+                            children: [
+                              // #
+                              SizedBox(
+                                width: 24,
+                                child: Text(
+                                  '${idx + 1}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+
+                              // Product Name & SKU
+                              Expanded(
+                                flex: 4,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 32,
+                                      height: 32,
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey.shade100,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Icon(
+                                        Icons.solar_power,
+                                        size: 18,
+                                        color: Colors.blueGrey,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item.product.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 11,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          Wrap(
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
+                                            spacing: 4,
+                                            children: [
+                                              Text(
+                                                'SKU: ${item.product.sku}',
+                                                style: const TextStyle(
+                                                  fontSize: 9,
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                              if (item.product.isMadeToOrder)
+                                                Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 4,
+                                                        vertical: 1,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: const Color(
+                                                      0xFFE8F5E9,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          3,
+                                                        ),
+                                                    border: Border.all(
+                                                      color: const Color(
+                                                        0xFF2E7D32,
+                                                      ),
+                                                      width: 0.5,
+                                                    ),
+                                                  ),
+                                                  child: const Text(
+                                                    'Made to Order',
+                                                    style: TextStyle(
+                                                      fontSize: 8,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Color(0xFF2E7D32),
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+
+                              // HSN/SAC
+                              Expanded(
+                                flex: 2,
+                                child: SizedBox(
+                                  height: 28,
+                                  child: TextFormField(
+                                    controller: item.hsnController,
+                                    style: const TextStyle(fontSize: 11),
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      contentPadding: EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 4,
+                                      ),
+                                      border: OutlineInputBorder(),
+                                    ),
+                                    onChanged: (_) => setState(() {}),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Qty input with stepper
+                              SizedBox(
+                                width: 70,
+                                height: 28,
+                                child: TextFormField(
+                                  controller: item.qtyController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 4,
+                                      vertical: 4,
+                                    ),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Rate (₹)
+                              SizedBox(
+                                width: 80,
+                                height: 28,
+                                child: TextFormField(
+                                  controller: item.priceController,
+                                  keyboardType: TextInputType.number,
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(fontSize: 11),
+                                  decoration: const InputDecoration(
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 6,
+                                      vertical: 4,
+                                    ),
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  onChanged: (_) => setState(() {}),
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+
+                              // Per (unit)
+                              SizedBox(
+                                width: 48,
+                                height: 28,
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<String>(
+                                    value: item.unit,
+                                    isDense: true,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.black87,
+                                    ),
+                                    items: const [
+                                      DropdownMenuItem(
+                                        value: 'unit_pcs',
+                                        child: Text('pcs'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'unit_nos',
+                                        child: Text('nos'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'unit_set',
+                                        child: Text('set'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'unit_kg',
+                                        child: Text('kg'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'unit_meter',
+                                        child: Text('mtr'),
+                                      ),
+                                      DropdownMenuItem(
+                                        value: 'unit_box',
+                                        child: Text('box'),
+                                      ),
+                                    ],
+                                    onChanged: (val) =>
+                                        setState(() => item.unit = val!),
+                                  ),
+                                ),
+                              ),
+
+                              // GST %
+                              SizedBox(
+                                width: 58,
+                                height: 28,
+                                child: DropdownButtonHideUnderline(
+                                  child: DropdownButton<double>(
+                                    value: _isWithGst ? item.gstRate : 0.0,
+                                    isDense: true,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.black87,
+                                    ),
+                                    items: [
+                                      const DropdownMenuItem(
+                                        value: 0.0,
+                                        child: Text('0%'),
+                                      ),
+                                      if (_isWithGst) ...const [
+                                        DropdownMenuItem(
+                                          value: 5.0,
+                                          child: Text('5%'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 12.0,
+                                          child: Text('12%'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 18.0,
+                                          child: Text('18%'),
+                                        ),
+                                        DropdownMenuItem(
+                                          value: 28.0,
+                                          child: Text('28%'),
+                                        ),
+                                      ],
+                                    ],
+                                    onChanged: _isWithGst
+                                        ? (val) => setState(
+                                            () => item.gstRate = val!,
+                                          )
+                                        : null,
+                                  ),
+                                ),
+                              ),
+
+                              // Amount (₹)
+                              SizedBox(
+                                width: 85,
+                                child: Text(
+                                  formatIndianCurrency(
+                                    lineAmount,
+                                    showSymbol: false,
+                                  ),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                  textAlign: TextAlign.right,
+                                ),
+                              ),
+
+                              // Actions (Edit serials, Delete)
+                              SizedBox(
+                                width: 55,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    InkWell(
+                                      onTap: () => _showEditItemDialog(item),
+                                      child: const Icon(
+                                        Icons.edit,
+                                        size: 16,
+                                        color: Colors.orange,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    InkWell(
+                                      onTap: () => _removeFromCart(idx),
+                                      child: const Icon(
+                                        Icons.delete,
+                                        size: 16,
+                                        color: Colors.red,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                ],
+              ),
             ),
           ),
-
-          // Items List
-          if (_cart.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 36.0),
-              child: Center(
-                child: Column(
-                  children: [
-                    Icon(Icons.shopping_cart_outlined, size: 40, color: Colors.grey.shade400),
-                    const SizedBox(height: 8),
-                    const Text('No items in bill. Search product or tap "+ Add Products".', style: TextStyle(color: Colors.grey)),
-                  ],
-                ),
-              ),
-            )
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: _cart.length,
-              separatorBuilder: (c, i) => Divider(height: 1, color: Colors.grey.shade200),
-              itemBuilder: (context, idx) {
-                final item = _cart[idx];
-                final lineAmount = item.qty * item.unitPrice;
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                  child: Row(
-                    children: [
-                      // #
-                      SizedBox(
-                        width: 24,
-                        child: Text('${idx + 1}', style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                      ),
-
-                      // Product Name & SKU
-                      Expanded(
-                        flex: 4,
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 32,
-                              height: 32,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Icon(Icons.solar_power, size: 18, color: Colors.blueGrey),
-                            ),
-                            const SizedBox(width: 6),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item.product.name,
-                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Wrap(
-                                    crossAxisAlignment: WrapCrossAlignment.center,
-                                    spacing: 4,
-                                    children: [
-                                      Text(
-                                        'SKU: ${item.product.sku}',
-                                        style: const TextStyle(fontSize: 9, color: Colors.grey),
-                                      ),
-                                      if (item.product.isMadeToOrder)
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFE8F5E9),
-                                            borderRadius: BorderRadius.circular(3),
-                                            border: Border.all(color: const Color(0xFF2E7D32), width: 0.5),
-                                          ),
-                                          child: const Text(
-                                            'Made to Order',
-                                            style: TextStyle(
-                                              fontSize: 8,
-                                              fontWeight: FontWeight.bold,
-                                              color: Color(0xFF2E7D32),
-                                            ),
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // HSN/SAC
-                      Expanded(
-                        flex: 2,
-                        child: SizedBox(
-                          height: 28,
-                          child: TextFormField(
-                            controller: item.hsnController,
-                            style: const TextStyle(fontSize: 11),
-                            decoration: const InputDecoration(
-                              isDense: true,
-                              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                              border: OutlineInputBorder(),
-                            ),
-                            onChanged: (_) => setState(() {}),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-
-                      // Qty input with stepper
-                      SizedBox(
-                        width: 70,
-                        height: 28,
-                        child: TextFormField(
-                          controller: item.qtyController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-
-                      // Rate (₹)
-                      SizedBox(
-                        width: 80,
-                        height: 28,
-                        child: TextFormField(
-                          controller: item.priceController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.right,
-                          style: const TextStyle(fontSize: 11),
-                          decoration: const InputDecoration(
-                            isDense: true,
-                            contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-
-                      // Per (unit)
-                      SizedBox(
-                        width: 48,
-                        height: 28,
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: item.unit,
-                            isDense: true,
-                            style: const TextStyle(fontSize: 11, color: Colors.black87),
-                            items: const [
-                              DropdownMenuItem(value: 'unit_pcs', child: Text('pcs')),
-                              DropdownMenuItem(value: 'unit_nos', child: Text('nos')),
-                              DropdownMenuItem(value: 'unit_set', child: Text('set')),
-                              DropdownMenuItem(value: 'unit_kg', child: Text('kg')),
-                              DropdownMenuItem(value: 'unit_meter', child: Text('mtr')),
-                              DropdownMenuItem(value: 'unit_box', child: Text('box')),
-                            ],
-                            onChanged: (val) => setState(() => item.unit = val!),
-                          ),
-                        ),
-                      ),
-
-                      // GST %
-                      SizedBox(
-                        width: 58,
-                        height: 28,
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<double>(
-                            value: _isWithGst ? item.gstRate : 0.0,
-                            isDense: true,
-                            style: const TextStyle(fontSize: 11, color: Colors.black87),
-                            items: [
-                              const DropdownMenuItem(value: 0.0, child: Text('0%')),
-                              if (_isWithGst) ...const [
-                                DropdownMenuItem(value: 5.0, child: Text('5%')),
-                                DropdownMenuItem(value: 12.0, child: Text('12%')),
-                                DropdownMenuItem(value: 18.0, child: Text('18%')),
-                                DropdownMenuItem(value: 28.0, child: Text('28%')),
-                              ],
-                            ],
-                            onChanged: _isWithGst
-                                ? (val) => setState(() => item.gstRate = val!)
-                                : null,
-                          ),
-                        ),
-                      ),
-
-                      // Amount (₹)
-                      SizedBox(
-                        width: 85,
-                        child: Text(
-                          formatIndianCurrency(lineAmount, showSymbol: false),
-                          style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.right,
-                        ),
-                      ),
-
-                      // Actions (Edit serials, Delete)
-                      SizedBox(
-                        width: 55,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            InkWell(
-                              onTap: () => _showEditItemDialog(item),
-                              child: const Icon(Icons.edit, size: 16, color: Colors.orange),
-                            ),
-                            const SizedBox(width: 6),
-                            InkWell(
-                              onTap: () => _removeFromCart(idx),
-                              child: const Icon(Icons.delete, size: 16, color: Colors.red),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-},
-);
-}
+        );
+      },
+    );
+  }
 
   void _showEditItemDialog(_PosCartItem item) {
     showDialog(
@@ -2021,15 +2516,22 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             TextButton.icon(
               onPressed: _showAddDiscountDialog,
               icon: const Icon(Icons.add, size: 14, color: Color(0xFFD32F2F)),
-              label: const Text('+ Add Discount', style: TextStyle(color: Color(0xFFD32F2F), fontSize: 11)),
+              label: const Text(
+                '+ Add Discount',
+                style: TextStyle(color: Color(0xFFD32F2F), fontSize: 11),
+              ),
             ),
             TextButton.icon(
               onPressed: _showAddChargesDialog,
               icon: const Icon(Icons.add, size: 14, color: Color(0xFFD32F2F)),
-              label: const Text('+ Add Charges', style: TextStyle(color: Color(0xFFD32F2F), fontSize: 11)),
+              label: const Text(
+                '+ Add Charges',
+                style: TextStyle(color: Color(0xFFD32F2F), fontSize: 11),
+              ),
             ),
             TextButton.icon(
-              onPressed: () => _remarksController.text = 'Delivery within 2 days. Kalamb main store warranty.',
+              onPressed: () => _remarksController.text =
+                  'Delivery within 2 days. Kalamb main store warranty.',
               icon: const Icon(Icons.note_add, size: 14),
               label: const Text('+ Add Note', style: TextStyle(fontSize: 11)),
             ),
@@ -2068,15 +2570,35 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             flex: 5,
             child: Column(
               children: [
-                _buildTotalRow('Items Total (${_cart.length})', formatIndianCurrency(_itemsSubtotalRupees)),
+                _buildTotalRow(
+                  'Items Total (${_cart.length})',
+                  formatIndianCurrency(_itemsSubtotalRupees),
+                ),
                 if (_totalDiscountRupees > 0)
-                  _buildTotalRow('Discount', '- ${formatIndianCurrency(_totalDiscountRupees)}', isDiscount: true),
+                  _buildTotalRow(
+                    'Discount',
+                    '- ${formatIndianCurrency(_totalDiscountRupees)}',
+                    isDiscount: true,
+                  ),
                 if (_additionalCharges > 0)
-                  _buildTotalRow('Additional Charges', '+ ${formatIndianCurrency(_additionalCharges)}'),
-                _buildTotalRow('Subtotal', formatIndianCurrency(_taxableSubtotalRupees), isBold: true),
+                  _buildTotalRow(
+                    'Additional Charges',
+                    '+ ${formatIndianCurrency(_additionalCharges)}',
+                  ),
+                _buildTotalRow(
+                  'Subtotal',
+                  formatIndianCurrency(_taxableSubtotalRupees),
+                  isBold: true,
+                ),
                 if (_isWithGst) ...[
-                  _buildTotalRow('CGST (6% / 9%)', formatIndianCurrency(_cgstRupees)),
-                  _buildTotalRow('SGST (6% / 9%)', formatIndianCurrency(_sgstRupees)),
+                  _buildTotalRow(
+                    'CGST (6% / 9%)',
+                    formatIndianCurrency(_cgstRupees),
+                  ),
+                  _buildTotalRow(
+                    'SGST (6% / 9%)',
+                    formatIndianCurrency(_sgstRupees),
+                  ),
                 ],
               ],
             ),
@@ -2140,7 +2662,12 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
     );
   }
 
-  Widget _buildTotalRow(String label, String value, {bool isBold = false, bool isDiscount = false}) {
+  Widget _buildTotalRow(
+    String label,
+    String value, {
+    bool isBold = false,
+    bool isDiscount = false,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
       child: Row(
@@ -2181,11 +2708,21 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
           children: [
             OutlinedButton.icon(
               onPressed: _cart.isEmpty ? null : _clearCart,
-              icon: const Icon(Icons.delete_outline, size: 15, color: Colors.red),
-              label: const Text('Clear All', style: TextStyle(color: Colors.red, fontSize: 11)),
+              icon: const Icon(
+                Icons.delete_outline,
+                size: 15,
+                color: Colors.red,
+              ),
+              label: const Text(
+                'Clear All',
+                style: TextStyle(color: Colors.red, fontSize: 11),
+              ),
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(color: Colors.red),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
             ),
             OutlinedButton.icon(
@@ -2193,7 +2730,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               icon: const Icon(Icons.pause, size: 15),
               label: const Text('Hold Draft', style: TextStyle(fontSize: 11)),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
             ),
             OutlinedButton.icon(
@@ -2201,7 +2741,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               icon: const Icon(Icons.folder_open, size: 15),
               label: const Text('Load Draft', style: TextStyle(fontSize: 11)),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
             ),
           ],
@@ -2215,21 +2758,32 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               icon: const Icon(Icons.print, size: 15),
               label: const Text('Print (F9)', style: TextStyle(fontSize: 11)),
               style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
             ),
             FilledButton.icon(
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFFD32F2F),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
               onPressed: _cart.isEmpty ? null : _showTenderModal,
               icon: const Icon(Icons.receipt_long, size: 16),
               label: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Generate & Print Bill (F5)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11)),
+                  Text(
+                    'Generate & Print Bill (F5)',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11),
+                  ),
                   SizedBox(width: 4),
                   Icon(Icons.arrow_drop_down, size: 16),
                 ],
@@ -2251,11 +2805,16 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             InkWell(
               onTap: () => setState(() => _rightPaneTab = 0),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: _rightPaneTab == 0 ? const Color(0xFFD32F2F) : Colors.transparent,
+                      color: _rightPaneTab == 0
+                          ? const Color(0xFFD32F2F)
+                          : Colors.transparent,
                       width: 2.5,
                     ),
                   ),
@@ -2265,7 +2824,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
-                    color: _rightPaneTab == 0 ? const Color(0xFFD32F2F) : Colors.black54,
+                    color: _rightPaneTab == 0
+                        ? const Color(0xFFD32F2F)
+                        : Colors.black54,
                   ),
                 ),
               ),
@@ -2274,11 +2835,16 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
             InkWell(
               onTap: () => setState(() => _rightPaneTab = 1),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: _rightPaneTab == 1 ? const Color(0xFFD32F2F) : Colors.transparent,
+                      color: _rightPaneTab == 1
+                          ? const Color(0xFFD32F2F)
+                          : Colors.transparent,
                       width: 2.5,
                     ),
                   ),
@@ -2292,7 +2858,9 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
-                        color: _rightPaneTab == 1 ? const Color(0xFFD32F2F) : Colors.black54,
+                        color: _rightPaneTab == 1
+                            ? const Color(0xFFD32F2F)
+                            : Colors.black54,
                       ),
                     ),
                   ],
@@ -2327,36 +2895,67 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
       ),
       child: ListView(
         children: [
-          const Text('Invoice Customization', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          const Text(
+            'Invoice Customization',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
           const SizedBox(height: 12),
           TextFormField(
             initialValue: _ewayBillNo,
-            decoration: const InputDecoration(labelText: 'e-Way Bill No.', border: OutlineInputBorder(), isDense: true),
+            decoration: const InputDecoration(
+              labelText: 'e-Way Bill No.',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
             onChanged: (val) => setState(() => _ewayBillNo = val),
           ),
           const SizedBox(height: 10),
           TextFormField(
             initialValue: _vehicleNo,
-            decoration: const InputDecoration(labelText: 'Motor Vehicle No.', border: OutlineInputBorder(), isDense: true),
+            decoration: const InputDecoration(
+              labelText: 'Motor Vehicle No.',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
             onChanged: (val) => setState(() => _vehicleNo = val),
           ),
           const SizedBox(height: 10),
           TextFormField(
             initialValue: _deliveryNote,
-            decoration: const InputDecoration(labelText: 'Delivery Note / Challan No.', border: OutlineInputBorder(), isDense: true),
+            decoration: const InputDecoration(
+              labelText: 'Delivery Note / Challan No.',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
             onChanged: (val) => setState(() => _deliveryNote = val),
           ),
           const SizedBox(height: 16),
           const Divider(),
-          const Text('Printer Spool Settings', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+          const Text(
+            'Printer Spool Settings',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
             initialValue: 'A4 Standard Invoice',
-            decoration: const InputDecoration(labelText: 'Default Format', border: OutlineInputBorder(), isDense: true),
+            decoration: const InputDecoration(
+              labelText: 'Default Format',
+              border: OutlineInputBorder(),
+              isDense: true,
+            ),
             items: const [
-              DropdownMenuItem(value: 'A4 Standard Invoice', child: Text('A4 Standard Laser/Inkjet')),
-              DropdownMenuItem(value: '80mm Thermal', child: Text('80mm POS Thermal Receipt')),
-              DropdownMenuItem(value: '58mm Thermal', child: Text('58mm Small Thermal Receipt')),
+              DropdownMenuItem(
+                value: 'A4 Standard Invoice',
+                child: Text('A4 Standard Laser/Inkjet'),
+              ),
+              DropdownMenuItem(
+                value: '80mm Thermal',
+                child: Text('80mm POS Thermal Receipt'),
+              ),
+              DropdownMenuItem(
+                value: '58mm Thermal',
+                child: Text('58mm Small Thermal Receipt'),
+              ),
             ],
             onChanged: (_) {},
           ),
@@ -2375,7 +2974,8 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
           builder: (context, setModalState) {
             final filtered = _customers.where((c) {
               return c.name.toLowerCase().contains(filter.toLowerCase()) ||
-                  (c.gstin?.toLowerCase().contains(filter.toLowerCase()) ?? false);
+                  (c.gstin?.toLowerCase().contains(filter.toLowerCase()) ??
+                      false);
             }).toList();
 
             return AlertDialog(
@@ -2401,8 +3001,15 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                         itemBuilder: (c, i) {
                           final party = filtered[i];
                           return ListTile(
-                            title: Text(party.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                            subtitle: Text('GSTIN: ${party.gstin ?? "Unregistered"}'),
+                            title: Text(
+                              party.name,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            subtitle: Text(
+                              'GSTIN: ${party.gstin ?? "Unregistered"}',
+                            ),
                             onTap: () {
                               Navigator.pop(ctx);
                               _onCustomerSelected(party);
@@ -2415,7 +3022,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                 ),
               ),
               actions: [
-                TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close')),
+                TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Close'),
+                ),
               ],
             );
           },
@@ -2724,8 +3334,8 @@ class _SalesHistoryTabState extends ConsumerState<_SalesHistoryTab> {
                                 ),
                                 backgroundColor:
                                     item.status == SaleStatus.posted
-                                        ? Colors.green[700]
-                                        : Colors.grey,
+                                    ? Colors.green[700]
+                                    : Colors.grey,
                                 visualDensity: VisualDensity.compact,
                               ),
                               Text(
