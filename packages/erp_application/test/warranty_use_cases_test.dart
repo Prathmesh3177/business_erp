@@ -26,7 +26,10 @@ final class MockSalesStoreForWarranty implements SalesStore {
   }
 
   @override
-  Future<void> saveSale({required SaleHeader header, required List<SaleLine> lines}) async {}
+  Future<void> saveSale({
+    required SaleHeader header,
+    required List<SaleLine> lines,
+  }) async {}
 
   @override
   Future<SaleHeader?> getSaleHeader(String id) async => null;
@@ -35,7 +38,10 @@ final class MockSalesStoreForWarranty implements SalesStore {
   Future<List<SaleLine>> getSaleLines(String saleId) async => [];
 
   @override
-  Future<List<SaleHeader>> listSales({required String organizationId, String? customerPartyId}) async => [];
+  Future<List<SaleHeader>> listSales({
+    required String organizationId,
+    String? customerPartyId,
+  }) async => [];
 
   @override
   Future<void> saveSaleDraft(SaleDraft draft) async {}
@@ -48,6 +54,24 @@ final class MockSalesStoreForWarranty implements SalesStore {
 
   @override
   Future<List<SaleDraft>> listSaleDrafts(String organizationId) async => [];
+
+  @override
+  Future<void> saveSaleOrder({
+    required SaleOrder order,
+    required List<SaleOrderLine> lines,
+  }) async {}
+
+  @override
+  Future<SaleOrder?> getSaleOrder(String id) async => null;
+
+  @override
+  Future<List<SaleOrderLine>> getSaleOrderLines(String orderId) async => [];
+
+  @override
+  Future<List<SaleOrder>> listSaleOrders({
+    required String organizationId,
+    OrderStatus? status,
+  }) async => [];
 }
 
 void main() {
@@ -73,10 +97,11 @@ void main() {
       timestampUtc: DateTime(2026, 9, 25),
     );
 
-
     setUp(() {
       salesStore = MockSalesStoreForWarranty();
-      generateUseCase = GenerateWarrantyRemindersUseCase(salesStore: salesStore);
+      generateUseCase = GenerateWarrantyRemindersUseCase(
+        salesStore: salesStore,
+      );
       exportUseCase = const ExportWarrantyRemindersUseCase();
     });
 
@@ -124,29 +149,32 @@ void main() {
       expect(reminders[1].status, equals(WarrantyReminderStatus.expiringSoon));
     });
 
-    test('ExportWarrantyRemindersUseCase sanitizes formula injection characters', () {
-      final reminders = [
-        WarrantyReminder(
-          id: 'rem-1',
-          serialId: 's-1',
-          serialNumber: '=CMD|"/C calc"!A0',
-          productId: 'prod-1',
-          productName: '+FormulaProduct',
-          partyId: 'cust-1',
-          customerName: '@EvilCustomer',
-          customerPhone: '9881630001',
-          startDate: DateTime(2025, 1, 1),
-          endDate: DateTime(2026, 10, 1),
-          daysRemaining: 6,
-          status: WarrantyReminderStatus.expiringSoon,
-        ),
-      ];
+    test(
+      'ExportWarrantyRemindersUseCase sanitizes formula injection characters',
+      () {
+        final reminders = [
+          WarrantyReminder(
+            id: 'rem-1',
+            serialId: 's-1',
+            serialNumber: '=CMD|"/C calc"!A0',
+            productId: 'prod-1',
+            productName: '+FormulaProduct',
+            partyId: 'cust-1',
+            customerName: '@EvilCustomer',
+            customerPhone: '9881630001',
+            startDate: DateTime(2025, 1, 1),
+            endDate: DateTime(2026, 10, 1),
+            daysRemaining: 6,
+            status: WarrantyReminderStatus.expiringSoon,
+          ),
+        ];
 
-      final csv = exportUseCase.executeCsv(reminders);
-      expect(csv, contains("'=CMD|\"/C calc\"!A0"));
-      expect(csv, contains("'+FormulaProduct"));
-      expect(csv, contains("'@EvilCustomer"));
-    });
+        final csv = exportUseCase.executeCsv(reminders);
+        expect(csv, contains("'=CMD|\"/C calc\"!A0"));
+        expect(csv, contains("'+FormulaProduct"));
+        expect(csv, contains("'@EvilCustomer"));
+      },
+    );
 
     test('AppLifecycleDraftHandler manages POS and stock draft lifecycle', () {
       final handler = AppLifecycleDraftHandler();

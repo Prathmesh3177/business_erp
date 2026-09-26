@@ -223,12 +223,14 @@ class Products extends Table {
   TextColumn get batchPolicy => text().withDefault(const Constant('none'))();
   RealColumn get minStock => real().withDefault(const Constant(0.0))();
   TextColumn get hsnCode => text()();
-  IntColumn get defaultTaxRateBps => integer().withDefault(const Constant(1800))();
+  IntColumn get defaultTaxRateBps =>
+      integer().withDefault(const Constant(1800))();
   IntColumn get costPricePaise => integer().withDefault(const Constant(0))();
   IntColumn get sellingPricePaise => integer().withDefault(const Constant(0))();
   TextColumn get attributesJson => text().withDefault(const Constant('{}'))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
-  BoolColumn get isMadeToOrder => boolean().withDefault(const Constant(false))();
+  BoolColumn get isMadeToOrder =>
+      boolean().withDefault(const Constant(false))();
   IntColumn get createdAtUtcMs => integer()();
   IntColumn get updatedAtUtcMs => integer()();
 
@@ -493,7 +495,8 @@ class StockMovements extends Table {
 class StockBalances extends Table {
   TextColumn get productId => text()();
   TextColumn get locationId => text()();
-  IntColumn get quantityMicroUnits => integer().withDefault(const Constant(0))();
+  IntColumn get quantityMicroUnits =>
+      integer().withDefault(const Constant(0))();
   IntColumn get valuePaise => integer().withDefault(const Constant(0))();
   IntColumn get updatedAtUtcMs => integer()();
 
@@ -730,6 +733,42 @@ class SaleDrafts extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('SaleOrderRow')
+class SaleOrders extends Table {
+  TextColumn get id => text()();
+  TextColumn get organizationId => text()();
+  TextColumn get branchId => text()();
+  TextColumn get customerPartyId => text()();
+  TextColumn get customerName => text()();
+  TextColumn get customerPhone => text().withDefault(const Constant(''))();
+  IntColumn get orderDateMs => integer()();
+  TextColumn get status => text().withDefault(const Constant('pending'))();
+  TextColumn get quotationId => text().nullable()();
+  TextColumn get saleHeaderId => text().nullable()();
+  IntColumn get grandTotalPaise => integer()();
+  IntColumn get expectedDeliveryDateMs => integer().nullable()();
+  TextColumn get notes => text().nullable()();
+  IntColumn get createdAtUtcMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('SaleOrderLineRow')
+class SaleOrderLines extends Table {
+  TextColumn get id => text()();
+  TextColumn get orderId => text()();
+  TextColumn get productId => text()();
+  TextColumn get productName => text()();
+  IntColumn get quantityMicroUnits => integer()();
+  IntColumn get unitPriceMicroRupees => integer()();
+  IntColumn get taxRateBps => integer()();
+  BoolColumn get isInStock => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DataClassName('WarrantyRow')
 class Warranties extends Table {
   TextColumn get id => text()();
@@ -790,7 +829,8 @@ class SalesReturnLines extends Table {
   IntColumn get costSnapshotMicroRupees => integer()();
   IntColumn get netTotalPaise => integer()();
   TextColumn get serialsJson => text().withDefault(const Constant('[]'))();
-  TextColumn get disposition => text().withDefault(const Constant('returnToStock'))();
+  TextColumn get disposition =>
+      text().withDefault(const Constant('returnToStock'))();
 
   @override
   Set<Column<Object>> get primaryKey => {id};
@@ -928,7 +968,8 @@ class QuotationLines extends Table {
   IntColumn get lineDiscountPaise => integer()();
   TextColumn get taxSnapshotJson => text()();
   IntColumn get netTotalPaise => integer()();
-  BoolColumn get isServiceLine => boolean().withDefault(const Constant(false))();
+  BoolColumn get isServiceLine =>
+      boolean().withDefault(const Constant(false))();
   TextColumn get bomSnapshotJson => text().withDefault(const Constant('{}'))();
 
   @override
@@ -1008,8 +1049,10 @@ class ServiceJobs extends Table {
   TextColumn get issueDescription => text()();
   TextColumn get assignedTechnicianUserId => text().nullable()();
   TextColumn get assignedTechnicianName => text().nullable()();
-  BoolColumn get isCoveredByWarranty => boolean().withDefault(const Constant(false))();
-  BoolColumn get isCoveredByAmc => boolean().withDefault(const Constant(false))();
+  BoolColumn get isCoveredByWarranty =>
+      boolean().withDefault(const Constant(false))();
+  BoolColumn get isCoveredByAmc =>
+      boolean().withDefault(const Constant(false))();
   TextColumn get status => text().withDefault(const Constant('logged'))();
   IntColumn get createdAtUtcMs => integer()();
 
@@ -1115,6 +1158,8 @@ class SerialReplacements extends Table {
     SaleHeaders,
     SaleLines,
     SaleDrafts,
+    SaleOrders,
+    SaleOrderLines,
     Warranties,
     SalesReturnHeaders,
     SalesReturnLines,
@@ -1175,7 +1220,7 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -1274,6 +1319,10 @@ final class FoundationDatabase extends _$FoundationDatabase
       if (from < 11) {
         await migrator.addColumn(products, products.isMadeToOrder);
       }
+      if (from < 12) {
+        await migrator.createTable(saleOrders);
+        await migrator.createTable(saleOrderLines);
+      }
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON');
@@ -1285,11 +1334,41 @@ final class FoundationDatabase extends _$FoundationDatabase
     final nowMs = DateTime.now().millisecondsSinceEpoch;
 
     final defaultUnits = [
-      UnitsCompanion.insert(id: 'unit_pcs', organizationId: orgId, code: 'Pcs', name: 'Pieces', precisionScale: const Value(0)),
-      UnitsCompanion.insert(id: 'unit_nos', organizationId: orgId, code: 'Nos', name: 'Numbers', precisionScale: const Value(0)),
-      UnitsCompanion.insert(id: 'unit_mtr', organizationId: orgId, code: 'Mtr', name: 'Meters', precisionScale: const Value(2)),
-      UnitsCompanion.insert(id: 'unit_set', organizationId: orgId, code: 'Set', name: 'Sets', precisionScale: const Value(0)),
-      UnitsCompanion.insert(id: 'unit_kg', organizationId: orgId, code: 'Kg', name: 'Kilograms', precisionScale: const Value(3)),
+      UnitsCompanion.insert(
+        id: 'unit_pcs',
+        organizationId: orgId,
+        code: 'Pcs',
+        name: 'Pieces',
+        precisionScale: const Value(0),
+      ),
+      UnitsCompanion.insert(
+        id: 'unit_nos',
+        organizationId: orgId,
+        code: 'Nos',
+        name: 'Numbers',
+        precisionScale: const Value(0),
+      ),
+      UnitsCompanion.insert(
+        id: 'unit_mtr',
+        organizationId: orgId,
+        code: 'Mtr',
+        name: 'Meters',
+        precisionScale: const Value(2),
+      ),
+      UnitsCompanion.insert(
+        id: 'unit_set',
+        organizationId: orgId,
+        code: 'Set',
+        name: 'Sets',
+        precisionScale: const Value(0),
+      ),
+      UnitsCompanion.insert(
+        id: 'unit_kg',
+        organizationId: orgId,
+        code: 'Kg',
+        name: 'Kilograms',
+        precisionScale: const Value(3),
+      ),
     ];
 
     for (final unitCompanion in defaultUnits) {
@@ -1297,11 +1376,46 @@ final class FoundationDatabase extends _$FoundationDatabase
     }
 
     final defaultCategories = [
-      CategoriesCompanion.insert(id: 'cat_panels', organizationId: orgId, name: 'Solar Panels', type: const Value('solarPanel'), createdAtUtcMs: nowMs, updatedAtUtcMs: nowMs),
-      CategoriesCompanion.insert(id: 'cat_inverters', organizationId: orgId, name: 'Solar Inverters', type: const Value('solarInverter'), createdAtUtcMs: nowMs, updatedAtUtcMs: nowMs),
-      CategoriesCompanion.insert(id: 'cat_batteries', organizationId: orgId, name: 'Solar Batteries', type: const Value('solarBattery'), createdAtUtcMs: nowMs, updatedAtUtcMs: nowMs),
-      CategoriesCompanion.insert(id: 'cat_cables', organizationId: orgId, name: 'Solar Cables & Wires', type: const Value('solarCable'), createdAtUtcMs: nowMs, updatedAtUtcMs: nowMs),
-      CategoriesCompanion.insert(id: 'cat_pumps', organizationId: orgId, name: 'Solar Pumps', type: const Value('solarPump'), createdAtUtcMs: nowMs, updatedAtUtcMs: nowMs),
+      CategoriesCompanion.insert(
+        id: 'cat_panels',
+        organizationId: orgId,
+        name: 'Solar Panels',
+        type: const Value('solarPanel'),
+        createdAtUtcMs: nowMs,
+        updatedAtUtcMs: nowMs,
+      ),
+      CategoriesCompanion.insert(
+        id: 'cat_inverters',
+        organizationId: orgId,
+        name: 'Solar Inverters',
+        type: const Value('solarInverter'),
+        createdAtUtcMs: nowMs,
+        updatedAtUtcMs: nowMs,
+      ),
+      CategoriesCompanion.insert(
+        id: 'cat_batteries',
+        organizationId: orgId,
+        name: 'Solar Batteries',
+        type: const Value('solarBattery'),
+        createdAtUtcMs: nowMs,
+        updatedAtUtcMs: nowMs,
+      ),
+      CategoriesCompanion.insert(
+        id: 'cat_cables',
+        organizationId: orgId,
+        name: 'Solar Cables & Wires',
+        type: const Value('solarCable'),
+        createdAtUtcMs: nowMs,
+        updatedAtUtcMs: nowMs,
+      ),
+      CategoriesCompanion.insert(
+        id: 'cat_pumps',
+        organizationId: orgId,
+        name: 'Solar Pumps',
+        type: const Value('solarPump'),
+        createdAtUtcMs: nowMs,
+        updatedAtUtcMs: nowMs,
+      ),
     ];
 
     for (final catCompanion in defaultCategories) {
@@ -1325,13 +1439,13 @@ final class FoundationDatabase extends _$FoundationDatabase
     }
   }
 
-  @override
   Future<void> _seedDefaultExpenseCategories() async {
     for (final cat in ExpenseCategory.defaultCategories) {
       await saveExpenseCategory(cat);
     }
   }
 
+  @override
   Future<FoundationIdentity?> loadIdentity() async {
     final rows = await customSelect('''
       SELECT
@@ -1735,17 +1849,26 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<Category>> getCategories(String organizationId) async {
-    final rows = await (select(categories)..where((c) => c.organizationId.equals(organizationId))).get();
-    return rows.map((r) => Category(
-      id: r.id,
-      organizationId: r.organizationId,
-      name: r.name,
-      parentCategoryId: r.parentCategoryId,
-      type: SolarCategoryType.values.firstWhere((e) => e.name == r.type, orElse: () => SolarCategoryType.other),
-      active: r.active,
-      createdAt: _fromEpoch(r.createdAtUtcMs),
-      updatedAt: _fromEpoch(r.updatedAtUtcMs),
-    )).toList();
+    final rows = await (select(
+      categories,
+    )..where((c) => c.organizationId.equals(organizationId))).get();
+    return rows
+        .map(
+          (r) => Category(
+            id: r.id,
+            organizationId: r.organizationId,
+            name: r.name,
+            parentCategoryId: r.parentCategoryId,
+            type: SolarCategoryType.values.firstWhere(
+              (e) => e.name == r.type,
+              orElse: () => SolarCategoryType.other,
+            ),
+            active: r.active,
+            createdAt: _fromEpoch(r.createdAtUtcMs),
+            updatedAt: _fromEpoch(r.updatedAtUtcMs),
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -1764,15 +1887,21 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<Brand>> getBrands(String organizationId) async {
-    final rows = await (select(brands)..where((b) => b.organizationId.equals(organizationId))).get();
-    return rows.map((r) => Brand(
-      id: r.id,
-      organizationId: r.organizationId,
-      name: r.name,
-      active: r.active,
-      createdAt: _fromEpoch(r.createdAtUtcMs),
-      updatedAt: _fromEpoch(r.updatedAtUtcMs),
-    )).toList();
+    final rows = await (select(
+      brands,
+    )..where((b) => b.organizationId.equals(organizationId))).get();
+    return rows
+        .map(
+          (r) => Brand(
+            id: r.id,
+            organizationId: r.organizationId,
+            name: r.name,
+            active: r.active,
+            createdAt: _fromEpoch(r.createdAtUtcMs),
+            updatedAt: _fromEpoch(r.updatedAtUtcMs),
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -1791,15 +1920,21 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<Unit>> getUnits(String organizationId) async {
-    final rows = await (select(units)..where((u) => u.organizationId.equals(organizationId))).get();
-    return rows.map((r) => Unit(
-      id: r.id,
-      organizationId: r.organizationId,
-      code: r.code,
-      name: r.name,
-      precisionScale: r.precisionScale,
-      active: r.active,
-    )).toList();
+    final rows = await (select(
+      units,
+    )..where((u) => u.organizationId.equals(organizationId))).get();
+    return rows
+        .map(
+          (r) => Unit(
+            id: r.id,
+            organizationId: r.organizationId,
+            code: r.code,
+            name: r.name,
+            precisionScale: r.precisionScale,
+            active: r.active,
+          ),
+        )
+        .toList();
   }
 
   @override
@@ -1833,7 +1968,11 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<Product?> getProductById(String organizationId, String id) async {
-    final row = await (select(products)..where((p) => p.organizationId.equals(organizationId) & p.id.equals(id))).getSingleOrNull();
+    final row =
+        await (select(products)..where(
+              (p) => p.organizationId.equals(organizationId) & p.id.equals(id),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapProductRow(row);
   }
@@ -1841,7 +1980,13 @@ final class FoundationDatabase extends _$FoundationDatabase
   @override
   Future<Product?> getProductBySku(String organizationId, String sku) async {
     final normalized = Product.normalizeSku(sku);
-    final row = await (select(products)..where((p) => p.organizationId.equals(organizationId) & p.normalizedSku.equals(normalized))).getSingleOrNull();
+    final row =
+        await (select(products)..where(
+              (p) =>
+                  p.organizationId.equals(organizationId) &
+                  p.normalizedSku.equals(normalized),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapProductRow(row);
   }
@@ -1854,7 +1999,8 @@ final class FoundationDatabase extends _$FoundationDatabase
     String? brandId,
     bool includeInactive = false,
   }) async {
-    final q = select(products)..where((p) => p.organizationId.equals(organizationId));
+    final q = select(products)
+      ..where((p) => p.organizationId.equals(organizationId));
     if (!includeInactive) {
       q.where((p) => p.active.equals(true));
     }
@@ -1866,7 +2012,12 @@ final class FoundationDatabase extends _$FoundationDatabase
     }
     if (query != null && query.trim().isNotEmpty) {
       final term = '%${query.trim().toLowerCase()}%';
-      q.where((p) => p.name.lower().like(term) | p.normalizedSku.like(term) | p.hsnCode.like(term));
+      q.where(
+        (p) =>
+            p.name.lower().like(term) |
+            p.normalizedSku.like(term) |
+            p.hsnCode.like(term),
+      );
     }
 
     final rows = await q.get();
@@ -1886,8 +2037,14 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<Product?> getProductByBarcode(String organizationId, String barcode) async {
-    final bRow = await (select(barcodes)..where((b) => b.code.equals(barcode.trim().toUpperCase()))).getSingleOrNull();
+  Future<Product?> getProductByBarcode(
+    String organizationId,
+    String barcode,
+  ) async {
+    final bRow =
+        await (select(barcodes)
+              ..where((b) => b.code.equals(barcode.trim().toUpperCase())))
+            .getSingleOrNull();
     if (bRow == null) return null;
     return getProductById(organizationId, bRow.productId);
   }
@@ -1908,8 +2065,14 @@ final class FoundationDatabase extends _$FoundationDatabase
       brandId: r.brandId,
       model: r.model,
       baseUnitId: r.baseUnitId,
-      serialPolicy: SerialPolicy.values.firstWhere((e) => e.name == r.serialPolicy, orElse: () => SerialPolicy.none),
-      batchPolicy: BatchPolicy.values.firstWhere((e) => e.name == r.batchPolicy, orElse: () => BatchPolicy.none),
+      serialPolicy: SerialPolicy.values.firstWhere(
+        (e) => e.name == r.serialPolicy,
+        orElse: () => SerialPolicy.none,
+      ),
+      batchPolicy: BatchPolicy.values.firstWhere(
+        (e) => e.name == r.batchPolicy,
+        orElse: () => BatchPolicy.none,
+      ),
       minStock: r.minStock,
       hsnCode: r.hsnCode,
       defaultTaxRateBps: r.defaultTaxRateBps,
@@ -1926,7 +2089,11 @@ final class FoundationDatabase extends _$FoundationDatabase
   // --- PartyStore implementation ---
 
   @override
-  Future<void> saveParty(Party party, {List<PartyAddress>? addresses, List<PartyContact>? contacts}) async {
+  Future<void> saveParty(
+    Party party, {
+    List<PartyAddress>? addresses,
+    List<PartyContact>? contacts,
+  }) async {
     await transaction(() async {
       await into(parties).insertOnConflictUpdate(
         PartiesCompanion.insert(
@@ -1983,14 +2150,24 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<Party?> getPartyById(String organizationId, String id) async {
-    final row = await (select(parties)..where((p) => p.organizationId.equals(organizationId) & p.id.equals(id))).getSingleOrNull();
+    final row =
+        await (select(parties)..where(
+              (p) => p.organizationId.equals(organizationId) & p.id.equals(id),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapPartyRow(row);
   }
 
   @override
   Future<Party?> getPartyByGstin(String organizationId, String gstin) async {
-    final row = await (select(parties)..where((p) => p.organizationId.equals(organizationId) & p.gstin.equals(gstin.trim().toUpperCase()))).getSingleOrNull();
+    final row =
+        await (select(parties)..where(
+              (p) =>
+                  p.organizationId.equals(organizationId) &
+                  p.gstin.equals(gstin.trim().toUpperCase()),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapPartyRow(row);
   }
@@ -2003,7 +2180,8 @@ final class FoundationDatabase extends _$FoundationDatabase
     bool? isSupplier,
     bool includeInactive = false,
   }) async {
-    final q = select(parties)..where((p) => p.organizationId.equals(organizationId));
+    final q = select(parties)
+      ..where((p) => p.organizationId.equals(organizationId));
     if (!includeInactive) {
       q.where((p) => p.active.equals(true));
     }
@@ -2024,32 +2202,44 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<PartyAddress>> getPartyAddresses(String partyId) async {
-    final rows = await (select(partyAddresses)..where((a) => a.partyId.equals(partyId))).get();
-    return rows.map((r) => PartyAddress(
-      id: r.id,
-      partyId: r.partyId,
-      addressLine1: r.addressLine1,
-      addressLine2: r.addressLine2,
-      city: r.city,
-      state: r.state,
-      pincode: r.pincode,
-      stateCode: r.stateCode,
-      isBilling: r.isBilling,
-      isShipping: r.isShipping,
-    )).toList();
+    final rows = await (select(
+      partyAddresses,
+    )..where((a) => a.partyId.equals(partyId))).get();
+    return rows
+        .map(
+          (r) => PartyAddress(
+            id: r.id,
+            partyId: r.partyId,
+            addressLine1: r.addressLine1,
+            addressLine2: r.addressLine2,
+            city: r.city,
+            state: r.state,
+            pincode: r.pincode,
+            stateCode: r.stateCode,
+            isBilling: r.isBilling,
+            isShipping: r.isShipping,
+          ),
+        )
+        .toList();
   }
 
   @override
   Future<List<PartyContact>> getPartyContacts(String partyId) async {
-    final rows = await (select(partyContacts)..where((c) => c.partyId.equals(partyId))).get();
-    return rows.map((r) => PartyContact(
-      id: r.id,
-      partyId: r.partyId,
-      name: r.name,
-      phone: r.phone,
-      email: r.email,
-      isPrimary: r.isPrimary,
-    )).toList();
+    final rows = await (select(
+      partyContacts,
+    )..where((c) => c.partyId.equals(partyId))).get();
+    return rows
+        .map(
+          (r) => PartyContact(
+            id: r.id,
+            partyId: r.partyId,
+            name: r.name,
+            phone: r.phone,
+            email: r.email,
+            isPrimary: r.isPrimary,
+          ),
+        )
+        .toList();
   }
 
   Party _mapPartyRow(PartyRow r) {
@@ -2089,15 +2279,26 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<Attachment?> getAttachmentByHash(String organizationId, String hash) async {
-    final row = await (select(attachments)..where((a) => a.organizationId.equals(organizationId) & a.sha256Hash.equals(hash))).getSingleOrNull();
+  Future<Attachment?> getAttachmentByHash(
+    String organizationId,
+    String hash,
+  ) async {
+    final row =
+        await (select(attachments)..where(
+              (a) =>
+                  a.organizationId.equals(organizationId) &
+                  a.sha256Hash.equals(hash),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapAttachmentRow(row);
   }
 
   @override
   Future<Attachment?> getAttachmentById(String id) async {
-    final row = await (select(attachments)..where((a) => a.id.equals(id))).getSingleOrNull();
+    final row = await (select(
+      attachments,
+    )..where((a) => a.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return _mapAttachmentRow(row);
   }
@@ -2117,25 +2318,40 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<List<Attachment>> getAttachmentsForEntity(String entityType, String entityId) async {
+  Future<List<Attachment>> getAttachmentsForEntity(
+    String entityType,
+    String entityId,
+  ) async {
     final query = select(attachments).join([
-      innerJoin(attachmentLinks, attachmentLinks.attachmentId.equalsExp(attachments.id)),
+      innerJoin(
+        attachmentLinks,
+        attachmentLinks.attachmentId.equalsExp(attachments.id),
+      ),
     ]);
-    query.where(attachmentLinks.entityType.equals(entityType) & attachmentLinks.entityId.equals(entityId));
+    query.where(
+      attachmentLinks.entityType.equals(entityType) &
+          attachmentLinks.entityId.equals(entityId),
+    );
 
     final rows = await query.get();
-    return rows.map((r) => _mapAttachmentRow(r.readTable(attachments))).toList();
+    return rows
+        .map((r) => _mapAttachmentRow(r.readTable(attachments)))
+        .toList();
   }
 
   @override
   Future<List<Attachment>> getOrphanedAttachments() async {
-    final rows = await (select(attachments)..where((a) => a.status.equals('orphaned'))).get();
+    final rows = await (select(
+      attachments,
+    )..where((a) => a.status.equals('orphaned'))).get();
     return rows.map(_mapAttachmentRow).toList();
   }
 
   @override
   Future<void> deleteAttachment(String id) async {
-    await (delete(attachmentLinks)..where((l) => l.attachmentId.equals(id))).go();
+    await (delete(
+      attachmentLinks,
+    )..where((l) => l.attachmentId.equals(id))).go();
     await (delete(attachments)..where((a) => a.id.equals(id))).go();
   }
 
@@ -2148,7 +2364,10 @@ final class FoundationDatabase extends _$FoundationDatabase
       fileSizeBytes: r.fileSizeBytes,
       sha256Hash: r.sha256Hash,
       storagePath: r.storagePath,
-      status: AttachmentStatus.values.firstWhere((e) => e.name == r.status, orElse: () => AttachmentStatus.active),
+      status: AttachmentStatus.values.firstWhere(
+        (e) => e.name == r.status,
+        orElse: () => AttachmentStatus.active,
+      ),
       createdAt: _fromEpoch(r.createdAtUtcMs),
     );
   }
@@ -2190,20 +2409,20 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<Account>> getAccounts(String organizationId) async {
-    final rows = await (select(accounts)
-          ..where((a) => a.organizationId.equals(organizationId)))
-        .get();
+    final rows = await (select(
+      accounts,
+    )..where((a) => a.organizationId.equals(organizationId))).get();
     return rows.map(_mapAccountRow).toList();
   }
 
   @override
   Future<Account?> getAccountByCode(String organizationId, String code) async {
-    final row = await (select(accounts)
-          ..where(
-            (a) =>
-                a.organizationId.equals(organizationId) & a.code.equals(code),
-          ))
-        .getSingleOrNull();
+    final row =
+        await (select(accounts)..where(
+              (a) =>
+                  a.organizationId.equals(organizationId) & a.code.equals(code),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapAccountRow(row);
   }
@@ -2242,9 +2461,9 @@ final class FoundationDatabase extends _$FoundationDatabase
         ),
       );
 
-      await (delete(journalLines)
-            ..where((l) => l.journalEntryId.equals(entry.id)))
-          .go();
+      await (delete(
+        journalLines,
+      )..where((l) => l.journalEntryId.equals(entry.id))).go();
 
       for (final line in entry.lines) {
         await into(journalLines).insert(
@@ -2275,8 +2494,9 @@ final class FoundationDatabase extends _$FoundationDatabase
         ..addColumns([journalLines.journalEntryId])
         ..where(journalLines.partyId.equals(partyId));
       final matchingRows = await matchingEntryIdsQuery.get();
-      final ids =
-          matchingRows.map((r) => r.read(journalLines.journalEntryId)!).toSet();
+      final ids = matchingRows
+          .map((r) => r.read(journalLines.journalEntryId)!)
+          .toSet();
       if (ids.isEmpty) return [];
       query.where((e) => e.id.isIn(ids));
     }
@@ -2290,9 +2510,9 @@ final class FoundationDatabase extends _$FoundationDatabase
     final result = <JournalEntry>[];
 
     for (final eRow in entryRows) {
-      final lineRows = await (select(journalLines)
-            ..where((l) => l.journalEntryId.equals(eRow.id)))
-          .get();
+      final lineRows = await (select(
+        journalLines,
+      )..where((l) => l.journalEntryId.equals(eRow.id))).get();
       final lines = lineRows
           .map(
             (l) => JournalLine(
@@ -2404,13 +2624,12 @@ final class FoundationDatabase extends _$FoundationDatabase
   }) async {
     return transaction(() async {
       final existing =
-          await (select(documentSequences)
-                ..where(
-                  (s) =>
-                      s.registrationId.equals(registrationId) &
-                      s.fiscalYear.equals(fiscalYear) &
-                      s.series.equals(series),
-                ))
+          await (select(documentSequences)..where(
+                (s) =>
+                    s.registrationId.equals(registrationId) &
+                    s.fiscalYear.equals(fiscalYear) &
+                    s.series.equals(series),
+              ))
               .getSingleOrNull();
 
       final currentVal = existing?.nextValue ?? 1;
@@ -2525,9 +2744,9 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<Location?> getLocationById(String id) async {
-    final row = await (select(locations)
-          ..where((l) => l.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (select(
+      locations,
+    )..where((l) => l.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return _mapLocationRow(row);
   }
@@ -2631,13 +2850,13 @@ final class FoundationDatabase extends _$FoundationDatabase
     String productId,
     String locationId,
   ) async {
-    final row = await (select(stockBalances)
-          ..where(
-            (b) =>
-                b.productId.equals(productId) &
-                b.locationId.equals(locationId),
-          ))
-        .getSingleOrNull();
+    final row =
+        await (select(stockBalances)..where(
+              (b) =>
+                  b.productId.equals(productId) &
+                  b.locationId.equals(locationId),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return StockBalance(
       productId: row.productId,
@@ -2653,9 +2872,9 @@ final class FoundationDatabase extends _$FoundationDatabase
     String organizationId,
     String productId,
   ) async {
-    final rows = await (select(stockBalances)
-          ..where((b) => b.productId.equals(productId)))
-        .get();
+    final rows = await (select(
+      stockBalances,
+    )..where((b) => b.productId.equals(productId))).get();
     return rows
         .map(
           (r) => StockBalance(
@@ -2693,21 +2912,20 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<List<StockBalance>> rebuildStockBalances(
-    String organizationId,
-  ) async {
+  Future<List<StockBalance>> rebuildStockBalances(String organizationId) async {
     return transaction(() async {
       await delete(stockBalances).go();
 
-      final movements = await (select(stockMovements)
-            ..where((m) => m.organizationId.equals(organizationId))
-            ..orderBy([
-              (t) => OrderingTerm(
+      final movements =
+          await (select(stockMovements)
+                ..where((m) => m.organizationId.equals(organizationId))
+                ..orderBy([
+                  (t) => OrderingTerm(
                     expression: t.createdAtUtcMs,
                     mode: OrderingMode.asc,
                   ),
-            ]))
-          .get();
+                ]))
+              .get();
 
       final map = <String, StockBalance>{};
       for (final r in movements) {
@@ -2731,7 +2949,8 @@ final class FoundationDatabase extends _$FoundationDatabase
           createdAt: _fromEpoch(r.createdAtUtcMs),
         );
 
-        final current = map[key] ??
+        final current =
+            map[key] ??
             StockBalance(
               productId: r.productId,
               locationId: r.locationId,
@@ -2776,14 +2995,14 @@ final class FoundationDatabase extends _$FoundationDatabase
     String productId,
     String serialNumber,
   ) async {
-    final row = await (select(serials)
-          ..where(
-            (s) =>
-                s.organizationId.equals(organizationId) &
-                s.productId.equals(productId) &
-                s.serialNumber.equals(serialNumber.trim().toUpperCase()),
-          ))
-        .getSingleOrNull();
+    final row =
+        await (select(serials)..where(
+              (s) =>
+                  s.organizationId.equals(organizationId) &
+                  s.productId.equals(productId) &
+                  s.serialNumber.equals(serialNumber.trim().toUpperCase()),
+            ))
+            .getSingleOrNull();
     if (row == null) return null;
     return _mapSerialRow(row);
   }
@@ -2839,9 +3058,9 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<SerialEvent>> getSerialEvents(String serialId) async {
-    final rows = await (select(serialEvents)
-          ..where((e) => e.serialId.equals(serialId)))
-        .get();
+    final rows = await (select(
+      serialEvents,
+    )..where((e) => e.serialId.equals(serialId))).get();
     return rows
         .map(
           (r) => SerialEvent(
@@ -2882,13 +3101,13 @@ final class FoundationDatabase extends _$FoundationDatabase
     String organizationId,
     String productId,
   ) async {
-    final rows = await (select(batches)
-          ..where(
-            (b) =>
-                b.organizationId.equals(organizationId) &
-                b.productId.equals(productId),
-          ))
-        .get();
+    final rows =
+        await (select(batches)..where(
+              (b) =>
+                  b.organizationId.equals(organizationId) &
+                  b.productId.equals(productId),
+            ))
+            .get();
     return rows
         .map(
           (r) => BatchRecord(
@@ -2928,14 +3147,14 @@ final class FoundationDatabase extends _$FoundationDatabase
     String organizationId,
     String productId,
   ) async {
-    final rows = await (select(reservations)
-          ..where(
-            (r) =>
-                r.organizationId.equals(organizationId) &
-                r.productId.equals(productId) &
-                r.status.equals('active'),
-          ))
-        .get();
+    final rows =
+        await (select(reservations)..where(
+              (r) =>
+                  r.organizationId.equals(organizationId) &
+                  r.productId.equals(productId) &
+                  r.status.equals('active'),
+            ))
+            .get();
     return rows
         .map(
           (r) => Reservation(
@@ -3081,7 +3300,8 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<PurchaseLine>> getPurchaseLines(String purchaseId) async {
-    final query = select(purchaseLines)..where((l) => l.purchaseId.equals(purchaseId));
+    final query = select(purchaseLines)
+      ..where((l) => l.purchaseId.equals(purchaseId));
     final rows = await query.get();
     return rows.map(_mapPurchaseLineRow).toList();
   }
@@ -3096,7 +3316,10 @@ final class FoundationDatabase extends _$FoundationDatabase
     if (supplierId != null) {
       query.where((p) => p.supplierId.equals(supplierId));
     }
-    query.orderBy([(t) => OrderingTerm(expression: t.createdAtUtcMs, mode: OrderingMode.desc)]);
+    query.orderBy([
+      (t) =>
+          OrderingTerm(expression: t.createdAtUtcMs, mode: OrderingMode.desc),
+    ]);
     final rows = await query.get();
     return rows.map(_mapPurchaseHeaderRow).toList();
   }
@@ -3108,12 +3331,16 @@ final class FoundationDatabase extends _$FoundationDatabase
     required String financialYear,
     required String externalInvoiceNumber,
   }) async {
-    final norm = PurchaseHeader.normalizeExternalInvoiceNumber(externalInvoiceNumber);
+    final norm = PurchaseHeader.normalizeExternalInvoiceNumber(
+      externalInvoiceNumber,
+    );
     final query = select(purchaseHeaders)
-      ..where((p) =>
-          p.organizationId.equals(organizationId) &
-          p.supplierId.equals(supplierId) &
-          p.normalizedExternalInvoiceNumber.equals(norm));
+      ..where(
+        (p) =>
+            p.organizationId.equals(organizationId) &
+            p.supplierId.equals(supplierId) &
+            p.normalizedExternalInvoiceNumber.equals(norm),
+      );
     final rows = await query.get();
     return rows.isNotEmpty;
   }
@@ -3159,10 +3386,12 @@ final class FoundationDatabase extends _$FoundationDatabase
     required String supplierId,
   }) async {
     final query = select(purchaseHeaders)
-      ..where((p) =>
-          p.organizationId.equals(organizationId) &
-          p.supplierId.equals(supplierId) &
-          p.status.equals('posted'));
+      ..where(
+        (p) =>
+            p.organizationId.equals(organizationId) &
+            p.supplierId.equals(supplierId) &
+            p.status.equals('posted'),
+      );
     final rows = await query.get();
     var sumPaise = 0;
     for (final r in rows) {
@@ -3222,7 +3451,9 @@ final class FoundationDatabase extends _$FoundationDatabase
       productName: r.productName,
       sku: r.sku,
       quantity: Quantity.fromUnits(r.quantityMicroUnits / 1000000.0),
-      unitPurchasePrice: UnitPrice.fromRupees(r.unitPurchasePriceMicroRupees / 1000000.0),
+      unitPurchasePrice: UnitPrice.fromRupees(
+        r.unitPurchasePriceMicroRupees / 1000000.0,
+      ),
       discountPaise: Money.fromPaise(r.discountPaise),
       taxSnapshot: taxSnapshot,
       landedCostAllocationPaise: Money.fromPaise(r.landedCostAllocationPaise),
@@ -3369,6 +3600,85 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
+  Future<void> saveSaleOrder({
+    required SaleOrder order,
+    required List<SaleOrderLine> lines,
+  }) async {
+    await transaction(() async {
+      await into(saleOrders).insertOnConflictUpdate(
+        SaleOrdersCompanion.insert(
+          id: order.id,
+          organizationId: order.organizationId,
+          branchId: order.branchId,
+          customerPartyId: order.customerPartyId,
+          customerName: order.customerName,
+          customerPhone: Value(order.customerPhone),
+          orderDateMs: order.orderDate.millisecondsSinceEpoch,
+          status: Value(order.status.name),
+          quotationId: Value(order.quotationId),
+          saleHeaderId: Value(order.saleHeaderId),
+          grandTotalPaise: order.grandTotalPaise.paise,
+          expectedDeliveryDateMs: Value(
+            order.expectedDeliveryDate?.millisecondsSinceEpoch,
+          ),
+          notes: Value(order.notes),
+          createdAtUtcMs: order.createdAtUtc.millisecondsSinceEpoch,
+        ),
+      );
+      await (delete(
+        saleOrderLines,
+      )..where((line) => line.orderId.equals(order.id))).go();
+      for (final line in lines) {
+        await into(saleOrderLines).insert(
+          SaleOrderLinesCompanion.insert(
+            id: line.id,
+            orderId: line.orderId,
+            productId: line.productId,
+            productName: line.productName,
+            quantityMicroUnits: line.quantity.microUnits,
+            unitPriceMicroRupees: line.unitPrice.microRupees,
+            taxRateBps: line.taxRate.bps,
+            isInStock: Value(line.isInStock),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  Future<SaleOrder?> getSaleOrder(String id) async {
+    final row = await (select(
+      saleOrders,
+    )..where((order) => order.id.equals(id))).getSingleOrNull();
+    return row == null ? null : _mapSaleOrderRow(row);
+  }
+
+  @override
+  Future<List<SaleOrderLine>> getSaleOrderLines(String orderId) async {
+    final rows = await (select(
+      saleOrderLines,
+    )..where((line) => line.orderId.equals(orderId))).get();
+    return rows.map(_mapSaleOrderLineRow).toList();
+  }
+
+  @override
+  Future<List<SaleOrder>> listSaleOrders({
+    required String organizationId,
+    OrderStatus? status,
+  }) async {
+    final query = select(saleOrders)
+      ..where((order) {
+        var expression = order.organizationId.equals(organizationId);
+        if (status != null) {
+          expression = expression & order.status.equals(status.name);
+        }
+        return expression;
+      })
+      ..orderBy([(order) => OrderingTerm.desc(order.createdAtUtcMs)]);
+    return (await query.get()).map(_mapSaleOrderRow).toList();
+  }
+
+  @override
   Future<void> saveWarrantyEntitlement(WarrantyEntitlement entitlement) async {
     await into(warranties).insertOnConflictUpdate(
       WarrantiesCompanion.insert(
@@ -3404,7 +3714,6 @@ final class FoundationDatabase extends _$FoundationDatabase
     final rows = await query.get();
     return rows.map(_mapWarrantyRow).toList();
   }
-
 
   SaleHeader _mapSaleHeaderRow(SaleHeaderRow r) {
     return SaleHeader(
@@ -3476,6 +3785,43 @@ final class FoundationDatabase extends _$FoundationDatabase
       linesJson: r.linesJson,
       updatedAtUtc: _fromEpoch(r.updatedAtUtcMs),
       notes: r.notes,
+    );
+  }
+
+  SaleOrder _mapSaleOrderRow(SaleOrderRow r) {
+    return SaleOrder(
+      id: r.id,
+      organizationId: r.organizationId,
+      branchId: r.branchId,
+      customerPartyId: r.customerPartyId,
+      customerName: r.customerName,
+      customerPhone: r.customerPhone,
+      orderDate: _fromEpoch(r.orderDateMs),
+      status: OrderStatus.values.firstWhere(
+        (status) => status.name == r.status,
+        orElse: () => OrderStatus.pending,
+      ),
+      quotationId: r.quotationId,
+      saleHeaderId: r.saleHeaderId,
+      grandTotalPaise: Money.fromPaise(r.grandTotalPaise),
+      expectedDeliveryDate: r.expectedDeliveryDateMs == null
+          ? null
+          : _fromEpoch(r.expectedDeliveryDateMs!),
+      notes: r.notes,
+      createdAtUtc: _fromEpoch(r.createdAtUtcMs),
+    );
+  }
+
+  SaleOrderLine _mapSaleOrderLineRow(SaleOrderLineRow r) {
+    return SaleOrderLine(
+      id: r.id,
+      orderId: r.orderId,
+      productId: r.productId,
+      productName: r.productName,
+      quantity: Quantity.fromUnits(r.quantityMicroUnits / 1000000.0),
+      unitPrice: UnitPrice.fromRupees(r.unitPriceMicroRupees / 1000000.0),
+      taxRate: TaxRate.fromBps(r.taxRateBps),
+      isInStock: r.isInStock,
     );
   }
 
@@ -3566,7 +3912,9 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<List<SalesReturnLine>> getSalesReturnLines(String salesReturnId) async {
+  Future<List<SalesReturnLine>> getSalesReturnLines(
+    String salesReturnId,
+  ) async {
     final query = select(salesReturnLines)
       ..where((tbl) => tbl.salesReturnId.equals(salesReturnId));
     final rows = await query.get();
@@ -3574,7 +3922,9 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<List<SalesReturnHeader>> listSalesReturns(String organizationId) async {
+  Future<List<SalesReturnHeader>> listSalesReturns(
+    String organizationId,
+  ) async {
     final query = select(salesReturnHeaders)
       ..where((tbl) => tbl.organizationId.equals(organizationId))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.returnDateMs)]);
@@ -3639,14 +3989,17 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<PurchaseReturnHeader?> getPurchaseReturnHeader(String id) async {
-    final query = select(purchaseReturnHeaders)..where((tbl) => tbl.id.equals(id));
+    final query = select(purchaseReturnHeaders)
+      ..where((tbl) => tbl.id.equals(id));
     final row = await query.getSingleOrNull();
     if (row == null) return null;
     return _mapPurchaseReturnHeaderRow(row);
   }
 
   @override
-  Future<List<PurchaseReturnLine>> getPurchaseReturnLines(String purchaseReturnId) async {
+  Future<List<PurchaseReturnLine>> getPurchaseReturnLines(
+    String purchaseReturnId,
+  ) async {
     final query = select(purchaseReturnLines)
       ..where((tbl) => tbl.purchaseReturnId.equals(purchaseReturnId));
     final rows = await query.get();
@@ -3654,7 +4007,9 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<List<PurchaseReturnHeader>> listPurchaseReturns(String organizationId) async {
+  Future<List<PurchaseReturnHeader>> listPurchaseReturns(
+    String organizationId,
+  ) async {
     final query = select(purchaseReturnHeaders)
       ..where((tbl) => tbl.organizationId.equals(organizationId))
       ..orderBy([(tbl) => OrderingTerm.desc(tbl.returnDateMs)]);
@@ -3676,9 +4031,16 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  Future<List<ExpenseCategory>> getExpenseCategories(String organizationId) async {
+  Future<List<ExpenseCategory>> getExpenseCategories(
+    String organizationId,
+  ) async {
     final query = select(expenseCategories)
-      ..where((tbl) => tbl.organizationId.equals(organizationId) | tbl.organizationId.equals('default_org') | tbl.organizationId.equals(''))
+      ..where(
+        (tbl) =>
+            tbl.organizationId.equals(organizationId) |
+            tbl.organizationId.equals('default_org') |
+            tbl.organizationId.equals(''),
+      )
       ..orderBy([(tbl) => OrderingTerm.asc(tbl.accountCode)]);
     final rows = await query.get();
     return rows.map(_mapExpenseCategoryRow).toList();
@@ -3778,7 +4140,9 @@ final class FoundationDatabase extends _$FoundationDatabase
       ..where(
         (tbl) =>
             tbl.organizationId.equals(organizationId) &
-            (isCustomer ? tbl.isCustomer.equals(true) : tbl.isSupplier.equals(true)),
+            (isCustomer
+                ? tbl.isCustomer.equals(true)
+                : tbl.isSupplier.equals(true)),
       );
     final partyRows = await partiesQuery.get();
     final nowMs = DateTime.now().millisecondsSinceEpoch;
@@ -3800,7 +4164,8 @@ final class FoundationDatabase extends _$FoundationDatabase
           );
         final sales = await salesQuery.get();
         for (final s in sales) {
-          final diffDays = ((nowMs - s.businessDateMs) / (1000 * 3600 * 24)).floor();
+          final diffDays = ((nowMs - s.businessDateMs) / (1000 * 3600 * 24))
+              .floor();
           final bal = s.balanceDuePaise;
           if (diffDays <= 30) {
             d0to30 += bal;
@@ -3822,7 +4187,8 @@ final class FoundationDatabase extends _$FoundationDatabase
           );
         final purchases = await purchasesQuery.get();
         for (final pur in purchases) {
-          final diffDays = ((nowMs - pur.invoiceDateMs) / (1000 * 3600 * 24)).floor();
+          final diffDays = ((nowMs - pur.invoiceDateMs) / (1000 * 3600 * 24))
+              .floor();
           final bal = pur.balanceDuePaise;
           if (diffDays <= 30) {
             d0to30 += bal;
@@ -3960,7 +4326,9 @@ final class FoundationDatabase extends _$FoundationDatabase
       productName: r.productName,
       sku: r.sku,
       quantity: Quantity.fromUnits(r.quantityMicroUnits / 1000000.0),
-      unitPurchasePrice: UnitPrice.fromRupees(r.unitPurchasePriceMicroRupees / 1000000.0),
+      unitPurchasePrice: UnitPrice.fromRupees(
+        r.unitPurchasePriceMicroRupees / 1000000.0,
+      ),
       taxSnapshot: taxSnapshot,
       netTotalPaise: Money.fromPaise(r.netTotalPaise),
       serials: serialsList,
@@ -4002,7 +4370,9 @@ final class FoundationDatabase extends _$FoundationDatabase
       userId: r.userId,
       username: r.username,
       openedAtUtc: _fromEpoch(r.openedAtUtcMs),
-      closedAtUtc: r.closedAtUtcMs != null ? _fromEpoch(r.closedAtUtcMs!) : null,
+      closedAtUtc: r.closedAtUtcMs != null
+          ? _fromEpoch(r.closedAtUtcMs!)
+          : null,
       openingCashPaise: Money.fromPaise(r.openingCashPaise),
       expectedCashPaise: Money.fromPaise(r.expectedCashPaise),
       countedCashPaise: Money.fromPaise(r.countedCashPaise),
@@ -4107,20 +4477,26 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<QuotationHeader?> getQuotationHeader(String id) async {
-    final row = await (select(quotations)..where((q) => q.id.equals(id))).getSingleOrNull();
+    final row = await (select(
+      quotations,
+    )..where((q) => q.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return _mapQuotationHeader(row);
   }
 
   @override
   Future<List<QuotationLine>> getQuotationLines(String quotationId) async {
-    final rows = await (select(quotationLines)..where((q) => q.quotationId.equals(quotationId))).get();
+    final rows = await (select(
+      quotationLines,
+    )..where((q) => q.quotationId.equals(quotationId))).get();
     return rows.map(_mapQuotationLine).toList();
   }
 
   @override
   Future<List<QuotationHeader>> listQuotations(String organizationId) async {
-    final rows = await (select(quotations)..where((q) => q.organizationId.equals(organizationId))).get();
+    final rows = await (select(
+      quotations,
+    )..where((q) => q.organizationId.equals(organizationId))).get();
     return rows.map(_mapQuotationHeader).toList();
   }
 
@@ -4152,14 +4528,18 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<SolarProject?> getProject(String id) async {
-    final row = await (select(solarProjects)..where((p) => p.id.equals(id))).getSingleOrNull();
+    final row = await (select(
+      solarProjects,
+    )..where((p) => p.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return _mapSolarProject(row);
   }
 
   @override
   Future<List<SolarProject>> listProjects(String organizationId) async {
-    final rows = await (select(solarProjects)..where((p) => p.organizationId.equals(organizationId))).get();
+    final rows = await (select(
+      solarProjects,
+    )..where((p) => p.organizationId.equals(organizationId))).get();
     return rows.map(_mapSolarProject).toList();
   }
 
@@ -4197,11 +4577,15 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<ProjectMaterialIssue>> getMaterialIssues(String projectId) async {
-    final issueRows = await (select(projectMaterialIssues)..where((i) => i.projectId.equals(projectId))).get();
+    final issueRows = await (select(
+      projectMaterialIssues,
+    )..where((i) => i.projectId.equals(projectId))).get();
     final issues = <ProjectMaterialIssue>[];
 
     for (final issueRow in issueRows) {
-      final lineRows = await (select(projectMaterialIssueLines)..where((l) => l.issueId.equals(issueRow.id))).get();
+      final lineRows = await (select(
+        projectMaterialIssueLines,
+      )..where((l) => l.issueId.equals(issueRow.id))).get();
       final lines = lineRows.map(_mapProjectMaterialIssueLine).toList();
       issues.add(_mapProjectMaterialIssue(issueRow, lines));
     }
@@ -4306,8 +4690,11 @@ final class FoundationDatabase extends _$FoundationDatabase
     );
   }
 
-  ProjectMaterialIssueLine _mapProjectMaterialIssueLine(ProjectMaterialIssueLineRow r) {
-    final List<dynamic> serialsList = jsonDecode(r.serialsJson) as List<dynamic>;
+  ProjectMaterialIssueLine _mapProjectMaterialIssueLine(
+    ProjectMaterialIssueLineRow r,
+  ) {
+    final List<dynamic> serialsList =
+        jsonDecode(r.serialsJson) as List<dynamic>;
     return ProjectMaterialIssueLine(
       id: r.id,
       issueId: r.issueId,
@@ -4351,13 +4738,17 @@ final class FoundationDatabase extends _$FoundationDatabase
 
     for (final visit in visits) {
       final sparesJson = jsonEncode(
-        visit.sparesUsed.map((s) => {
-          'productId': s.productId,
-          'productName': s.productName,
-          'sku': s.sku,
-          'quantityMicroUnits': s.quantity.microUnits,
-          'unitCostPaise': s.unitCostPaise.paise,
-        }).toList(),
+        visit.sparesUsed
+            .map(
+              (s) => {
+                'productId': s.productId,
+                'productName': s.productName,
+                'sku': s.sku,
+                'quantityMicroUnits': s.quantity.microUnits,
+                'unitCostPaise': s.unitCostPaise.paise,
+              },
+            )
+            .toList(),
       );
 
       await into(serviceJobVisits).insertOnConflictUpdate(
@@ -4380,14 +4771,18 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<ServiceJob?> getServiceJob(String id) async {
-    final row = await (select(serviceJobs)..where((j) => j.id.equals(id))).getSingleOrNull();
+    final row = await (select(
+      serviceJobs,
+    )..where((j) => j.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return _mapServiceJob(row);
   }
 
   @override
   Future<List<ServiceJobVisit>> getServiceJobVisits(String jobId) async {
-    final rows = await (select(serviceJobVisits)..where((v) => v.jobId.equals(jobId))).get();
+    final rows = await (select(
+      serviceJobVisits,
+    )..where((v) => v.jobId.equals(jobId))).get();
     return rows.map(_mapServiceJobVisit).toList();
   }
 
@@ -4397,9 +4792,12 @@ final class FoundationDatabase extends _$FoundationDatabase
     String? assignedTechnicianUserId,
     String? customerPartyId,
   }) async {
-    final query = select(serviceJobs)..where((j) => j.organizationId.equals(organizationId));
+    final query = select(serviceJobs)
+      ..where((j) => j.organizationId.equals(organizationId));
     if (assignedTechnicianUserId != null) {
-      query.where((j) => j.assignedTechnicianUserId.equals(assignedTechnicianUserId));
+      query.where(
+        (j) => j.assignedTechnicianUserId.equals(assignedTechnicianUserId),
+      );
     }
     if (customerPartyId != null) {
       query.where((j) => j.customerPartyId.equals(customerPartyId));
@@ -4432,14 +4830,18 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<AmcContract?> getAmcContract(String id) async {
-    final row = await (select(amcContracts)..where((c) => c.id.equals(id))).getSingleOrNull();
+    final row = await (select(
+      amcContracts,
+    )..where((c) => c.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return _mapAmcContract(row);
   }
 
   @override
   Future<List<AmcContract>> listAmcContracts(String organizationId) async {
-    final rows = await (select(amcContracts)..where((c) => c.organizationId.equals(organizationId))).get();
+    final rows = await (select(
+      amcContracts,
+    )..where((c) => c.organizationId.equals(organizationId))).get();
     return rows.map(_mapAmcContract).toList();
   }
 
@@ -4459,7 +4861,13 @@ final class FoundationDatabase extends _$FoundationDatabase
 
   @override
   Future<List<SerialReplacement>> getSerialReplacements(String serialId) async {
-    final rows = await (select(serialReplacements)..where((r) => r.oldSerialId.equals(serialId) | r.newSerialId.equals(serialId))).get();
+    final rows =
+        await (select(serialReplacements)..where(
+              (r) =>
+                  r.oldSerialId.equals(serialId) |
+                  r.newSerialId.equals(serialId),
+            ))
+            .get();
     return rows.map(_mapSerialReplacement).toList();
   }
 
@@ -4487,14 +4895,17 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   ServiceJobVisit _mapServiceJobVisit(ServiceJobVisitRow r) {
-    final List<dynamic> sparesList = jsonDecode(r.sparesUsedJson) as List<dynamic>;
+    final List<dynamic> sparesList =
+        jsonDecode(r.sparesUsedJson) as List<dynamic>;
     final spares = sparesList.map((item) {
       final map = item as Map<String, dynamic>;
       return ServiceJobSpareItem(
         productId: map['productId'] as String,
         productName: map['productName'] as String,
         sku: map['sku'] as String,
-        quantity: Quantity.fromUnits((map['quantityMicroUnits'] as int) / 1000000.0),
+        quantity: Quantity.fromUnits(
+          (map['quantityMicroUnits'] as int) / 1000000.0,
+        ),
         unitCostPaise: Money.fromPaise(map['unitCostPaise'] as int),
       );
     }).toList();

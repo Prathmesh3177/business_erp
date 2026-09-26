@@ -23,6 +23,21 @@ abstract interface class SalesStore {
 
   Future<List<SaleDraft>> listSaleDrafts(String organizationId);
 
+  Future<void> saveSaleOrder({
+    required SaleOrder order,
+    required List<SaleOrderLine> lines,
+  }) => throw UnimplementedError();
+
+  Future<SaleOrder?> getSaleOrder(String id) => throw UnimplementedError();
+
+  Future<List<SaleOrderLine>> getSaleOrderLines(String orderId) =>
+      throw UnimplementedError();
+
+  Future<List<SaleOrder>> listSaleOrders({
+    required String organizationId,
+    OrderStatus? status,
+  }) => throw UnimplementedError();
+
   Future<void> saveWarrantyEntitlement(WarrantyEntitlement entitlement);
 
   Future<List<WarrantyEntitlement>> getWarrantyEntitlementsForCustomer({
@@ -34,4 +49,3 @@ abstract interface class SalesStore {
     required String organizationId,
   });
 }
-

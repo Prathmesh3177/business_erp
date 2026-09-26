@@ -6,6 +6,72 @@ enum SaleStatus {
   cancelled,
 }
 
+enum OrderStatus {
+  pending,
+  ordered,
+  partialArrival,
+  arrived,
+  readyToDeliver,
+  delivered,
+  cancelled,
+}
+
+final class SaleOrder {
+  const SaleOrder({
+    required this.id,
+    required this.organizationId,
+    required this.branchId,
+    required this.customerPartyId,
+    required this.customerName,
+    required this.customerPhone,
+    required this.orderDate,
+    required this.status,
+    required this.grandTotalPaise,
+    required this.createdAtUtc,
+    this.quotationId,
+    this.saleHeaderId,
+    this.expectedDeliveryDate,
+    this.notes,
+  });
+
+  final String id;
+  final String organizationId;
+  final String branchId;
+  final String customerPartyId;
+  final String customerName;
+  final String customerPhone;
+  final DateTime orderDate;
+  final OrderStatus status;
+  final String? quotationId;
+  final String? saleHeaderId;
+  final Money grandTotalPaise;
+  final DateTime? expectedDeliveryDate;
+  final String? notes;
+  final DateTime createdAtUtc;
+}
+
+final class SaleOrderLine {
+  const SaleOrderLine({
+    required this.id,
+    required this.orderId,
+    required this.productId,
+    required this.productName,
+    required this.quantity,
+    required this.unitPrice,
+    required this.taxRate,
+    this.isInStock = false,
+  });
+
+  final String id;
+  final String orderId;
+  final String productId;
+  final String productName;
+  final Quantity quantity;
+  final UnitPrice unitPrice;
+  final TaxRate taxRate;
+  final bool isInStock;
+}
+
 enum TenderMethod {
   cash,
   bankTransfer,

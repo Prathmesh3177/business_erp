@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:erp_domain/erp_domain.dart';
+
 import 'accounting_store.dart';
 import 'command_context.dart';
 import 'inventory_store.dart';
@@ -37,6 +38,86 @@ final class SaleLineInput {
   final bool isMadeToOrder;
 }
 
+final class SaleOrderLineInput {
+  const SaleOrderLineInput({
+    required this.productId,
+    required this.productName,
+    required this.quantity,
+    required this.unitPrice,
+    required this.taxRate,
+  });
+
+  final String productId;
+  final String productName;
+  final Quantity quantity;
+  final UnitPrice unitPrice;
+  final TaxRate taxRate;
+}
+
+final class CreatePendingOrderUseCase {
+  const CreatePendingOrderUseCase(this.salesStore);
+
+  final SalesStore salesStore;
+
+  Future<SaleOrder> execute(
+    CommandContext context, {
+    required String organizationId,
+    required String branchId,
+    required String customerPartyId,
+    required String customerName,
+    required String customerPhone,
+    required List<SaleOrderLineInput> lineInputs,
+    String? saleHeaderId,
+    DateTime? expectedDeliveryDate,
+    String? notes,
+  }) async {
+    context.requireCapability(Capability.salesCreate);
+    if (lineInputs.isEmpty) {
+      throw const ValidationFailure(
+        'empty_order',
+        'An order must contain at least one item',
+      );
+    }
+    final now = context.timestampUtc;
+    final id = 'order_${now.microsecondsSinceEpoch}';
+    final lines = lineInputs.asMap().entries.map((entry) {
+      final line = entry.value;
+      return SaleOrderLine(
+        id: '${id}_line_${entry.key}',
+        orderId: id,
+        productId: line.productId,
+        productName: line.productName,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        taxRate: line.taxRate,
+      );
+    }).toList();
+    final total = lines.fold<Money>(Money.zero, (sum, line) {
+      final base = Money.fromRupees(
+        line.quantity.inUnits * line.unitPrice.inRupees,
+      );
+      return sum + base + base.times(line.taxRate.bps / 10000);
+    });
+    final order = SaleOrder(
+      id: id,
+      organizationId: organizationId,
+      branchId: branchId,
+      customerPartyId: customerPartyId,
+      customerName: customerName,
+      customerPhone: customerPhone,
+      orderDate: now,
+      status: OrderStatus.pending,
+      saleHeaderId: saleHeaderId,
+      grandTotalPaise: total,
+      expectedDeliveryDate: expectedDeliveryDate,
+      notes: notes,
+      createdAtUtc: now,
+    );
+    await salesStore.saveSaleOrder(order: order, lines: lines);
+    return order;
+  }
+}
+
 final class PostSaleUseCase {
   const PostSaleUseCase({
     required this.salesStore,
@@ -69,13 +150,17 @@ final class PostSaleUseCase {
     context.requireCapability(Capability.salesCreate);
 
     if (lineInputs.isEmpty) {
-      throw const ValidationFailure('empty_cart', 'Sale invoice must contain at least one line item');
+      throw const ValidationFailure(
+        'empty_cart',
+        'Sale invoice must contain at least one line item',
+      );
     }
 
     // 2. Idempotency check: if commandId executed previously, return cached header
     final cachedResult = await accountingStore.getCommandResult(commandId);
     if (cachedResult != null) {
-      final resultMap = jsonDecode(cachedResult.resultJson) as Map<String, dynamic>;
+      final resultMap =
+          jsonDecode(cachedResult.resultJson) as Map<String, dynamic>;
       final existingSaleId = resultMap['saleHeaderId'] as String;
       final existingHeader = await salesStore.getSaleHeader(existingSaleId);
       if (existingHeader != null) return existingHeader;
@@ -116,14 +201,17 @@ final class PostSaleUseCase {
       int costSnapshotMicroRupees = 0;
 
       if (!input.isMadeToOrder) {
-        final balance = await inventoryStore.getStockBalance(input.productId, locationId);
-        final activeReservations = await inventoryStore.getActiveReservationsForProduct(
-          organizationId,
+        final balance = await inventoryStore.getStockBalance(
           input.productId,
+          locationId,
         );
+        final activeReservations = await inventoryStore
+            .getActiveReservationsForProduct(organizationId, input.productId);
 
-        final reservedMicroUnits = activeReservations
-            .fold<int>(0, (sum, r) => sum + r.quantityMicroUnits);
+        final reservedMicroUnits = activeReservations.fold<int>(
+          0,
+          (sum, r) => sum + r.quantityMicroUnits,
+        );
 
         final onHandMicroUnits = balance?.quantityMicroUnits ?? 0;
         final availableMicroUnits = onHandMicroUnits - reservedMicroUnits;
@@ -137,7 +225,8 @@ final class PostSaleUseCase {
         }
 
         // Cost snapshot from weighted average cost
-        costSnapshotMicroRupees = balance?.weightedAverageUnitCostMicroRupees ?? 0;
+        costSnapshotMicroRupees =
+            balance?.weightedAverageUnitCostMicroRupees ?? 0;
 
         // Serial revalidation if item is serial-tracked
         if (input.serials.isNotEmpty) {
@@ -150,8 +239,14 @@ final class PostSaleUseCase {
           }
 
           for (final sStr in input.serials) {
-            final sRec = await inventoryStore.getSerialByNumber(organizationId, input.productId, sStr);
-            if (sRec == null || sRec.state != SerialState.inStock || sRec.locationId != locationId) {
+            final sRec = await inventoryStore.getSerialByNumber(
+              organizationId,
+              input.productId,
+              sStr,
+            );
+            if (sRec == null ||
+                sRec.state != SerialState.inStock ||
+                sRec.locationId != locationId) {
               throw ValidationFailure(
                 'serial_unavailable',
                 'Serial $sStr for ${input.productName} is not in stock at location $locationId',
@@ -176,7 +271,9 @@ final class PostSaleUseCase {
           taxSnapshot: lineResult,
           costSnapshotMicroRupees: costSnapshotMicroRupees,
           netTotalPaise: lineResult.totalAmount,
-          serials: input.serials.map(SerialRecord.normalizeSerialNumber).toList(),
+          serials: input.serials
+              .map(SerialRecord.normalizeSerialNumber)
+              .toList(),
           batchLot: input.batchLot,
           isMadeToOrder: input.isMadeToOrder,
         ),
@@ -185,14 +282,21 @@ final class PostSaleUseCase {
 
     // 5. Total calculation & Split Tender allocation
     final grandTotalPaise = taxInvoiceResult.grandTotal.paise;
-    final totalAmountPaidPaise = tenderLines.fold<int>(0, (sum, t) => sum + t.amountPaise.paise);
+    final totalAmountPaidPaise = tenderLines.fold<int>(
+      0,
+      (sum, t) => sum + t.amountPaise.paise,
+    );
     final balanceDuePaise = grandTotalPaise - totalAmountPaidPaise;
 
     // 6. Customer Credit Limit Check
     if (customerPartyId.isNotEmpty && balanceDuePaise > 0) {
-      final party = await partyStore.getPartyById(organizationId, customerPartyId);
+      final party = await partyStore.getPartyById(
+        organizationId,
+        customerPartyId,
+      );
       if (party != null && party.creditLimitPaise > 0) {
-        final currentOutstandingPaise = await accountingStore.getPartyBalancePaise(organizationId, customerPartyId);
+        final currentOutstandingPaise = await accountingStore
+            .getPartyBalancePaise(organizationId, customerPartyId);
         final newOutstandingPaise = currentOutstandingPaise + balanceDuePaise;
 
         if (newOutstandingPaise > party.creditLimitPaise) {
@@ -243,7 +347,9 @@ final class PostSaleUseCase {
       totalTaxPaise: taxInvoiceResult.totalTax,
       grandTotalPaise: taxInvoiceResult.grandTotal,
       amountPaidPaise: Money.fromPaise(totalAmountPaidPaise),
-      balanceDuePaise: Money.fromPaise(balanceDuePaise > 0 ? balanceDuePaise : 0),
+      balanceDuePaise: Money.fromPaise(
+        balanceDuePaise > 0 ? balanceDuePaise : 0,
+      ),
       createdAtUtc: now,
       notes: notes,
     );
@@ -268,22 +374,33 @@ final class PostSaleUseCase {
         productId: line.productId,
         locationId: locationId,
         movementKind: MovementKind.saleIssue,
-        quantityMicroUnits: -line.quantity.microUnits, // Negative for sale issue
+        quantityMicroUnits:
+            -line.quantity.microUnits, // Negative for sale issue
         valueDeltaPaise: -cogsPaise, // Negative inventory value reduction
         costSnapshotMicroRupees: line.costSnapshotMicroRupees,
         createdAt: now,
       );
       movements.add(movement);
 
-      final currentBalance = await inventoryStore.getStockBalance(line.productId, locationId);
-      final updatedBalance = currentBalance!.applyMovement(movement: movement, updatedAt: now);
+      final currentBalance = await inventoryStore.getStockBalance(
+        line.productId,
+        locationId,
+      );
+      final updatedBalance = currentBalance!.applyMovement(
+        movement: movement,
+        updatedAt: now,
+      );
 
       await inventoryStore.saveStockMovement(movement);
       await inventoryStore.saveStockBalance(updatedBalance);
 
       // Serial update to sold & warranty creation
       for (final sStr in line.serials) {
-        final sRec = await inventoryStore.getSerialByNumber(organizationId, line.productId, sStr);
+        final sRec = await inventoryStore.getSerialByNumber(
+          organizationId,
+          line.productId,
+          sStr,
+        );
         if (sRec != null) {
           final soldRec = SerialRecord(
             id: sRec.id,
@@ -314,7 +431,9 @@ final class PostSaleUseCase {
             partyId: customerPartyId,
             saleDocumentId: docHeaderId,
             startDate: businessDate,
-            endDate: businessDate.add(const Duration(days: 365 * 5)), // 5 Year Warranty Default
+            endDate: businessDate.add(
+              const Duration(days: 365 * 5),
+            ), // 5 Year Warranty Default
             termsSnapshot: 'Standard Solar Equipment Warranty',
             createdAtUtc: now,
           );
@@ -334,8 +453,8 @@ final class PostSaleUseCase {
           final accountId = (t.method == TenderMethod.cash)
               ? 'acc_cash'
               : (t.method == TenderMethod.customerCredit)
-                  ? 'acc_ar'
-                  : 'acc_bank';
+              ? 'acc_ar'
+              : 'acc_bank';
 
           revJournalLines.add(
             JournalLine(
@@ -364,7 +483,9 @@ final class PostSaleUseCase {
       );
     }
 
-    final netSalesRevenuePaise = taxInvoiceResult.subtotal.paise - taxInvoiceResult.allocatedDiscount.paise;
+    final netSalesRevenuePaise =
+        taxInvoiceResult.subtotal.paise -
+        taxInvoiceResult.allocatedDiscount.paise;
     revJournalLines.add(
       JournalLine(
         id: 'jl_rev_${lineSeq++}',
@@ -424,7 +545,10 @@ final class PostSaleUseCase {
     );
 
     // 10. Post COGS Double-Entry Journal (if COGS > 0)
-    final totalCogsPaise = tempLines.fold<int>(0, (sum, l) => sum + l.lineCogsPaise.paise);
+    final totalCogsPaise = tempLines.fold<int>(
+      0,
+      (sum, l) => sum + l.lineCogsPaise.paise,
+    );
 
     await accountingStore.saveDocumentHeader(docHeader);
     await salesStore.saveSale(header: header, lines: tempLines);
@@ -469,7 +593,10 @@ final class PostSaleUseCase {
         id: 'cmd_res_${now.microsecondsSinceEpoch}',
         commandId: commandId,
         payloadHash: docHeaderId,
-        resultJson: jsonEncode({'saleHeaderId': saleId, 'documentNumber': docNumber}),
+        resultJson: jsonEncode({
+          'saleHeaderId': saleId,
+          'documentNumber': docNumber,
+        }),
         createdAt: now,
       ),
     );

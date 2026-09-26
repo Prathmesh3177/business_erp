@@ -12,6 +12,7 @@ import '../common/indian_currency_formatter.dart';
 import '../printing/invoice_preview_dialog.dart';
 import '../printing/tax_invoice_widget.dart';
 import 'quotation_sale_draft.dart';
+import 'order_sale_draft.dart';
 
 final class PosPage extends ConsumerStatefulWidget {
   const PosPage({super.key});
@@ -187,6 +188,7 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
     final custs = await runtime.database.searchParties(orgId, isCustomer: true);
     final sales = await runtime.database.listSales(organizationId: orgId);
     final quotationDraft = takeStagedQuotationForSale();
+    final orderDraft = takeStagedOrderForSale();
 
     if (mounted) {
       setState(() {
@@ -228,6 +230,31 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
                     ? 0
                     : product.defaultTaxRateBps / 100,
                 hsnCode: line.hsnCode,
+              );
+            }).whereType<_PosCartItem>(),
+          );
+        }
+        if (orderDraft != null) {
+          final matchingCustomers = custs.where(
+            (customer) => customer.id == orderDraft.customerPartyId,
+          );
+          _selectedCustomer = matchingCustomers.isEmpty
+              ? null
+              : matchingCustomers.first;
+          _cart.addAll(
+            orderDraft.lines.map((line) {
+              final matchingProducts = prods.where(
+                (candidate) => candidate.id == line.productId,
+              );
+              final product = matchingProducts.isEmpty
+                  ? null
+                  : matchingProducts.first;
+              if (product == null) return null;
+              return _PosCartItem(
+                product: product,
+                qty: line.quantity.inUnits,
+                unitPriceRupees: line.unitPrice.inRupees,
+                gstRate: line.taxRate.bps / 100,
               );
             }).whereType<_PosCartItem>(),
           );
@@ -1464,11 +1491,44 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
         notes: _remarksController.text,
       );
 
+      final madeToOrderLines = _cart
+          .where((item) => item.product.isMadeToOrder)
+          .toList();
+      SaleOrder? pendingOrder;
+      if (madeToOrderLines.isNotEmpty) {
+        pendingOrder = await CreatePendingOrderUseCase(runtime.database)
+            .execute(
+              commandContext,
+              organizationId: orgId,
+              branchId: branchId,
+              customerPartyId: _selectedCustomer?.id ?? 'guest_customer',
+              customerName: _selectedCustomer?.name ?? 'Counter Cash Customer',
+              customerPhone: _customerPhone,
+              saleHeaderId: saleHeader.id,
+              notes: _remarksController.text,
+              lineInputs: madeToOrderLines
+                  .map(
+                    (item) => SaleOrderLineInput(
+                      productId: item.product.id,
+                      productName: item.product.name,
+                      quantity: Quantity.fromUnits(item.qty),
+                      unitPrice: UnitPrice.fromRupees(item.unitPrice),
+                      taxRate: _isWithGst
+                          ? TaxRate.fromPercentage(item.gstRate)
+                          : TaxRate.zero,
+                    ),
+                  )
+                  .toList(),
+            );
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Sale Posted Successfully! Invoice #${saleHeader.id.substring(0, 8)}',
+              pendingOrder == null
+                  ? 'Sale Posted Successfully! Invoice #${saleHeader.id.substring(0, 8)}'
+                  : 'Sale posted. Pending order #${pendingOrder.id.substring(0, 8)} created for made-to-order items.',
             ),
             backgroundColor: Colors.green[800],
           ),

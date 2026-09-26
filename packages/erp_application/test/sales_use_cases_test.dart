@@ -21,7 +21,8 @@ class InMemorySalesStore implements SalesStore {
   Future<SaleHeader?> getSaleHeader(String id) async => headers[id];
 
   @override
-  Future<List<SaleLine>> getSaleLines(String saleId) async => lines[saleId] ?? [];
+  Future<List<SaleLine>> getSaleLines(String saleId) async =>
+      lines[saleId] ?? [];
 
   @override
   Future<List<SaleHeader>> listSales({
@@ -30,7 +31,8 @@ class InMemorySalesStore implements SalesStore {
   }) async {
     return headers.values.where((h) {
       if (h.organizationId != organizationId) return false;
-      if (customerPartyId != null && h.customerPartyId != customerPartyId) return false;
+      if (customerPartyId != null && h.customerPartyId != customerPartyId)
+        return false;
       return true;
     }).toList();
   }
@@ -50,7 +52,9 @@ class InMemorySalesStore implements SalesStore {
 
   @override
   Future<List<SaleDraft>> listSaleDrafts(String organizationId) async {
-    return drafts.values.where((d) => d.organizationId == organizationId).toList();
+    return drafts.values
+        .where((d) => d.organizationId == organizationId)
+        .toList();
   }
 
   @override
@@ -72,8 +76,22 @@ class InMemorySalesStore implements SalesStore {
   }) async {
     return warranties;
   }
-}
 
+  @override
+  Future<void> saveSaleOrder({
+    required SaleOrder order,
+    required List<SaleOrderLine> lines,
+  }) async {}
+  @override
+  Future<SaleOrder?> getSaleOrder(String id) async => null;
+  @override
+  Future<List<SaleOrderLine>> getSaleOrderLines(String orderId) async => [];
+  @override
+  Future<List<SaleOrder>> listSaleOrders({
+    required String organizationId,
+    OrderStatus? status,
+  }) async => [];
+}
 
 class InMemoryInventoryStore implements InventoryStore {
   final Map<String, Location> locations = {};
@@ -88,7 +106,10 @@ class InMemoryInventoryStore implements InventoryStore {
   }
 
   @override
-  Future<List<Location>> getLocations(String organizationId, {String? branchId}) async => locations.values.toList();
+  Future<List<Location>> getLocations(
+    String organizationId, {
+    String? branchId,
+  }) async => locations.values.toList();
 
   @override
   Future<Location?> getLocationById(String id) async => locations[id];
@@ -112,22 +133,35 @@ class InMemoryInventoryStore implements InventoryStore {
   }
 
   @override
-  Future<StockBalance?> getStockBalance(String productId, String locationId) async {
+  Future<StockBalance?> getStockBalance(
+    String productId,
+    String locationId,
+  ) async {
     return balances['${productId}_$locationId'];
   }
 
   @override
-  Future<List<StockBalance>> getStockBalancesForProduct(String organizationId, String productId) async {
+  Future<List<StockBalance>> getStockBalancesForProduct(
+    String organizationId,
+    String productId,
+  ) async {
     return balances.values.where((b) => b.productId == productId).toList();
   }
 
   @override
-  Future<List<StockBalance>> getAllStockBalances(String organizationId, {String? locationId}) async {
-    return balances.values.where((b) => locationId == null || b.locationId == locationId).toList();
+  Future<List<StockBalance>> getAllStockBalances(
+    String organizationId, {
+    String? locationId,
+  }) async {
+    return balances.values
+        .where((b) => locationId == null || b.locationId == locationId)
+        .toList();
   }
 
   @override
-  Future<List<StockBalance>> rebuildStockBalances(String organizationId) async => balances.values.toList();
+  Future<List<StockBalance>> rebuildStockBalances(
+    String organizationId,
+  ) async => balances.values.toList();
 
   @override
   Future<void> saveSerialRecord(SerialRecord serial) async {
@@ -135,13 +169,26 @@ class InMemoryInventoryStore implements InventoryStore {
   }
 
   @override
-  Future<SerialRecord?> getSerialByNumber(String organizationId, String productId, String serialNumber) async {
+  Future<SerialRecord?> getSerialByNumber(
+    String organizationId,
+    String productId,
+    String serialNumber,
+  ) async {
     return serials['${productId}_${SerialRecord.normalizeSerialNumber(serialNumber)}'];
   }
 
   @override
-  Future<List<SerialRecord>> getSerialsForProduct(String organizationId, String productId, {SerialState? state}) async {
-    return serials.values.where((s) => s.productId == productId && (state == null || s.state == state)).toList();
+  Future<List<SerialRecord>> getSerialsForProduct(
+    String organizationId,
+    String productId, {
+    SerialState? state,
+  }) async {
+    return serials.values
+        .where(
+          (s) =>
+              s.productId == productId && (state == null || s.state == state),
+        )
+        .toList();
   }
 
   @override
@@ -158,19 +205,28 @@ class InMemoryInventoryStore implements InventoryStore {
   Future<void> saveBatchRecord(BatchRecord batch) async {}
 
   @override
-  Future<List<BatchRecord>> getBatchesForProduct(String organizationId, String productId) async => [];
+  Future<List<BatchRecord>> getBatchesForProduct(
+    String organizationId,
+    String productId,
+  ) async => [];
 
   @override
   Future<void> saveReservation(Reservation reservation) async {}
 
   @override
-  Future<List<Reservation>> getActiveReservationsForProduct(String organizationId, String productId) async => [];
+  Future<List<Reservation>> getActiveReservationsForProduct(
+    String organizationId,
+    String productId,
+  ) async => [];
 
   @override
   Future<void> saveStockAdjustment(StockAdjustment adjustment) async {}
 
   @override
-  Future<List<StockAdjustment>> getStockAdjustments(String organizationId, {int limit = 100}) async => [];
+  Future<List<StockAdjustment>> getStockAdjustments(
+    String organizationId, {
+    int limit = 100,
+  }) async => [];
 }
 
 class InMemoryAccountingStore implements AccountingStore {
@@ -186,7 +242,8 @@ class InMemoryAccountingStore implements AccountingStore {
   }
 
   @override
-  Future<List<Account>> getAccounts(String organizationId) async => accounts.values.toList();
+  Future<List<Account>> getAccounts(String organizationId) async =>
+      accounts.values.toList();
 
   @override
   Future<Account?> getAccountByCode(String organizationId, String code) async =>
@@ -198,11 +255,17 @@ class InMemoryAccountingStore implements AccountingStore {
   }
 
   @override
-  Future<List<JournalEntry>> getJournalEntries(String organizationId, {String? partyId, int limit = 100}) async =>
-      journals.values.toList();
+  Future<List<JournalEntry>> getJournalEntries(
+    String organizationId, {
+    String? partyId,
+    int limit = 100,
+  }) async => journals.values.toList();
 
   @override
-  Future<int> getPartyBalancePaise(String organizationId, String partyId) async => 0;
+  Future<int> getPartyBalancePaise(
+    String organizationId,
+    String partyId,
+  ) async => 0;
 
   @override
   Future<void> saveDocumentHeader(DocumentHeader header) async {
@@ -210,7 +273,8 @@ class InMemoryAccountingStore implements AccountingStore {
   }
 
   @override
-  Future<DocumentHeader?> getDocumentHeaderById(String id) async => docHeaders[id];
+  Future<DocumentHeader?> getDocumentHeaderById(String id) async =>
+      docHeaders[id];
 
   @override
   Future<String> allocateNextDocumentNumber({
@@ -224,7 +288,8 @@ class InMemoryAccountingStore implements AccountingStore {
   }
 
   @override
-  Future<CommandResultRecord?> getCommandResult(String commandId) async => commandResults[commandId];
+  Future<CommandResultRecord?> getCommandResult(String commandId) async =>
+      commandResults[commandId];
 
   @override
   Future<void> saveCommandResult(CommandResultRecord record) async {
@@ -236,15 +301,21 @@ class InMemoryPartyStore implements PartyStore {
   final Map<String, Party> parties = {};
 
   @override
-  Future<void> saveParty(Party party, {List<PartyAddress>? addresses, List<PartyContact>? contacts}) async {
+  Future<void> saveParty(
+    Party party, {
+    List<PartyAddress>? addresses,
+    List<PartyContact>? contacts,
+  }) async {
     parties[party.id] = party;
   }
 
   @override
-  Future<Party?> getPartyById(String organizationId, String id) async => parties[id];
+  Future<Party?> getPartyById(String organizationId, String id) async =>
+      parties[id];
 
   @override
-  Future<Party?> getPartyByGstin(String organizationId, String gstin) async => null;
+  Future<Party?> getPartyByGstin(String organizationId, String gstin) async =>
+      null;
 
   @override
   Future<List<Party>> searchParties(
@@ -253,8 +324,7 @@ class InMemoryPartyStore implements PartyStore {
     bool? isCustomer,
     bool? isSupplier,
     bool includeInactive = false,
-  }) async =>
-      parties.values.toList();
+  }) async => parties.values.toList();
 
   @override
   Future<List<PartyAddress>> getPartyAddresses(String partyId) async => [];
@@ -334,7 +404,10 @@ void main() {
 
   group('Sale Use Cases Invariants & Authorization', () {
     test('Denies sale posting if user lacks salesCreate capability', () async {
-      final context = CommandContext(session: unauthorizedSession, timestampUtc: DateTime.now());
+      final context = CommandContext(
+        session: unauthorizedSession,
+        timestampUtc: DateTime.now(),
+      );
 
       expect(
         () => postSaleUseCase.execute(
@@ -358,7 +431,12 @@ void main() {
               taxRate: TaxRate.fromBps(1800),
             ),
           ],
-          tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(1770000))],
+          tenderLines: [
+            TenderLine(
+              method: TenderMethod.cash,
+              amountPaise: Money.fromPaise(1770000),
+            ),
+          ],
           commandId: 'cmd_sale_001',
         ),
         throwsA(isA<AuthorizationFailure>()),
@@ -366,7 +444,10 @@ void main() {
     });
 
     test('Posts sale, stock issue, serial state sold, warranty, and balanced journals', () async {
-      final context = CommandContext(session: counterSession, timestampUtc: DateTime.now());
+      final context = CommandContext(
+        session: counterSession,
+        timestampUtc: DateTime.now(),
+      );
 
       final header = await postSaleUseCase.execute(
         context,
@@ -390,7 +471,12 @@ void main() {
             serials: const ['SN-PERC-100'],
           ),
         ],
-        tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(1770000))],
+        tenderLines: [
+          TenderLine(
+            method: TenderMethod.cash,
+            amountPaise: Money.fromPaise(1770000),
+          ),
+        ],
         commandId: 'cmd_sale_002',
       );
 
@@ -402,7 +488,11 @@ void main() {
       expect(balance?.quantityMicroUnits, equals(9000000)); // 9 units
 
       // Serial updated to sold
-      final serial = await inventoryStore.getSerialByNumber('org_1', 'prod_1', 'SN-PERC-100');
+      final serial = await inventoryStore.getSerialByNumber(
+        'org_1',
+        'prod_1',
+        'SN-PERC-100',
+      );
       expect(serial?.state, equals(SerialState.sold));
 
       // Warranty entitlement created
@@ -418,74 +508,105 @@ void main() {
       expect(journals.length, equals(2));
 
       final revJournal = journals.first;
-      final sumRevDebit = revJournal.lines.fold<int>(0, (sum, l) => sum + l.debitPaise);
-      final sumRevCredit = revJournal.lines.fold<int>(0, (sum, l) => sum + l.creditPaise);
+      final sumRevDebit = revJournal.lines.fold<int>(
+        0,
+        (sum, l) => sum + l.debitPaise,
+      );
+      final sumRevCredit = revJournal.lines.fold<int>(
+        0,
+        (sum, l) => sum + l.creditPaise,
+      );
       expect(sumRevDebit, equals(sumRevCredit));
 
       final cogsJournal = journals.last;
-      final sumCogsDebit = cogsJournal.lines.fold<int>(0, (sum, l) => sum + l.debitPaise);
-      final sumCogsCredit = cogsJournal.lines.fold<int>(0, (sum, l) => sum + l.creditPaise);
+      final sumCogsDebit = cogsJournal.lines.fold<int>(
+        0,
+        (sum, l) => sum + l.debitPaise,
+      );
+      final sumCogsCredit = cogsJournal.lines.fold<int>(
+        0,
+        (sum, l) => sum + l.creditPaise,
+      );
       expect(sumCogsDebit, equals(sumCogsCredit));
     });
 
-    test('Idempotently returns existing committed invoice on duplicate commandId', () async {
-      final context = CommandContext(session: counterSession, timestampUtc: DateTime.now());
+    test(
+      'Idempotently returns existing committed invoice on duplicate commandId',
+      () async {
+        final context = CommandContext(
+          session: counterSession,
+          timestampUtc: DateTime.now(),
+        );
 
-      final header1 = await postSaleUseCase.execute(
-        context,
-        organizationId: 'org_1',
-        branchId: 'branch_1',
-        customerPartyId: 'cust_1',
-        customerName: 'Rahul Sharma',
-        businessDate: DateTime.now(),
-        locationId: 'MAIN_WH',
-        supplyType: TaxSupplyType.intraState,
-        lineInputs: [
-          SaleLineInput(
-            productId: 'prod_1',
-            productName: 'Panel 540W',
-            sku: 'P-540',
-            hsnCode: '8541',
-            baseUnit: 'NOS',
-            quantity: Quantity.fromUnits(1.0),
-            unitPrice: UnitPrice.fromRupees(15000.0),
-            taxRate: TaxRate.fromBps(1800),
-          ),
-        ],
-        tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(1770000))],
-        commandId: 'cmd_sale_repeat',
-      );
+        final header1 = await postSaleUseCase.execute(
+          context,
+          organizationId: 'org_1',
+          branchId: 'branch_1',
+          customerPartyId: 'cust_1',
+          customerName: 'Rahul Sharma',
+          businessDate: DateTime.now(),
+          locationId: 'MAIN_WH',
+          supplyType: TaxSupplyType.intraState,
+          lineInputs: [
+            SaleLineInput(
+              productId: 'prod_1',
+              productName: 'Panel 540W',
+              sku: 'P-540',
+              hsnCode: '8541',
+              baseUnit: 'NOS',
+              quantity: Quantity.fromUnits(1.0),
+              unitPrice: UnitPrice.fromRupees(15000.0),
+              taxRate: TaxRate.fromBps(1800),
+            ),
+          ],
+          tenderLines: [
+            TenderLine(
+              method: TenderMethod.cash,
+              amountPaise: Money.fromPaise(1770000),
+            ),
+          ],
+          commandId: 'cmd_sale_repeat',
+        );
 
-      final header2 = await postSaleUseCase.execute(
-        context,
-        organizationId: 'org_1',
-        branchId: 'branch_1',
-        customerPartyId: 'cust_1',
-        customerName: 'Rahul Sharma',
-        businessDate: DateTime.now(),
-        locationId: 'MAIN_WH',
-        supplyType: TaxSupplyType.intraState,
-        lineInputs: [
-          SaleLineInput(
-            productId: 'prod_1',
-            productName: 'Panel 540W',
-            sku: 'P-540',
-            hsnCode: '8541',
-            baseUnit: 'NOS',
-            quantity: Quantity.fromUnits(1.0),
-            unitPrice: UnitPrice.fromRupees(15000.0),
-            taxRate: TaxRate.fromBps(1800),
-          ),
-        ],
-        tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(1770000))],
-        commandId: 'cmd_sale_repeat',
-      );
+        final header2 = await postSaleUseCase.execute(
+          context,
+          organizationId: 'org_1',
+          branchId: 'branch_1',
+          customerPartyId: 'cust_1',
+          customerName: 'Rahul Sharma',
+          businessDate: DateTime.now(),
+          locationId: 'MAIN_WH',
+          supplyType: TaxSupplyType.intraState,
+          lineInputs: [
+            SaleLineInput(
+              productId: 'prod_1',
+              productName: 'Panel 540W',
+              sku: 'P-540',
+              hsnCode: '8541',
+              baseUnit: 'NOS',
+              quantity: Quantity.fromUnits(1.0),
+              unitPrice: UnitPrice.fromRupees(15000.0),
+              taxRate: TaxRate.fromBps(1800),
+            ),
+          ],
+          tenderLines: [
+            TenderLine(
+              method: TenderMethod.cash,
+              amountPaise: Money.fromPaise(1770000),
+            ),
+          ],
+          commandId: 'cmd_sale_repeat',
+        );
 
-      expect(header1.id, equals(header2.id));
-    });
+        expect(header1.id, equals(header2.id));
+      },
+    );
 
     test('Rejects sale when available stock is insufficient', () async {
-      final context = CommandContext(session: counterSession, timestampUtc: DateTime.now());
+      final context = CommandContext(
+        session: counterSession,
+        timestampUtc: DateTime.now(),
+      );
 
       expect(
         () => postSaleUseCase.execute(
@@ -504,12 +625,19 @@ void main() {
               sku: 'P-540',
               hsnCode: '8541',
               baseUnit: 'NOS',
-              quantity: Quantity.fromUnits(500.0), // Exceeds available stock of 10
+              quantity: Quantity.fromUnits(
+                500.0,
+              ), // Exceeds available stock of 10
               unitPrice: UnitPrice.fromRupees(15000.0),
               taxRate: TaxRate.fromBps(1800),
             ),
           ],
-          tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(885000000))],
+          tenderLines: [
+            TenderLine(
+              method: TenderMethod.cash,
+              amountPaise: Money.fromPaise(885000000),
+            ),
+          ],
           commandId: 'cmd_sale_excess_stock',
         ),
         throwsA(isA<ValidationFailure>()),
@@ -517,7 +645,10 @@ void main() {
     });
 
     test('Made-to-order products bypass stock check and post successfully with zero stock, while standard products are rejected', () async {
-      final context = CommandContext(session: counterSession, timestampUtc: DateTime.now());
+      final context = CommandContext(
+        session: counterSession,
+        timestampUtc: DateTime.now(),
+      );
 
       // 1. Standard product with zero stock is rejected
       expect(
@@ -543,7 +674,12 @@ void main() {
               isMadeToOrder: false,
             ),
           ],
-          tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(5900000))],
+          tenderLines: [
+            TenderLine(
+              method: TenderMethod.cash,
+              amountPaise: Money.fromPaise(5900000),
+            ),
+          ],
           commandId: 'cmd_std_zero_stock',
         ),
         throwsA(isA<ValidationFailure>()),
@@ -572,7 +708,12 @@ void main() {
             isMadeToOrder: true,
           ),
         ],
-        tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(2360000))],
+        tenderLines: [
+          TenderLine(
+            method: TenderMethod.cash,
+            amountPaise: Money.fromPaise(2360000),
+          ),
+        ],
         commandId: 'cmd_mto_zero_stock_success',
       );
 
@@ -585,7 +726,9 @@ void main() {
       expect(lines.first.isMadeToOrder, isTrue);
 
       // Verify no stock movements were created for made-to-order product
-      final mtoMovements = inventoryStore.movements.where((m) => m.productId == 'prod_mto_structure').toList();
+      final mtoMovements = inventoryStore.movements
+          .where((m) => m.productId == 'prod_mto_structure')
+          .toList();
       expect(mtoMovements, isEmpty);
     });
   });

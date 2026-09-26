@@ -224,12 +224,7 @@ class _FeatureNavigation extends StatelessWidget {
 
 enum _FeatureNavEntry {
   dashboard('/', 'dashboard', Icons.dashboard_rounded, Capability.salesRead),
-  reports(
-    '/reports',
-    'reports',
-    Icons.bar_chart_rounded,
-    Capability.salesRead,
-  ),
+  reports('/reports', 'reports', Icons.bar_chart_rounded, Capability.salesRead),
   catalog(
     '/catalog',
     'catalog',
@@ -246,6 +241,12 @@ enum _FeatureNavEntry {
     '/sales',
     'sales',
     Icons.shopping_cart_outlined,
+    Capability.salesCreate,
+  ),
+  orders(
+    '/orders',
+    'orders',
+    Icons.pending_actions_outlined,
     Capability.salesCreate,
   ),
   purchases(
