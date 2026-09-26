@@ -46,6 +46,35 @@ void main() {
         updatedAt: DateTime.now(),
       ), throwsA(isA<ValidationFailure>()));
     });
+
+    test('supports isMadeToOrder property defaulting to false and setting to true', () {
+      final standardProduct = Product(
+        id: 'prod_std',
+        organizationId: 'org_1',
+        sku: 'STD-100',
+        name: 'Standard Panel',
+        categoryId: 'cat_panels',
+        baseUnitId: 'unit_pcs',
+        hsnCode: '85414011',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      expect(standardProduct.isMadeToOrder, isFalse);
+
+      final madeToOrderProduct = Product(
+        id: 'prod_mto',
+        organizationId: 'org_1',
+        sku: 'MTO-100',
+        name: 'Custom Fabricated Structure',
+        categoryId: 'cat_struct',
+        baseUnitId: 'unit_set',
+        hsnCode: '73089000',
+        isMadeToOrder: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      expect(madeToOrderProduct.isMadeToOrder, isTrue);
+    });
   });
 
   group('Party domain invariants', () {

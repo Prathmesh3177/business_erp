@@ -97,18 +97,28 @@ class _FeatureNavigation extends StatelessWidget {
         child: Column(
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(18, 20, 12, 16),
+              padding: const EdgeInsets.fromLTRB(16, 18, 12, 14),
               child: Row(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFEE2E2),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.solar_power,
-                      color: SolarColors.crimson,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/images/app_logo.png',
+                      width: 36,
+                      height: 36,
+                      fit: BoxFit.contain,
+                      errorBuilder: (_, _, _) => Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFFEE2E2),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Icon(
+                          Icons.solar_power_rounded,
+                          color: Color(0xFFDC2626),
+                          size: 22,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -118,13 +128,18 @@ class _FeatureNavigation extends StatelessWidget {
                       children: [
                         const Text(
                           'Shree Krushna Sales',
-                          style: TextStyle(fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
                         ),
                         Text(
                           strings.get('branch'),
                           style: const TextStyle(
-                            fontSize: 12,
-                            color: SolarColors.slate500,
+                            fontSize: 11,
+                            color: Color(0xFF64748B),
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
@@ -208,18 +223,12 @@ class _FeatureNavigation extends StatelessWidget {
 }
 
 enum _FeatureNavEntry {
-  dashboard('/', 'dashboard', Icons.dashboard_outlined, Capability.salesRead),
-  sales(
-    '/sales',
-    'sales',
-    Icons.point_of_sale_outlined,
-    Capability.salesCreate,
-  ),
-  inventory(
-    '/inventory',
-    'inventory',
-    Icons.inventory_2_outlined,
-    Capability.inventoryManage,
+  dashboard('/', 'dashboard', Icons.dashboard_rounded, Capability.salesRead),
+  reports(
+    '/reports',
+    'reports',
+    Icons.bar_chart_rounded,
+    Capability.salesRead,
   ),
   catalog(
     '/catalog',
@@ -227,33 +236,38 @@ enum _FeatureNavEntry {
     Icons.category_outlined,
     Capability.inventoryManage,
   ),
-  parties('/parties', 'parties', Icons.people_outline, Capability.partyManage),
+  inventory(
+    '/inventory',
+    'inventory',
+    Icons.dns_outlined,
+    Capability.inventoryManage,
+  ),
+  sales(
+    '/sales',
+    'sales',
+    Icons.shopping_cart_outlined,
+    Capability.salesCreate,
+  ),
   purchases(
     '/purchases',
     'purchases',
     Icons.local_shipping_outlined,
     Capability.purchaseManage,
   ),
-  finance(
-    '/finance',
-    'finance',
-    Icons.account_balance_wallet_outlined,
-    Capability.financeManage,
-  ),
   accounting(
     '/accounting',
     'accounting',
-    Icons.receipt_long_outlined,
+    Icons.calculate_outlined,
     Capability.costDataRead,
   ),
-  reports(
-    '/reports',
-    'reports',
-    Icons.bar_chart_outlined,
-    Capability.salesRead,
-  ),
   projects('/projects', 'projects', Icons.wb_sunny_outlined, null),
-  service('/service', 'service', Icons.handyman_outlined, null),
+  service('/service', 'service', Icons.build_outlined, null),
+  parties(
+    '/parties',
+    'parties',
+    Icons.people_alt_outlined,
+    Capability.partyManage,
+  ),
   warranty(
     '/warranty',
     'warranty',

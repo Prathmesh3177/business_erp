@@ -784,6 +784,70 @@ void main() {
 
     await db.close();
   });
+
+  test('FoundationDatabase persists and retrieves isMadeToOrder for products', () async {
+    final directory = Directory.systemTemp.createTempSync('solar-erp-mto-test-');
+    addTearDown(() => directory.deleteSync(recursive: true));
+    final db = FoundationDatabase.open(
+      file: File('${directory.path}${Platform.pathSeparator}foundation.db'),
+      key: key,
+    );
+
+    final now = DateTime.now();
+
+    // 1. Standard product (isMadeToOrder = false)
+    final stdProduct = Product(
+      id: 'prod_std_db',
+      organizationId: 'org_1',
+      sku: 'STD-PANEL-300',
+      name: 'Standard Panel 300W',
+      categoryId: 'cat_panels',
+      baseUnitId: 'unit_pcs',
+      hsnCode: '85414011',
+      isMadeToOrder: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await db.saveProduct(stdProduct);
+
+    // 2. Made-to-order product (isMadeToOrder = true)
+    final mtoProduct = Product(
+      id: 'prod_mto_db',
+      organizationId: 'org_1',
+      sku: 'MTO-ROOF-STRUCTURE',
+      name: 'Custom Elevated Roof Structure',
+      categoryId: 'mountingStructure',
+      baseUnitId: 'unit_set',
+      hsnCode: '73089000',
+      isMadeToOrder: true,
+      createdAt: now,
+      updatedAt: now,
+    );
+    await db.saveProduct(mtoProduct);
+
+    // Retrieve and verify Product isMadeToOrder via getProductById
+    final fetchedStd = await db.getProductById('org_1', 'prod_std_db');
+    expect(fetchedStd, isNotNull);
+    expect(fetchedStd?.isMadeToOrder, isFalse);
+
+    final fetchedMto = await db.getProductById('org_1', 'prod_mto_db');
+    expect(fetchedMto, isNotNull);
+    expect(fetchedMto?.isMadeToOrder, isTrue);
+
+    // Retrieve and verify Product isMadeToOrder via getProductBySku
+    final fetchedMtoBySku = await db.getProductBySku('org_1', 'MTO-ROOF-STRUCTURE');
+    expect(fetchedMtoBySku, isNotNull);
+    expect(fetchedMtoBySku?.isMadeToOrder, isTrue);
+
+    // Retrieve and verify via searchProducts
+    final searchResults = await db.searchProducts('org_1');
+    final mtoFromSearch = searchResults.firstWhere((p) => p.id == 'prod_mto_db');
+    expect(mtoFromSearch.isMadeToOrder, isTrue);
+    final stdFromSearch = searchResults.firstWhere((p) => p.id == 'prod_std_db');
+    expect(stdFromSearch.isMadeToOrder, isFalse);
+
+    await db.close();
+  });
 }
 
 Future<FoundationIdentity> _initialize(FoundationStore store) {

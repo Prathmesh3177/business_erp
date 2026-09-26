@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/auth_controller.dart';
+import '../../app/bootstrap.dart';
 import '../common/erp_shell.dart';
+import '../inventory/add_product_dialog.dart';
 
 final class CatalogPage extends ConsumerStatefulWidget {
   const CatalogPage({super.key});
@@ -15,6 +17,35 @@ final class CatalogPage extends ConsumerStatefulWidget {
 final class _CatalogPageState extends ConsumerState<CatalogPage> {
   String _searchQuery = '';
   String _selectedCategory = 'all';
+  List<Product> _products = [];
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProducts();
+  }
+
+  Future<void> _loadProducts() async {
+    try {
+      final runtime = await ref.read(runtimeProvider.future);
+      final orgId = runtime.identity?.organization.id.value ?? 'default_org';
+      final prods = await runtime.database.searchProducts(orgId, includeInactive: true);
+      if (mounted) {
+        setState(() {
+          _products = prods.isNotEmpty ? prods : _mockProducts;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _products = _mockProducts;
+          _loading = false;
+        });
+      }
+    }
+  }
 
   final List<Product> _mockProducts = [
     Product(
@@ -45,6 +76,7 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
       hsnCode: '85044090',
       costPricePaise: 4200000,
       sellingPricePaise: 4950000,
+      isMadeToOrder: true,
       attributes: {
         'capacity': '5kW',
         'phase': 'Three Phase',
@@ -80,7 +112,7 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
         session?.hasCapability(Capability.costDataRead) ?? false;
     final isAdministrator = session?.roleId == Role.adminRoleId;
 
-    final filteredProducts = _mockProducts.where((p) {
+    final filteredProducts = _products.where((p) {
       final matchesCategory =
           _selectedCategory == 'all' || p.categoryId == _selectedCategory;
       final matchesQuery =
@@ -99,7 +131,12 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
             IconButton(
               icon: const Icon(Icons.add),
               tooltip: 'Add Product',
-              onPressed: () => _showAddProductDialog(context),
+              onPressed: () async {
+                final added = await AddProductDialog.show(context);
+                if (added == true) {
+                  _loadProducts();
+                }
+              },
             ),
         ],
       ),
@@ -143,8 +180,13 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
               ),
             ),
             const SizedBox(height: 16),
-            Expanded(
-              child: Card(
+            if (_loading)
+              const Expanded(
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else
+              Expanded(
+                child: Card(
                 child: ListView.separated(
                   itemCount: filteredProducts.length,
                   separatorBuilder: (context, index) =>
@@ -152,17 +194,34 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                   itemBuilder: (context, index) {
                     final product = filteredProducts[index];
                     return ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: const Color(0xFF990000)
-                            .withValues(alpha: 0.1),
-                        child: Icon(
-                          _getCategoryIcon(product.categoryId),
-                          color: const Color(0xFF990000),
-                        ),
-                      ),
-                      title: Text(
-                        product.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      leading: _buildProductThumbnail(product),
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              product.name,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                          if (product.isMadeToOrder)
+                            Container(
+                              margin: const EdgeInsets.only(left: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE8F5E9),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: const Color(0xFF2E7D32)),
+                              ),
+                              child: const Text(
+                                'Made to Order',
+                                style: TextStyle(
+                                  color: Color(0xFF2E7D32),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,18 +232,36 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                           const SizedBox(height: 4),
                           Wrap(
                             spacing: 6,
-                            children: product.attributes.entries.map((e) {
-                              return Chip(
-                                label: Text(
-                                  '${e.key}: ${e.value}',
-                                  style: const TextStyle(fontSize: 11),
+                            children: [
+                              if (product.isMadeToOrder)
+                                Chip(
+                                  avatar: const Icon(Icons.build_circle_outlined, size: 14, color: Color(0xFF2E7D32)),
+                                  label: const Text(
+                                    'Made to Order',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFF2E7D32),
+                                    ),
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: const Color(0xFFE8F5E9),
+                                  side: const BorderSide(color: Color(0xFF2E7D32), width: 0.5),
                                 ),
-                                visualDensity: VisualDensity.compact,
-                                padding: EdgeInsets.zero,
-                                backgroundColor: const Color(0xFF004D40)
-                                    .withValues(alpha: 0.1),
-                              );
-                            }).toList(),
+                              ...product.attributes.entries.map((e) {
+                                return Chip(
+                                  label: Text(
+                                    '${e.key}: ${e.value}',
+                                    style: const TextStyle(fontSize: 11),
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: const Color(0xFF004D40)
+                                      .withValues(alpha: 0.1),
+                                );
+                              }),
+                            ],
                           ),
                         ],
                       ),
@@ -255,111 +332,44 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
     }
   }
 
-  void _showAddProductDialog(BuildContext context) {
-    final skuCtrl = TextEditingController();
-    final nameCtrl = TextEditingController();
-    final hsnCtrl = TextEditingController(text: '85414011');
-    final priceCtrl = TextEditingController();
-    final costCtrl = TextEditingController();
-    String category = 'solarPanel';
+  Widget _buildProductThumbnail(Product product) {
+    final img = product.imageUrl;
+    if (img != null && img.trim().isNotEmpty) {
+      if (img.startsWith('http://') || img.startsWith('https://')) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            img,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildCategoryAvatar(product.categoryId),
+          ),
+        );
+      } else if (img.startsWith('assets/')) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(
+            img,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildCategoryAvatar(product.categoryId),
+          ),
+        );
+      }
+    }
+    return _buildCategoryAvatar(product.categoryId);
+  }
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Solar Product'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: skuCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'SKU (e.g. SKS-PANEL-400)',
-                ),
-              ),
-              TextField(
-                controller: nameCtrl,
-                decoration: const InputDecoration(labelText: 'Product Name'),
-              ),
-              DropdownButtonFormField<String>(
-                initialValue: category,
-                items: const [
-                  DropdownMenuItem(
-                    value: 'solarPanel',
-                    child: Text('Solar Panel'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'solarInverter',
-                    child: Text('Inverter'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'solarBattery',
-                    child: Text('Battery'),
-                  ),
-                  DropdownMenuItem(value: 'solarCable', child: Text('Cable')),
-                  DropdownMenuItem(value: 'solarPump', child: Text('Pump')),
-                ],
-                onChanged: (val) => category = val!,
-                decoration: const InputDecoration(labelText: 'Category'),
-              ),
-              TextField(
-                controller: hsnCtrl,
-                decoration: const InputDecoration(labelText: 'HSN Code'),
-              ),
-              TextField(
-                controller: priceCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Selling Price (₹)',
-                ),
-              ),
-              TextField(
-                controller: costCtrl,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Purchase Cost (₹)',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF990000),
-            ),
-            onPressed: () {
-              if (skuCtrl.text.isNotEmpty && nameCtrl.text.isNotEmpty) {
-                setState(() {
-                  _mockProducts.add(
-                    Product(
-                      id: 'p_${DateTime.now().millisecondsSinceEpoch}',
-                      organizationId: 'org1',
-                      sku: skuCtrl.text,
-                      name: nameCtrl.text,
-                      categoryId: category,
-                      baseUnitId: 'Pcs',
-                      hsnCode: hsnCtrl.text,
-                      costPricePaise:
-                          ((double.tryParse(costCtrl.text) ?? 0) * 100).round(),
-                      sellingPricePaise:
-                          ((double.tryParse(priceCtrl.text) ?? 0) * 100)
-                              .round(),
-                      createdAt: DateTime.now(),
-                      updatedAt: DateTime.now(),
-                    ),
-                  );
-                });
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Save Product'),
-          ),
-        ],
+  Widget _buildCategoryAvatar(String categoryId) {
+    return CircleAvatar(
+      backgroundColor: const Color(0xFF990000).withValues(alpha: 0.1),
+      child: Icon(
+        _getCategoryIcon(categoryId),
+        color: const Color(0xFF990000),
       ),
     );
   }

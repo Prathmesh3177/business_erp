@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../common/erp_shell.dart';
+import 'add_product_dialog.dart';
 
 final class InventoryPage extends ConsumerStatefulWidget {
   const InventoryPage({super.key});
@@ -18,6 +19,7 @@ final class _InventoryPageState extends ConsumerState<InventoryPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late final bool _isAdministrator;
+  Key _balancesTabKey = UniqueKey();
 
   @override
   void initState() {
@@ -40,6 +42,27 @@ final class _InventoryPageState extends ConsumerState<InventoryPage>
     return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Inventory & Serial Control'),
+        actions: [
+          if (_isAdministrator)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF990000),
+                ),
+                onPressed: () async {
+                  final added = await AddProductDialog.show(context);
+                  if (added == true && mounted) {
+                    setState(() {
+                      _balancesTabKey = UniqueKey();
+                    });
+                  }
+                },
+                icon: const Icon(Icons.add, size: 18),
+                label: const Text('Add Product'),
+              ),
+            ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -58,7 +81,7 @@ final class _InventoryPageState extends ConsumerState<InventoryPage>
       body: TabBarView(
         controller: _tabController,
         children: [
-          const _StockBalancesTab(),
+          _StockBalancesTab(key: _balancesTabKey),
           const _StockMovementsTab(),
           const _SerialsTab(),
           if (_isAdministrator) const _AdjustmentsAndTransfersTab(),
@@ -72,7 +95,7 @@ final class _InventoryPageState extends ConsumerState<InventoryPage>
 // 1. Stock Balances Tab
 // -----------------------------------------------------------------------------
 final class _StockBalancesTab extends ConsumerStatefulWidget {
-  const _StockBalancesTab();
+  const _StockBalancesTab({super.key});
 
   @override
   ConsumerState<_StockBalancesTab> createState() => _StockBalancesTabState();
@@ -178,30 +201,83 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                 ],
               ),
               if (isAdministrator)
-                FilledButton.icon(
-                  style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF004D40),
-                  ),
-                  onPressed: _rebuilding ? null : _rebuildLedger,
-                  icon: _rebuilding
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
-                        )
-                      : const Icon(Icons.refresh),
-                  label: const Text('Rebuild Stock Ledger'),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 8,
+                  children: [
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF990000),
+                      ),
+                      onPressed: () async {
+                        final added = await AddProductDialog.show(context);
+                        if (added == true) {
+                          _loadData();
+                        }
+                      },
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add Product'),
+                    ),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF004D40),
+                      ),
+                      onPressed: _rebuilding ? null : _rebuildLedger,
+                      icon: _rebuilding
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Icon(Icons.refresh),
+                      label: const Text('Rebuild Stock Ledger'),
+                    ),
+                  ],
                 ),
             ],
           ),
           const SizedBox(height: 16),
           Expanded(
             child: _balances.isEmpty
-                ? const Center(
-                    child: Text('No stock balance positions recorded yet.'),
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.inventory_2_outlined,
+                          size: 64,
+                          color: Colors.grey,
+                        ),
+                        const SizedBox(height: 12),
+                        const Text(
+                          'No stock balance positions recorded yet.',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                        if (isAdministrator) ...[
+                          const SizedBox(height: 16),
+                          FilledButton.icon(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF990000),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                            ),
+                            onPressed: () async {
+                              final added = await AddProductDialog.show(context);
+                              if (added == true) {
+                                _loadData();
+                              }
+                            },
+                            icon: const Icon(Icons.add),
+                            label: const Text('Add First Product'),
+                          ),
+                        ],
+                      ],
+                    ),
                   )
                 : Card(
                     elevation: 2,
@@ -227,16 +303,52 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                         );
 
                         return ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: Color(0xFF004D40),
-                            foregroundColor: Colors.white,
-                            child: Icon(Icons.inventory),
+                          leading: _buildProductThumbnail(prod),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  '${prod.name} (${prod.sku})',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF004D40).withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  _formatCategory(prod.categoryId),
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    color: Color(0xFF004D40),
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          title: Text(
-                            '${prod.name} (${prod.sku})',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          subtitle: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 2),
+                              Text('Location ID: ${b.locationId} • Unit: ${prod.baseUnitId.replaceFirst('unit_', '')}'),
+                              if (prod.sellingPricePaise > 0 || (isAdministrator && prod.costPricePaise > 0)) ...[
+                                const SizedBox(height: 2),
+                                Text(
+                                  'Selling: ₹${(prod.sellingPricePaise / 100.0).toStringAsFixed(2)}${isAdministrator && prod.costPricePaise > 0 ? ' • Purchase: ₹${(prod.costPricePaise / 100.0).toStringAsFixed(2)}' : ''}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade700,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                          subtitle: Text('Location ID: ${b.locationId}'),
                           trailing: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.end,
@@ -267,6 +379,69 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
         ],
       ),
     );
+  }
+
+  Widget _buildProductThumbnail(Product prod) {
+    final img = prod.imageUrl;
+    if (img != null && img.trim().isNotEmpty) {
+      if (img.startsWith('http://') || img.startsWith('https://')) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            img,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildFallbackCategoryAvatar(prod.categoryId),
+          ),
+        );
+      } else if (img.startsWith('assets/')) {
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(
+            img,
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildFallbackCategoryAvatar(prod.categoryId),
+          ),
+        );
+      }
+    }
+    return _buildFallbackCategoryAvatar(prod.categoryId);
+  }
+
+  Widget _buildFallbackCategoryAvatar(String categoryId) {
+    final icon = switch (categoryId) {
+      'solarPanel' => Icons.solar_power,
+      'solarInverter' => Icons.electric_bolt,
+      'solarBattery' => Icons.battery_charging_full,
+      'solarCable' => Icons.cable,
+      'solarPump' => Icons.water_drop,
+      'mountingStructure' => Icons.grid_view,
+      'accessories' => Icons.settings_input_component,
+      _ => Icons.inventory_2,
+    };
+    return CircleAvatar(
+      backgroundColor: const Color(0xFF004D40),
+      foregroundColor: Colors.white,
+      child: Icon(icon),
+    );
+  }
+
+  String _formatCategory(String categoryId) {
+    return switch (categoryId) {
+      'solarPanel' => 'Solar Panel',
+      'solarInverter' => 'Inverter',
+      'solarBattery' => 'Battery',
+      'solarCable' => 'Cable',
+      'solarPump' => 'Pump',
+      'mountingStructure' => 'Structure',
+      'accessories' => 'Accessories',
+      _ => categoryId.replaceFirst('cat_', ''),
+    };
   }
 }
 
@@ -547,9 +722,19 @@ final class _AdjustmentsAndTransfersTabState
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.all(20),
                 ),
+                onPressed: () => AddProductDialog.show(context),
+                icon: const Icon(Icons.add_box),
+                label: const Text('Add Product & Initial Stock'),
+              ),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF004D40),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.all(20),
+                ),
                 onPressed: () => _showOpeningStockDialog(context),
                 icon: const Icon(Icons.add_business),
-                label: const Text('Post Opening Stock'),
+                label: const Text('Post Opening Stock (Existing Product)'),
               ),
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(

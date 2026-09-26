@@ -134,6 +134,7 @@ final class Product {
     this.costPricePaise = 0,
     this.sellingPricePaise = 0,
     this.active = true,
+    this.isMadeToOrder = false,
     Map<String, String>? attributes,
     required this.createdAt,
     required this.updatedAt,
@@ -170,9 +171,12 @@ final class Product {
   final int costPricePaise;
   final int sellingPricePaise;
   final bool active;
+  final bool isMadeToOrder;
   final Map<String, String> attributes;
   final DateTime createdAt;
   final DateTime updatedAt;
+
+  String? get imageUrl => attributes['imageUrl'] ?? attributes['image'];
 
   static String normalizeSku(String rawSku) {
     return rawSku.trim().toUpperCase();

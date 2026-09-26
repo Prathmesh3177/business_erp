@@ -20,6 +20,7 @@ final class SaleLineInput {
     this.lineDiscount = Money.zero,
     this.serials = const [],
     this.batchLot,
+    this.isMadeToOrder = false,
   });
 
   final String productId;
@@ -33,6 +34,7 @@ final class SaleLineInput {
   final Money lineDiscount;
   final List<String> serials;
   final String? batchLot;
+  final bool isMadeToOrder;
 }
 
 final class PostSaleUseCase {
@@ -110,47 +112,51 @@ final class PostSaleUseCase {
       final input = lineInputs[i];
       final lineResult = taxInvoiceResult.lineResults[i];
 
-      // Check stock balance availability
-      final balance = await inventoryStore.getStockBalance(input.productId, locationId);
-      final activeReservations = await inventoryStore.getActiveReservationsForProduct(
-        organizationId,
-        input.productId,
-      );
+      // Check stock balance availability and serials if not made-to-order
+      int costSnapshotMicroRupees = 0;
 
-      final reservedMicroUnits = activeReservations
-          .fold<int>(0, (sum, r) => sum + r.quantityMicroUnits);
-
-      final onHandMicroUnits = balance?.quantityMicroUnits ?? 0;
-      final availableMicroUnits = onHandMicroUnits - reservedMicroUnits;
-
-      if (availableMicroUnits < input.quantity.microUnits) {
-        final availUnits = availableMicroUnits / 1000000.0;
-        throw ValidationFailure(
-          'insufficient_stock',
-          'Insufficient available stock for ${input.productName}. Required ${input.quantity.inUnits} base units, but only $availUnits available in $locationId.',
+      if (!input.isMadeToOrder) {
+        final balance = await inventoryStore.getStockBalance(input.productId, locationId);
+        final activeReservations = await inventoryStore.getActiveReservationsForProduct(
+          organizationId,
+          input.productId,
         );
-      }
 
-      // Cost snapshot from weighted average cost
-      final costSnapshotMicroRupees = balance?.weightedAverageUnitCostMicroRupees ?? 0;
+        final reservedMicroUnits = activeReservations
+            .fold<int>(0, (sum, r) => sum + r.quantityMicroUnits);
 
-      // Serial revalidation if item is serial-tracked
-      if (input.serials.isNotEmpty) {
-        final expectedCount = (input.quantity.inUnits).round();
-        if (input.serials.length != expectedCount) {
+        final onHandMicroUnits = balance?.quantityMicroUnits ?? 0;
+        final availableMicroUnits = onHandMicroUnits - reservedMicroUnits;
+
+        if (availableMicroUnits < input.quantity.microUnits) {
+          final availUnits = availableMicroUnits / 1000000.0;
           throw ValidationFailure(
-            'invalid_serial_count',
-            'Line ${input.productName} expected $expectedCount serials but received ${input.serials.length}',
+            'insufficient_stock',
+            'Insufficient available stock for ${input.productName}. Required ${input.quantity.inUnits} base units, but only $availUnits available in $locationId.',
           );
         }
 
-        for (final sStr in input.serials) {
-          final sRec = await inventoryStore.getSerialByNumber(organizationId, input.productId, sStr);
-          if (sRec == null || sRec.state != SerialState.inStock || sRec.locationId != locationId) {
+        // Cost snapshot from weighted average cost
+        costSnapshotMicroRupees = balance?.weightedAverageUnitCostMicroRupees ?? 0;
+
+        // Serial revalidation if item is serial-tracked
+        if (input.serials.isNotEmpty) {
+          final expectedCount = (input.quantity.inUnits).round();
+          if (input.serials.length != expectedCount) {
             throw ValidationFailure(
-              'serial_unavailable',
-              'Serial $sStr for ${input.productName} is not in stock at location $locationId',
+              'invalid_serial_count',
+              'Line ${input.productName} expected $expectedCount serials but received ${input.serials.length}',
             );
+          }
+
+          for (final sStr in input.serials) {
+            final sRec = await inventoryStore.getSerialByNumber(organizationId, input.productId, sStr);
+            if (sRec == null || sRec.state != SerialState.inStock || sRec.locationId != locationId) {
+              throw ValidationFailure(
+                'serial_unavailable',
+                'Serial $sStr for ${input.productName} is not in stock at location $locationId',
+              );
+            }
           }
         }
       }
@@ -172,6 +178,7 @@ final class PostSaleUseCase {
           netTotalPaise: lineResult.totalAmount,
           serials: input.serials.map(SerialRecord.normalizeSerialNumber).toList(),
           batchLot: input.batchLot,
+          isMadeToOrder: input.isMadeToOrder,
         ),
       );
     }
@@ -245,6 +252,11 @@ final class PostSaleUseCase {
     final movements = <StockMovement>[];
 
     for (final line in tempLines) {
+      if (line.isMadeToOrder) {
+        // Made-to-order items have no immediate physical stock to deduct.
+        continue;
+      }
+
       final cogsPaise = line.lineCogsPaise.paise;
 
       final movement = StockMovement(
@@ -411,42 +423,45 @@ final class PostSaleUseCase {
       createdAt: now,
     );
 
-    // 10. Post COGS Double-Entry Journal
+    // 10. Post COGS Double-Entry Journal (if COGS > 0)
     final totalCogsPaise = tempLines.fold<int>(0, (sum, l) => sum + l.lineCogsPaise.paise);
-
-    final cogsJournalId = 'je_cogs_${now.microsecondsSinceEpoch}';
-    final cogsLines = [
-      JournalLine(
-        id: 'jl_cogs_1',
-        journalEntryId: cogsJournalId,
-        accountId: 'acc_cogs',
-        debitPaise: totalCogsPaise,
-        creditPaise: 0,
-      ),
-      JournalLine(
-        id: 'jl_cogs_2',
-        journalEntryId: cogsJournalId,
-        accountId: 'acc_inv',
-        debitPaise: 0,
-        creditPaise: totalCogsPaise,
-      ),
-    ];
-
-    final cogsJournal = JournalEntry(
-      id: cogsJournalId,
-      organizationId: organizationId,
-      branchId: branchId,
-      documentId: docHeaderId,
-      postingDate: businessDate,
-      memo: 'COGS for Sale Invoice $docNumber',
-      lines: cogsLines,
-      createdAt: now,
-    );
 
     await accountingStore.saveDocumentHeader(docHeader);
     await salesStore.saveSale(header: header, lines: tempLines);
     await accountingStore.saveJournalEntry(revJournal);
-    await accountingStore.saveJournalEntry(cogsJournal);
+
+    if (totalCogsPaise > 0) {
+      final cogsJournalId = 'je_cogs_${now.microsecondsSinceEpoch}';
+      final cogsLines = [
+        JournalLine(
+          id: 'jl_cogs_1',
+          journalEntryId: cogsJournalId,
+          accountId: 'acc_cogs',
+          debitPaise: totalCogsPaise,
+          creditPaise: 0,
+        ),
+        JournalLine(
+          id: 'jl_cogs_2',
+          journalEntryId: cogsJournalId,
+          accountId: 'acc_inv',
+          debitPaise: 0,
+          creditPaise: totalCogsPaise,
+        ),
+      ];
+
+      final cogsJournal = JournalEntry(
+        id: cogsJournalId,
+        organizationId: organizationId,
+        branchId: branchId,
+        documentId: docHeaderId,
+        postingDate: businessDate,
+        memo: 'COGS for Sale Invoice $docNumber',
+        lines: cogsLines,
+        createdAt: now,
+      );
+
+      await accountingStore.saveJournalEntry(cogsJournal);
+    }
 
     // 11. Save Command Result for Idempotency
     await accountingStore.saveCommandResult(

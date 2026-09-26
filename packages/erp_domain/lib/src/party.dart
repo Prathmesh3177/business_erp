@@ -90,4 +90,11 @@ final class Party {
   final DateTime updatedAt;
 
   static final RegExp _gstinRegex = RegExp(r'^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$');
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is Party && other.id == id);
+
+  @override
+  int get hashCode => id.hashCode;
 }

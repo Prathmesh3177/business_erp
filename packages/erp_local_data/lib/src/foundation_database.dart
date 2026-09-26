@@ -228,6 +228,7 @@ class Products extends Table {
   IntColumn get sellingPricePaise => integer().withDefault(const Constant(0))();
   TextColumn get attributesJson => text().withDefault(const Constant('{}'))();
   BoolColumn get active => boolean().withDefault(const Constant(true))();
+  BoolColumn get isMadeToOrder => boolean().withDefault(const Constant(false))();
   IntColumn get createdAtUtcMs => integer()();
   IntColumn get updatedAtUtcMs => integer()();
 
@@ -1174,7 +1175,7 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -1269,6 +1270,9 @@ final class FoundationDatabase extends _$FoundationDatabase
         await migrator.createTable(serviceJobVisits);
         await migrator.createTable(amcContracts);
         await migrator.createTable(serialReplacements);
+      }
+      if (from < 11) {
+        await migrator.addColumn(products, products.isMadeToOrder);
       }
     },
     beforeOpen: (details) async {
@@ -1820,6 +1824,7 @@ final class FoundationDatabase extends _$FoundationDatabase
         sellingPricePaise: Value(product.sellingPricePaise),
         attributesJson: Value(jsonEncode(product.attributes)),
         active: Value(product.active),
+        isMadeToOrder: Value(product.isMadeToOrder),
         createdAtUtcMs: product.createdAt.millisecondsSinceEpoch,
         updatedAtUtcMs: product.updatedAt.millisecondsSinceEpoch,
       ),
@@ -1911,6 +1916,7 @@ final class FoundationDatabase extends _$FoundationDatabase
       costPricePaise: r.costPricePaise,
       sellingPricePaise: r.sellingPricePaise,
       active: r.active,
+      isMadeToOrder: r.isMadeToOrder,
       attributes: attrs,
       createdAt: _fromEpoch(r.createdAtUtcMs),
       updatedAt: _fromEpoch(r.updatedAtUtcMs),

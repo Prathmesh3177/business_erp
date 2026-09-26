@@ -1,6 +1,7 @@
 import 'package:erp_domain/erp_domain.dart';
 import 'package:erp_platform/erp_platform.dart';
 import 'package:flutter/material.dart';
+import 'tax_invoice_widget.dart';
 
 final class InvoicePreviewDialog extends StatefulWidget {
   const InvoicePreviewDialog({
@@ -164,6 +165,7 @@ final class _InvoicePreviewDialogState extends State<InvoicePreviewDialog> {
                     const SizedBox(height: 6),
                     DropdownButtonFormField<String>(
                       initialValue: _selectedPrinter,
+                      isExpanded: true,
                       decoration: const InputDecoration(isDense: true, border: OutlineInputBorder()),
                       items: _printers.map((p) {
                         return DropdownMenuItem(value: p, child: Text(p, overflow: TextOverflow.ellipsis));
@@ -204,14 +206,56 @@ final class _InvoicePreviewDialogState extends State<InvoicePreviewDialog> {
                       ),
                       const Divider(),
                       Expanded(
-                        child: SingleChildScrollView(
-                          child: SelectableText(
-                            _selectedFormat == InvoiceFormat.a4
-                                ? String.fromCharCodes(const PdfInvoiceRenderer().renderA4Pdf(vm).bytes)
-                                : thermalText,
-                            style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
-                          ),
-                        ),
+                        child: _selectedFormat == InvoiceFormat.a4
+                            ? SingleChildScrollView(
+                                child: TaxInvoiceWidget(
+                                  sellerName: vm.sellerDisplayName.isNotEmpty
+                                      ? vm.sellerDisplayName
+                                      : vm.sellerLegalName,
+                                  sellerAddress: vm.sellerAddress,
+                                  sellerPhone: vm.sellerPhone,
+                                  sellerGstin: vm.sellerGstin,
+                                  sellerState: vm.sellerStateCode.contains('-')
+                                      ? vm.sellerStateCode.split('-')[1]
+                                      : 'Maharashtra',
+                                  sellerStateCode: vm.sellerStateCode.contains('-')
+                                      ? vm.sellerStateCode.split('-')[0]
+                                      : '27',
+                                  invoiceNo: vm.invoiceNumber,
+                                  invoiceDate: vm.businessDate.toLocal().toString().split(' ')[0],
+                                  customerName: vm.customerName,
+                                  customerAddress: vm.customerAddress,
+                                  customerPhone: vm.customerPhone,
+                                  customerGstin: vm.customerGstin,
+                                  customerState: vm.customerStateCode != null && vm.customerStateCode!.contains('-')
+                                      ? vm.customerStateCode!.split('-')[1]
+                                      : 'Maharashtra',
+                                  customerStateCode: vm.customerStateCode != null && vm.customerStateCode!.contains('-')
+                                      ? vm.customerStateCode!.split('-')[0]
+                                      : '27',
+                                  items: vm.lineItems.map((l) => TaxInvoiceItemData(
+                                    productName: l.productName,
+                                    sku: l.sku,
+                                    hsnCode: l.hsnCode,
+                                    quantity: l.quantityUnits,
+                                    rate: l.unitPriceRupees,
+                                    unit: 'pcs',
+                                    gstRate: l.taxRatePercentage,
+                                    discount: l.discountPaise.inRupees,
+                                    serials: l.serials,
+                                  )).toList(),
+                                  discountAmount: vm.totalDiscountPaise.inRupees,
+                                  isWithGst: vm.totalTaxPaise.paise > 0 ||
+                                      (vm.sellerGstin != null && vm.sellerGstin!.isNotEmpty),
+                                  termsAndConditions: vm.termsAndConditions,
+                                ),
+                              )
+                            : SingleChildScrollView(
+                                child: SelectableText(
+                                  thermalText,
+                                  style: const TextStyle(fontFamily: 'monospace', fontSize: 11),
+                                ),
+                              ),
                       ),
                     ],
                   ),

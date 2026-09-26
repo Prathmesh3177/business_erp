@@ -515,5 +515,78 @@ void main() {
         throwsA(isA<ValidationFailure>()),
       );
     });
+
+    test('Made-to-order products bypass stock check and post successfully with zero stock, while standard products are rejected', () async {
+      final context = CommandContext(session: counterSession, timestampUtc: DateTime.now());
+
+      // 1. Standard product with zero stock is rejected
+      expect(
+        () => postSaleUseCase.execute(
+          context,
+          organizationId: 'org_1',
+          branchId: 'branch_1',
+          customerPartyId: 'cust_1',
+          customerName: 'Rahul Sharma',
+          businessDate: DateTime.now(),
+          locationId: 'MAIN_WH',
+          supplyType: TaxSupplyType.intraState,
+          lineInputs: [
+            SaleLineInput(
+              productId: 'prod_std_no_stock',
+              productName: 'Standard Inverter (No Stock)',
+              sku: 'INV-NOSTOCK',
+              hsnCode: '8504',
+              baseUnit: 'NOS',
+              quantity: Quantity.fromUnits(1.0),
+              unitPrice: UnitPrice.fromRupees(50000.0),
+              taxRate: TaxRate.fromBps(1800),
+              isMadeToOrder: false,
+            ),
+          ],
+          tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(5900000))],
+          commandId: 'cmd_std_zero_stock',
+        ),
+        throwsA(isA<ValidationFailure>()),
+      );
+
+      // 2. Made-to-order product with zero stock posts successfully
+      final header = await postSaleUseCase.execute(
+        context,
+        organizationId: 'org_1',
+        branchId: 'branch_1',
+        customerPartyId: 'cust_1',
+        customerName: 'Rahul Sharma',
+        businessDate: DateTime.now(),
+        locationId: 'MAIN_WH',
+        supplyType: TaxSupplyType.intraState,
+        lineInputs: [
+          SaleLineInput(
+            productId: 'prod_mto_structure',
+            productName: 'Custom Fabricated Structure',
+            sku: 'STR-MTO-001',
+            hsnCode: '7308',
+            baseUnit: 'SET',
+            quantity: Quantity.fromUnits(2.0),
+            unitPrice: UnitPrice.fromRupees(10000.0),
+            taxRate: TaxRate.fromBps(1800),
+            isMadeToOrder: true,
+          ),
+        ],
+        tenderLines: [TenderLine(method: TenderMethod.cash, amountPaise: Money.fromPaise(2360000))],
+        commandId: 'cmd_mto_zero_stock_success',
+      );
+
+      expect(header.id, isNotEmpty);
+      expect(header.status, equals(SaleStatus.posted));
+
+      // Verify line is saved with isMadeToOrder = true
+      final lines = await salesStore.getSaleLines(header.id);
+      expect(lines.length, equals(1));
+      expect(lines.first.isMadeToOrder, isTrue);
+
+      // Verify no stock movements were created for made-to-order product
+      final mtoMovements = inventoryStore.movements.where((m) => m.productId == 'prod_mto_structure').toList();
+      expect(mtoMovements, isEmpty);
+    });
   });
 }

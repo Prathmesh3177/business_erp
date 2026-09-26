@@ -6035,6 +6035,21 @@ class $ProductsTable extends Products
     ),
     defaultValue: const Constant(true),
   );
+  static const VerificationMeta _isMadeToOrderMeta = const VerificationMeta(
+    'isMadeToOrder',
+  );
+  @override
+  late final GeneratedColumn<bool> isMadeToOrder = GeneratedColumn<bool>(
+    'is_made_to_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_made_to_order" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
   static const VerificationMeta _createdAtUtcMsMeta = const VerificationMeta(
     'createdAtUtcMs',
   );
@@ -6077,6 +6092,7 @@ class $ProductsTable extends Products
     sellingPricePaise,
     attributesJson,
     active,
+    isMadeToOrder,
     createdAtUtcMs,
     updatedAtUtcMs,
   ];
@@ -6240,6 +6256,15 @@ class $ProductsTable extends Products
         active.isAcceptableOrUnknown(data['active']!, _activeMeta),
       );
     }
+    if (data.containsKey('is_made_to_order')) {
+      context.handle(
+        _isMadeToOrderMeta,
+        isMadeToOrder.isAcceptableOrUnknown(
+          data['is_made_to_order']!,
+          _isMadeToOrderMeta,
+        ),
+      );
+    }
     if (data.containsKey('created_at_utc_ms')) {
       context.handle(
         _createdAtUtcMsMeta,
@@ -6347,6 +6372,10 @@ class $ProductsTable extends Products
         DriftSqlType.bool,
         data['${effectivePrefix}active'],
       )!,
+      isMadeToOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_made_to_order'],
+      ) ?? false,
       createdAtUtcMs: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}created_at_utc_ms'],
@@ -6383,6 +6412,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
   final int sellingPricePaise;
   final String attributesJson;
   final bool active;
+  final bool isMadeToOrder;
   final int createdAtUtcMs;
   final int updatedAtUtcMs;
   const ProductRow({
@@ -6404,6 +6434,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     required this.sellingPricePaise,
     required this.attributesJson,
     required this.active,
+    this.isMadeToOrder = false,
     required this.createdAtUtcMs,
     required this.updatedAtUtcMs,
   });
@@ -6432,6 +6463,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     map['selling_price_paise'] = Variable<int>(sellingPricePaise);
     map['attributes_json'] = Variable<String>(attributesJson);
     map['active'] = Variable<bool>(active);
+    map['is_made_to_order'] = Variable<bool>(isMadeToOrder);
     map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs);
     map['updated_at_utc_ms'] = Variable<int>(updatedAtUtcMs);
     return map;
@@ -6461,6 +6493,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
       sellingPricePaise: Value(sellingPricePaise),
       attributesJson: Value(attributesJson),
       active: Value(active),
+      isMadeToOrder: Value(isMadeToOrder),
       createdAtUtcMs: Value(createdAtUtcMs),
       updatedAtUtcMs: Value(updatedAtUtcMs),
     );
@@ -6490,6 +6523,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
       sellingPricePaise: serializer.fromJson<int>(json['sellingPricePaise']),
       attributesJson: serializer.fromJson<String>(json['attributesJson']),
       active: serializer.fromJson<bool>(json['active']),
+      isMadeToOrder: serializer.fromJson<bool>(json['isMadeToOrder']),
       createdAtUtcMs: serializer.fromJson<int>(json['createdAtUtcMs']),
       updatedAtUtcMs: serializer.fromJson<int>(json['updatedAtUtcMs']),
     );
@@ -6516,6 +6550,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
       'sellingPricePaise': serializer.toJson<int>(sellingPricePaise),
       'attributesJson': serializer.toJson<String>(attributesJson),
       'active': serializer.toJson<bool>(active),
+      'isMadeToOrder': serializer.toJson<bool>(isMadeToOrder),
       'createdAtUtcMs': serializer.toJson<int>(createdAtUtcMs),
       'updatedAtUtcMs': serializer.toJson<int>(updatedAtUtcMs),
     };
@@ -6540,6 +6575,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     int? sellingPricePaise,
     String? attributesJson,
     bool? active,
+    bool? isMadeToOrder,
     int? createdAtUtcMs,
     int? updatedAtUtcMs,
   }) => ProductRow(
@@ -6561,6 +6597,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     sellingPricePaise: sellingPricePaise ?? this.sellingPricePaise,
     attributesJson: attributesJson ?? this.attributesJson,
     active: active ?? this.active,
+    isMadeToOrder: isMadeToOrder ?? this.isMadeToOrder,
     createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
     updatedAtUtcMs: updatedAtUtcMs ?? this.updatedAtUtcMs,
   );
@@ -6604,6 +6641,9 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
           ? data.attributesJson.value
           : this.attributesJson,
       active: data.active.present ? data.active.value : this.active,
+      isMadeToOrder: data.isMadeToOrder.present
+          ? data.isMadeToOrder.value
+          : this.isMadeToOrder,
       createdAtUtcMs: data.createdAtUtcMs.present
           ? data.createdAtUtcMs.value
           : this.createdAtUtcMs,
@@ -6634,6 +6674,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
           ..write('sellingPricePaise: $sellingPricePaise, ')
           ..write('attributesJson: $attributesJson, ')
           ..write('active: $active, ')
+          ..write('isMadeToOrder: $isMadeToOrder, ')
           ..write('createdAtUtcMs: $createdAtUtcMs, ')
           ..write('updatedAtUtcMs: $updatedAtUtcMs')
           ..write(')'))
@@ -6641,7 +6682,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     organizationId,
     sku,
@@ -6660,9 +6701,10 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
     sellingPricePaise,
     attributesJson,
     active,
+    isMadeToOrder,
     createdAtUtcMs,
     updatedAtUtcMs,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -6685,6 +6727,7 @@ class ProductRow extends DataClass implements Insertable<ProductRow> {
           other.sellingPricePaise == this.sellingPricePaise &&
           other.attributesJson == this.attributesJson &&
           other.active == this.active &&
+          other.isMadeToOrder == this.isMadeToOrder &&
           other.createdAtUtcMs == this.createdAtUtcMs &&
           other.updatedAtUtcMs == this.updatedAtUtcMs);
 }
@@ -6708,6 +6751,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
   final Value<int> sellingPricePaise;
   final Value<String> attributesJson;
   final Value<bool> active;
+  final Value<bool> isMadeToOrder;
   final Value<int> createdAtUtcMs;
   final Value<int> updatedAtUtcMs;
   final Value<int> rowid;
@@ -6730,6 +6774,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     this.sellingPricePaise = const Value.absent(),
     this.attributesJson = const Value.absent(),
     this.active = const Value.absent(),
+    this.isMadeToOrder = const Value.absent(),
     this.createdAtUtcMs = const Value.absent(),
     this.updatedAtUtcMs = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -6753,6 +6798,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     this.sellingPricePaise = const Value.absent(),
     this.attributesJson = const Value.absent(),
     this.active = const Value.absent(),
+    this.isMadeToOrder = const Value.absent(),
     required int createdAtUtcMs,
     required int updatedAtUtcMs,
     this.rowid = const Value.absent(),
@@ -6785,6 +6831,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     Expression<int>? sellingPricePaise,
     Expression<String>? attributesJson,
     Expression<bool>? active,
+    Expression<bool>? isMadeToOrder,
     Expression<int>? createdAtUtcMs,
     Expression<int>? updatedAtUtcMs,
     Expression<int>? rowid,
@@ -6808,6 +6855,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
       if (sellingPricePaise != null) 'selling_price_paise': sellingPricePaise,
       if (attributesJson != null) 'attributes_json': attributesJson,
       if (active != null) 'active': active,
+      if (isMadeToOrder != null) 'is_made_to_order': isMadeToOrder,
       if (createdAtUtcMs != null) 'created_at_utc_ms': createdAtUtcMs,
       if (updatedAtUtcMs != null) 'updated_at_utc_ms': updatedAtUtcMs,
       if (rowid != null) 'rowid': rowid,
@@ -6833,6 +6881,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     Value<int>? sellingPricePaise,
     Value<String>? attributesJson,
     Value<bool>? active,
+    Value<bool>? isMadeToOrder,
     Value<int>? createdAtUtcMs,
     Value<int>? updatedAtUtcMs,
     Value<int>? rowid,
@@ -6856,6 +6905,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
       sellingPricePaise: sellingPricePaise ?? this.sellingPricePaise,
       attributesJson: attributesJson ?? this.attributesJson,
       active: active ?? this.active,
+      isMadeToOrder: isMadeToOrder ?? this.isMadeToOrder,
       createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
       updatedAtUtcMs: updatedAtUtcMs ?? this.updatedAtUtcMs,
       rowid: rowid ?? this.rowid,
@@ -6919,6 +6969,9 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
     if (active.present) {
       map['active'] = Variable<bool>(active.value);
     }
+    if (isMadeToOrder.present) {
+      map['is_made_to_order'] = Variable<bool>(isMadeToOrder.value);
+    }
     if (createdAtUtcMs.present) {
       map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs.value);
     }
@@ -6952,6 +7005,7 @@ class ProductsCompanion extends UpdateCompanion<ProductRow> {
           ..write('sellingPricePaise: $sellingPricePaise, ')
           ..write('attributesJson: $attributesJson, ')
           ..write('active: $active, ')
+          ..write('isMadeToOrder: $isMadeToOrder, ')
           ..write('createdAtUtcMs: $createdAtUtcMs, ')
           ..write('updatedAtUtcMs: $updatedAtUtcMs, ')
           ..write('rowid: $rowid')

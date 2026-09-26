@@ -41,6 +41,7 @@ final class SaleLine {
     required this.netTotalPaise,
     this.serials = const [],
     this.batchLot,
+    this.isMadeToOrder = false,
   });
 
   final String id;
@@ -58,6 +59,7 @@ final class SaleLine {
   final Money netTotalPaise;
   final List<String> serials;
   final String? batchLot;
+  final bool isMadeToOrder;
 
   /// Line subtotal before discount
   Money get subtotalBeforeDiscountPaise =>
