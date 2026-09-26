@@ -16,6 +16,7 @@ import '../features/purchases/purchases_page.dart';
 import '../features/projects/projects_page.dart';
 import '../features/reports/reports_page.dart';
 import '../features/sales/pos_page.dart';
+import '../features/sales/orders_page.dart';
 import '../features/mobile/mobile_navigation_shell.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/warranty/warranty_page.dart';
@@ -91,6 +92,13 @@ final _router = GoRouter(
       builder: (context, state) => const _RoleGuard(
         capability: Capability.salesCreate,
         child: PosPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/orders',
+      builder: (context, state) => const _RoleGuard(
+        capability: Capability.salesCreate,
+        child: OrdersPage(),
       ),
     ),
     GoRoute(
