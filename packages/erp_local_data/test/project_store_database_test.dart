@@ -150,4 +150,42 @@ void main() {
     expect(fetchedIssues.first.lines.length, 1);
     expect(fetchedIssues.first.lines.first.serials, ['SN-PNL-001', 'SN-PNL-002']);
   });
+
+  test('KitStore persists kit lines by catalog product ID and replaces lines on update', () async {
+    final now = DateTime.now().toUtc();
+    final kit = Kit(
+      id: 'kit_1',
+      organizationId: 'org_1',
+      name: '3kW rooftop',
+      category: 'residential_rooftop',
+      capacityKw: 3,
+      installationChargesPaise: Money.fromRupees(12000),
+      active: true,
+      createdAtUtc: now,
+      updatedAtUtc: now,
+    );
+    final firstLine = KitLine(
+      id: 'kit_1_line_1',
+      kitId: kit.id,
+      productId: 'product_panel_540',
+      quantity: Quantity.fromUnits(6),
+      sortOrder: 0,
+    );
+
+    await db.saveKit(kit: kit, lines: [firstLine]);
+    expect((await db.listKits('org_1')).single.name, '3kW rooftop');
+    expect((await db.getKitLines(kit.id)).single.productId, 'product_panel_540');
+
+    final replacement = KitLine(
+      id: 'kit_1_line_2',
+      kitId: kit.id,
+      productId: 'product_inverter_3kw',
+      quantity: Quantity.fromUnits(1),
+      sortOrder: 0,
+    );
+    await db.saveKit(kit: kit, lines: [replacement]);
+    final lines = await db.getKitLines(kit.id);
+    expect(lines, hasLength(1));
+    expect(lines.single.productId, 'product_inverter_3kw');
+  });
 }

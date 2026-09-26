@@ -37833,6 +37833,955 @@ class SerialReplacementsCompanion
   }
 }
 
+class $KitsTable extends Kits with TableInfo<$KitsTable, KitRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $KitsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _categoryMeta = const VerificationMeta(
+    'category',
+  );
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+    'category',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _capacityKwMeta = const VerificationMeta(
+    'capacityKw',
+  );
+  @override
+  late final GeneratedColumn<double> capacityKw = GeneratedColumn<double>(
+    'capacity_kw',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _installationChargesPaiseMeta =
+      const VerificationMeta('installationChargesPaise');
+  @override
+  late final GeneratedColumn<int> installationChargesPaise =
+      GeneratedColumn<int>(
+        'installation_charges_paise',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      );
+  static const VerificationMeta _activeMeta = const VerificationMeta('active');
+  @override
+  late final GeneratedColumn<bool> active = GeneratedColumn<bool>(
+    'active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _createdAtUtcMsMeta = const VerificationMeta(
+    'createdAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> createdAtUtcMs = GeneratedColumn<int>(
+    'created_at_utc_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtUtcMsMeta = const VerificationMeta(
+    'updatedAtUtcMs',
+  );
+  @override
+  late final GeneratedColumn<int> updatedAtUtcMs = GeneratedColumn<int>(
+    'updated_at_utc_ms',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    name,
+    category,
+    capacityKw,
+    installationChargesPaise,
+    active,
+    createdAtUtcMs,
+    updatedAtUtcMs,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'kits';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<KitRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('category')) {
+      context.handle(
+        _categoryMeta,
+        category.isAcceptableOrUnknown(data['category']!, _categoryMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_categoryMeta);
+    }
+    if (data.containsKey('capacity_kw')) {
+      context.handle(
+        _capacityKwMeta,
+        capacityKw.isAcceptableOrUnknown(data['capacity_kw']!, _capacityKwMeta),
+      );
+    }
+    if (data.containsKey('installation_charges_paise')) {
+      context.handle(
+        _installationChargesPaiseMeta,
+        installationChargesPaise.isAcceptableOrUnknown(
+          data['installation_charges_paise']!,
+          _installationChargesPaiseMeta,
+        ),
+      );
+    }
+    if (data.containsKey('active')) {
+      context.handle(
+        _activeMeta,
+        active.isAcceptableOrUnknown(data['active']!, _activeMeta),
+      );
+    }
+    if (data.containsKey('created_at_utc_ms')) {
+      context.handle(
+        _createdAtUtcMsMeta,
+        createdAtUtcMs.isAcceptableOrUnknown(
+          data['created_at_utc_ms']!,
+          _createdAtUtcMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtUtcMsMeta);
+    }
+    if (data.containsKey('updated_at_utc_ms')) {
+      context.handle(
+        _updatedAtUtcMsMeta,
+        updatedAtUtcMs.isAcceptableOrUnknown(
+          data['updated_at_utc_ms']!,
+          _updatedAtUtcMsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtUtcMsMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  KitRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return KitRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      category: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category'],
+      )!,
+      capacityKw: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}capacity_kw'],
+      )!,
+      installationChargesPaise: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}installation_charges_paise'],
+      )!,
+      active: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}active'],
+      )!,
+      createdAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}created_at_utc_ms'],
+      )!,
+      updatedAtUtcMs: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}updated_at_utc_ms'],
+      )!,
+    );
+  }
+
+  @override
+  $KitsTable createAlias(String alias) {
+    return $KitsTable(attachedDatabase, alias);
+  }
+}
+
+class KitRow extends DataClass implements Insertable<KitRow> {
+  final String id;
+  final String organizationId;
+  final String name;
+  final String category;
+  final double capacityKw;
+  final int installationChargesPaise;
+  final bool active;
+  final int createdAtUtcMs;
+  final int updatedAtUtcMs;
+  const KitRow({
+    required this.id,
+    required this.organizationId,
+    required this.name,
+    required this.category,
+    required this.capacityKw,
+    required this.installationChargesPaise,
+    required this.active,
+    required this.createdAtUtcMs,
+    required this.updatedAtUtcMs,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['name'] = Variable<String>(name);
+    map['category'] = Variable<String>(category);
+    map['capacity_kw'] = Variable<double>(capacityKw);
+    map['installation_charges_paise'] = Variable<int>(installationChargesPaise);
+    map['active'] = Variable<bool>(active);
+    map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs);
+    map['updated_at_utc_ms'] = Variable<int>(updatedAtUtcMs);
+    return map;
+  }
+
+  KitsCompanion toCompanion(bool nullToAbsent) {
+    return KitsCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      name: Value(name),
+      category: Value(category),
+      capacityKw: Value(capacityKw),
+      installationChargesPaise: Value(installationChargesPaise),
+      active: Value(active),
+      createdAtUtcMs: Value(createdAtUtcMs),
+      updatedAtUtcMs: Value(updatedAtUtcMs),
+    );
+  }
+
+  factory KitRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return KitRow(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      name: serializer.fromJson<String>(json['name']),
+      category: serializer.fromJson<String>(json['category']),
+      capacityKw: serializer.fromJson<double>(json['capacityKw']),
+      installationChargesPaise: serializer.fromJson<int>(
+        json['installationChargesPaise'],
+      ),
+      active: serializer.fromJson<bool>(json['active']),
+      createdAtUtcMs: serializer.fromJson<int>(json['createdAtUtcMs']),
+      updatedAtUtcMs: serializer.fromJson<int>(json['updatedAtUtcMs']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'name': serializer.toJson<String>(name),
+      'category': serializer.toJson<String>(category),
+      'capacityKw': serializer.toJson<double>(capacityKw),
+      'installationChargesPaise': serializer.toJson<int>(
+        installationChargesPaise,
+      ),
+      'active': serializer.toJson<bool>(active),
+      'createdAtUtcMs': serializer.toJson<int>(createdAtUtcMs),
+      'updatedAtUtcMs': serializer.toJson<int>(updatedAtUtcMs),
+    };
+  }
+
+  KitRow copyWith({
+    String? id,
+    String? organizationId,
+    String? name,
+    String? category,
+    double? capacityKw,
+    int? installationChargesPaise,
+    bool? active,
+    int? createdAtUtcMs,
+    int? updatedAtUtcMs,
+  }) => KitRow(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    name: name ?? this.name,
+    category: category ?? this.category,
+    capacityKw: capacityKw ?? this.capacityKw,
+    installationChargesPaise:
+        installationChargesPaise ?? this.installationChargesPaise,
+    active: active ?? this.active,
+    createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+    updatedAtUtcMs: updatedAtUtcMs ?? this.updatedAtUtcMs,
+  );
+  KitRow copyWithCompanion(KitsCompanion data) {
+    return KitRow(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      name: data.name.present ? data.name.value : this.name,
+      category: data.category.present ? data.category.value : this.category,
+      capacityKw: data.capacityKw.present
+          ? data.capacityKw.value
+          : this.capacityKw,
+      installationChargesPaise: data.installationChargesPaise.present
+          ? data.installationChargesPaise.value
+          : this.installationChargesPaise,
+      active: data.active.present ? data.active.value : this.active,
+      createdAtUtcMs: data.createdAtUtcMs.present
+          ? data.createdAtUtcMs.value
+          : this.createdAtUtcMs,
+      updatedAtUtcMs: data.updatedAtUtcMs.present
+          ? data.updatedAtUtcMs.value
+          : this.updatedAtUtcMs,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KitRow(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('capacityKw: $capacityKw, ')
+          ..write('installationChargesPaise: $installationChargesPaise, ')
+          ..write('active: $active, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs, ')
+          ..write('updatedAtUtcMs: $updatedAtUtcMs')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    name,
+    category,
+    capacityKw,
+    installationChargesPaise,
+    active,
+    createdAtUtcMs,
+    updatedAtUtcMs,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is KitRow &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.name == this.name &&
+          other.category == this.category &&
+          other.capacityKw == this.capacityKw &&
+          other.installationChargesPaise == this.installationChargesPaise &&
+          other.active == this.active &&
+          other.createdAtUtcMs == this.createdAtUtcMs &&
+          other.updatedAtUtcMs == this.updatedAtUtcMs);
+}
+
+class KitsCompanion extends UpdateCompanion<KitRow> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> name;
+  final Value<String> category;
+  final Value<double> capacityKw;
+  final Value<int> installationChargesPaise;
+  final Value<bool> active;
+  final Value<int> createdAtUtcMs;
+  final Value<int> updatedAtUtcMs;
+  final Value<int> rowid;
+  const KitsCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.category = const Value.absent(),
+    this.capacityKw = const Value.absent(),
+    this.installationChargesPaise = const Value.absent(),
+    this.active = const Value.absent(),
+    this.createdAtUtcMs = const Value.absent(),
+    this.updatedAtUtcMs = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  KitsCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String name,
+    required String category,
+    this.capacityKw = const Value.absent(),
+    this.installationChargesPaise = const Value.absent(),
+    this.active = const Value.absent(),
+    required int createdAtUtcMs,
+    required int updatedAtUtcMs,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       name = Value(name),
+       category = Value(category),
+       createdAtUtcMs = Value(createdAtUtcMs),
+       updatedAtUtcMs = Value(updatedAtUtcMs);
+  static Insertable<KitRow> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? name,
+    Expression<String>? category,
+    Expression<double>? capacityKw,
+    Expression<int>? installationChargesPaise,
+    Expression<bool>? active,
+    Expression<int>? createdAtUtcMs,
+    Expression<int>? updatedAtUtcMs,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (name != null) 'name': name,
+      if (category != null) 'category': category,
+      if (capacityKw != null) 'capacity_kw': capacityKw,
+      if (installationChargesPaise != null)
+        'installation_charges_paise': installationChargesPaise,
+      if (active != null) 'active': active,
+      if (createdAtUtcMs != null) 'created_at_utc_ms': createdAtUtcMs,
+      if (updatedAtUtcMs != null) 'updated_at_utc_ms': updatedAtUtcMs,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  KitsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? name,
+    Value<String>? category,
+    Value<double>? capacityKw,
+    Value<int>? installationChargesPaise,
+    Value<bool>? active,
+    Value<int>? createdAtUtcMs,
+    Value<int>? updatedAtUtcMs,
+    Value<int>? rowid,
+  }) {
+    return KitsCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      name: name ?? this.name,
+      category: category ?? this.category,
+      capacityKw: capacityKw ?? this.capacityKw,
+      installationChargesPaise:
+          installationChargesPaise ?? this.installationChargesPaise,
+      active: active ?? this.active,
+      createdAtUtcMs: createdAtUtcMs ?? this.createdAtUtcMs,
+      updatedAtUtcMs: updatedAtUtcMs ?? this.updatedAtUtcMs,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (capacityKw.present) {
+      map['capacity_kw'] = Variable<double>(capacityKw.value);
+    }
+    if (installationChargesPaise.present) {
+      map['installation_charges_paise'] = Variable<int>(
+        installationChargesPaise.value,
+      );
+    }
+    if (active.present) {
+      map['active'] = Variable<bool>(active.value);
+    }
+    if (createdAtUtcMs.present) {
+      map['created_at_utc_ms'] = Variable<int>(createdAtUtcMs.value);
+    }
+    if (updatedAtUtcMs.present) {
+      map['updated_at_utc_ms'] = Variable<int>(updatedAtUtcMs.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KitsCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('name: $name, ')
+          ..write('category: $category, ')
+          ..write('capacityKw: $capacityKw, ')
+          ..write('installationChargesPaise: $installationChargesPaise, ')
+          ..write('active: $active, ')
+          ..write('createdAtUtcMs: $createdAtUtcMs, ')
+          ..write('updatedAtUtcMs: $updatedAtUtcMs, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $KitLinesTable extends KitLines
+    with TableInfo<$KitLinesTable, KitLineRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $KitLinesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kitIdMeta = const VerificationMeta('kitId');
+  @override
+  late final GeneratedColumn<String> kitId = GeneratedColumn<String>(
+    'kit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMicroUnitsMeta =
+      const VerificationMeta('quantityMicroUnits');
+  @override
+  late final GeneratedColumn<int> quantityMicroUnits = GeneratedColumn<int>(
+    'quantity_micro_units',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sortOrderMeta = const VerificationMeta(
+    'sortOrder',
+  );
+  @override
+  late final GeneratedColumn<int> sortOrder = GeneratedColumn<int>(
+    'sort_order',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    kitId,
+    productId,
+    quantityMicroUnits,
+    sortOrder,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'kit_lines';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<KitLineRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('kit_id')) {
+      context.handle(
+        _kitIdMeta,
+        kitId.isAcceptableOrUnknown(data['kit_id']!, _kitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kitIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('quantity_micro_units')) {
+      context.handle(
+        _quantityMicroUnitsMeta,
+        quantityMicroUnits.isAcceptableOrUnknown(
+          data['quantity_micro_units']!,
+          _quantityMicroUnitsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_quantityMicroUnitsMeta);
+    }
+    if (data.containsKey('sort_order')) {
+      context.handle(
+        _sortOrderMeta,
+        sortOrder.isAcceptableOrUnknown(data['sort_order']!, _sortOrderMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sortOrderMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  KitLineRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return KitLineRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      kitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kit_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      quantityMicroUnits: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}quantity_micro_units'],
+      )!,
+      sortOrder: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}sort_order'],
+      )!,
+    );
+  }
+
+  @override
+  $KitLinesTable createAlias(String alias) {
+    return $KitLinesTable(attachedDatabase, alias);
+  }
+}
+
+class KitLineRow extends DataClass implements Insertable<KitLineRow> {
+  final String id;
+  final String kitId;
+  final String productId;
+  final int quantityMicroUnits;
+  final int sortOrder;
+  const KitLineRow({
+    required this.id,
+    required this.kitId,
+    required this.productId,
+    required this.quantityMicroUnits,
+    required this.sortOrder,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['kit_id'] = Variable<String>(kitId);
+    map['product_id'] = Variable<String>(productId);
+    map['quantity_micro_units'] = Variable<int>(quantityMicroUnits);
+    map['sort_order'] = Variable<int>(sortOrder);
+    return map;
+  }
+
+  KitLinesCompanion toCompanion(bool nullToAbsent) {
+    return KitLinesCompanion(
+      id: Value(id),
+      kitId: Value(kitId),
+      productId: Value(productId),
+      quantityMicroUnits: Value(quantityMicroUnits),
+      sortOrder: Value(sortOrder),
+    );
+  }
+
+  factory KitLineRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return KitLineRow(
+      id: serializer.fromJson<String>(json['id']),
+      kitId: serializer.fromJson<String>(json['kitId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      quantityMicroUnits: serializer.fromJson<int>(json['quantityMicroUnits']),
+      sortOrder: serializer.fromJson<int>(json['sortOrder']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'kitId': serializer.toJson<String>(kitId),
+      'productId': serializer.toJson<String>(productId),
+      'quantityMicroUnits': serializer.toJson<int>(quantityMicroUnits),
+      'sortOrder': serializer.toJson<int>(sortOrder),
+    };
+  }
+
+  KitLineRow copyWith({
+    String? id,
+    String? kitId,
+    String? productId,
+    int? quantityMicroUnits,
+    int? sortOrder,
+  }) => KitLineRow(
+    id: id ?? this.id,
+    kitId: kitId ?? this.kitId,
+    productId: productId ?? this.productId,
+    quantityMicroUnits: quantityMicroUnits ?? this.quantityMicroUnits,
+    sortOrder: sortOrder ?? this.sortOrder,
+  );
+  KitLineRow copyWithCompanion(KitLinesCompanion data) {
+    return KitLineRow(
+      id: data.id.present ? data.id.value : this.id,
+      kitId: data.kitId.present ? data.kitId.value : this.kitId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      quantityMicroUnits: data.quantityMicroUnits.present
+          ? data.quantityMicroUnits.value
+          : this.quantityMicroUnits,
+      sortOrder: data.sortOrder.present ? data.sortOrder.value : this.sortOrder,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KitLineRow(')
+          ..write('id: $id, ')
+          ..write('kitId: $kitId, ')
+          ..write('productId: $productId, ')
+          ..write('quantityMicroUnits: $quantityMicroUnits, ')
+          ..write('sortOrder: $sortOrder')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, kitId, productId, quantityMicroUnits, sortOrder);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is KitLineRow &&
+          other.id == this.id &&
+          other.kitId == this.kitId &&
+          other.productId == this.productId &&
+          other.quantityMicroUnits == this.quantityMicroUnits &&
+          other.sortOrder == this.sortOrder);
+}
+
+class KitLinesCompanion extends UpdateCompanion<KitLineRow> {
+  final Value<String> id;
+  final Value<String> kitId;
+  final Value<String> productId;
+  final Value<int> quantityMicroUnits;
+  final Value<int> sortOrder;
+  final Value<int> rowid;
+  const KitLinesCompanion({
+    this.id = const Value.absent(),
+    this.kitId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.quantityMicroUnits = const Value.absent(),
+    this.sortOrder = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  KitLinesCompanion.insert({
+    required String id,
+    required String kitId,
+    required String productId,
+    required int quantityMicroUnits,
+    required int sortOrder,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       kitId = Value(kitId),
+       productId = Value(productId),
+       quantityMicroUnits = Value(quantityMicroUnits),
+       sortOrder = Value(sortOrder);
+  static Insertable<KitLineRow> custom({
+    Expression<String>? id,
+    Expression<String>? kitId,
+    Expression<String>? productId,
+    Expression<int>? quantityMicroUnits,
+    Expression<int>? sortOrder,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (kitId != null) 'kit_id': kitId,
+      if (productId != null) 'product_id': productId,
+      if (quantityMicroUnits != null)
+        'quantity_micro_units': quantityMicroUnits,
+      if (sortOrder != null) 'sort_order': sortOrder,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  KitLinesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? kitId,
+    Value<String>? productId,
+    Value<int>? quantityMicroUnits,
+    Value<int>? sortOrder,
+    Value<int>? rowid,
+  }) {
+    return KitLinesCompanion(
+      id: id ?? this.id,
+      kitId: kitId ?? this.kitId,
+      productId: productId ?? this.productId,
+      quantityMicroUnits: quantityMicroUnits ?? this.quantityMicroUnits,
+      sortOrder: sortOrder ?? this.sortOrder,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (kitId.present) {
+      map['kit_id'] = Variable<String>(kitId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (quantityMicroUnits.present) {
+      map['quantity_micro_units'] = Variable<int>(quantityMicroUnits.value);
+    }
+    if (sortOrder.present) {
+      map['sort_order'] = Variable<int>(sortOrder.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('KitLinesCompanion(')
+          ..write('id: $id, ')
+          ..write('kitId: $kitId, ')
+          ..write('productId: $productId, ')
+          ..write('quantityMicroUnits: $quantityMicroUnits, ')
+          ..write('sortOrder: $sortOrder, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$FoundationDatabase extends GeneratedDatabase {
   _$FoundationDatabase(QueryExecutor e) : super(e);
   $FoundationDatabaseManager get managers => $FoundationDatabaseManager(this);
@@ -37926,6 +38875,8 @@ abstract class _$FoundationDatabase extends GeneratedDatabase {
   late final $AmcContractsTable amcContracts = $AmcContractsTable(this);
   late final $SerialReplacementsTable serialReplacements =
       $SerialReplacementsTable(this);
+  late final $KitsTable kits = $KitsTable(this);
+  late final $KitLinesTable kitLines = $KitLinesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -37994,6 +38945,8 @@ abstract class _$FoundationDatabase extends GeneratedDatabase {
     serviceJobVisits,
     amcContracts,
     serialReplacements,
+    kits,
+    kitLines,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -58482,6 +59435,502 @@ typedef $$SerialReplacementsTableProcessedTableManager =
       SerialReplacementRow,
       PrefetchHooks Function()
     >;
+typedef $$KitsTableCreateCompanionBuilder = KitsCompanion Function({
+  required String id,
+  required String organizationId,
+  required String name,
+  required String category,
+  Value<double> capacityKw,
+  Value<int> installationChargesPaise,
+  Value<bool> active,
+  required int createdAtUtcMs,
+  required int updatedAtUtcMs,
+  Value<int> rowid,
+});
+typedef $$KitsTableUpdateCompanionBuilder = KitsCompanion Function({
+  Value<String> id,
+  Value<String> organizationId,
+  Value<String> name,
+  Value<String> category,
+  Value<double> capacityKw,
+  Value<int> installationChargesPaise,
+  Value<bool> active,
+  Value<int> createdAtUtcMs,
+  Value<int> updatedAtUtcMs,
+  Value<int> rowid,
+});
+
+class $$KitsTableFilterComposer
+    extends Composer<_$FoundationDatabase, $KitsTable> {
+  $$KitsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get capacityKw => $composableBuilder(
+    column: $table.capacityKw,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get installationChargesPaise => $composableBuilder(
+    column: $table.installationChargesPaise,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get active => $composableBuilder(
+    column: $table.active,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get updatedAtUtcMs => $composableBuilder(
+    column: $table.updatedAtUtcMs,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$KitsTableOrderingComposer
+    extends Composer<_$FoundationDatabase, $KitsTable> {
+  $$KitsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get category => $composableBuilder(
+    column: $table.category,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get capacityKw => $composableBuilder(
+    column: $table.capacityKw,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get installationChargesPaise => $composableBuilder(
+    column: $table.installationChargesPaise,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get active => $composableBuilder(
+    column: $table.active,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get updatedAtUtcMs => $composableBuilder(
+    column: $table.updatedAtUtcMs,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$KitsTableAnnotationComposer
+    extends Composer<_$FoundationDatabase, $KitsTable> {
+  $$KitsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<double> get capacityKw => $composableBuilder(
+    column: $table.capacityKw,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get installationChargesPaise => $composableBuilder(
+    column: $table.installationChargesPaise,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get active =>
+      $composableBuilder(column: $table.active, builder: (column) => column);
+
+  GeneratedColumn<int> get createdAtUtcMs => $composableBuilder(
+    column: $table.createdAtUtcMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get updatedAtUtcMs => $composableBuilder(
+    column: $table.updatedAtUtcMs,
+    builder: (column) => column,
+  );
+}
+
+class $$KitsTableTableManager
+    extends
+        RootTableManager<
+          _$FoundationDatabase,
+          $KitsTable,
+          KitRow,
+          $$KitsTableFilterComposer,
+          $$KitsTableOrderingComposer,
+          $$KitsTableAnnotationComposer,
+          $$KitsTableCreateCompanionBuilder,
+          $$KitsTableUpdateCompanionBuilder,
+          (KitRow, BaseReferences<_$FoundationDatabase, $KitsTable, KitRow>),
+          KitRow,
+          PrefetchHooks Function()
+        > {
+  $$KitsTableTableManager(_$FoundationDatabase db, $KitsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$KitsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$KitsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$KitsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> category = const Value.absent(),
+                Value<double> capacityKw = const Value.absent(),
+                Value<int> installationChargesPaise = const Value.absent(),
+                Value<bool> active = const Value.absent(),
+                Value<int> createdAtUtcMs = const Value.absent(),
+                Value<int> updatedAtUtcMs = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => KitsCompanion(
+                id: id,
+                organizationId: organizationId,
+                name: name,
+                category: category,
+                capacityKw: capacityKw,
+                installationChargesPaise: installationChargesPaise,
+                active: active,
+                createdAtUtcMs: createdAtUtcMs,
+                updatedAtUtcMs: updatedAtUtcMs,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String name,
+                required String category,
+                Value<double> capacityKw = const Value.absent(),
+                Value<int> installationChargesPaise = const Value.absent(),
+                Value<bool> active = const Value.absent(),
+                required int createdAtUtcMs,
+                required int updatedAtUtcMs,
+                Value<int> rowid = const Value.absent(),
+              }) => KitsCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                name: name,
+                category: category,
+                capacityKw: capacityKw,
+                installationChargesPaise: installationChargesPaise,
+                active: active,
+                createdAtUtcMs: createdAtUtcMs,
+                updatedAtUtcMs: updatedAtUtcMs,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$KitsTable, KitRow>(table),
+                  BaseReferences<_$FoundationDatabase, $KitsTable, KitRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$KitsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FoundationDatabase,
+      $KitsTable,
+      KitRow,
+      $$KitsTableFilterComposer,
+      $$KitsTableOrderingComposer,
+      $$KitsTableAnnotationComposer,
+      $$KitsTableCreateCompanionBuilder,
+      $$KitsTableUpdateCompanionBuilder,
+      (KitRow, BaseReferences<_$FoundationDatabase, $KitsTable, KitRow>),
+      KitRow,
+      PrefetchHooks Function()
+    >;
+typedef $$KitLinesTableCreateCompanionBuilder = KitLinesCompanion Function({
+  required String id,
+  required String kitId,
+  required String productId,
+  required int quantityMicroUnits,
+  required int sortOrder,
+  Value<int> rowid,
+});
+typedef $$KitLinesTableUpdateCompanionBuilder = KitLinesCompanion Function({
+  Value<String> id,
+  Value<String> kitId,
+  Value<String> productId,
+  Value<int> quantityMicroUnits,
+  Value<int> sortOrder,
+  Value<int> rowid,
+});
+
+class $$KitLinesTableFilterComposer
+    extends Composer<_$FoundationDatabase, $KitLinesTable> {
+  $$KitLinesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kitId => $composableBuilder(
+    column: $table.kitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get quantityMicroUnits => $composableBuilder(
+    column: $table.quantityMicroUnits,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$KitLinesTableOrderingComposer
+    extends Composer<_$FoundationDatabase, $KitLinesTable> {
+  $$KitLinesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kitId => $composableBuilder(
+    column: $table.kitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get quantityMicroUnits => $composableBuilder(
+    column: $table.quantityMicroUnits,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get sortOrder => $composableBuilder(
+    column: $table.sortOrder,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$KitLinesTableAnnotationComposer
+    extends Composer<_$FoundationDatabase, $KitLinesTable> {
+  $$KitLinesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get kitId =>
+      $composableBuilder(column: $table.kitId, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<int> get quantityMicroUnits => $composableBuilder(
+    column: $table.quantityMicroUnits,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get sortOrder =>
+      $composableBuilder(column: $table.sortOrder, builder: (column) => column);
+}
+
+class $$KitLinesTableTableManager
+    extends
+        RootTableManager<
+          _$FoundationDatabase,
+          $KitLinesTable,
+          KitLineRow,
+          $$KitLinesTableFilterComposer,
+          $$KitLinesTableOrderingComposer,
+          $$KitLinesTableAnnotationComposer,
+          $$KitLinesTableCreateCompanionBuilder,
+          $$KitLinesTableUpdateCompanionBuilder,
+          (
+            KitLineRow,
+            BaseReferences<_$FoundationDatabase, $KitLinesTable, KitLineRow>,
+          ),
+          KitLineRow,
+          PrefetchHooks Function()
+        > {
+  $$KitLinesTableTableManager(_$FoundationDatabase db, $KitLinesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$KitLinesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$KitLinesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$KitLinesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> kitId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<int> quantityMicroUnits = const Value.absent(),
+                Value<int> sortOrder = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => KitLinesCompanion(
+                id: id,
+                kitId: kitId,
+                productId: productId,
+                quantityMicroUnits: quantityMicroUnits,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String kitId,
+                required String productId,
+                required int quantityMicroUnits,
+                required int sortOrder,
+                Value<int> rowid = const Value.absent(),
+              }) => KitLinesCompanion.insert(
+                id: id,
+                kitId: kitId,
+                productId: productId,
+                quantityMicroUnits: quantityMicroUnits,
+                sortOrder: sortOrder,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$KitLinesTable, KitLineRow>(table),
+                  BaseReferences<
+                    _$FoundationDatabase,
+                    $KitLinesTable,
+                    KitLineRow
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$KitLinesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FoundationDatabase,
+      $KitLinesTable,
+      KitLineRow,
+      $$KitLinesTableFilterComposer,
+      $$KitLinesTableOrderingComposer,
+      $$KitLinesTableAnnotationComposer,
+      $$KitLinesTableCreateCompanionBuilder,
+      $$KitLinesTableUpdateCompanionBuilder,
+      (
+        KitLineRow,
+        BaseReferences<_$FoundationDatabase, $KitLinesTable, KitLineRow>,
+      ),
+      KitLineRow,
+      PrefetchHooks Function()
+    >;
 
 class $FoundationDatabaseManager {
   final _$FoundationDatabase _db;
@@ -58618,4 +60067,7 @@ class $FoundationDatabaseManager {
       $$AmcContractsTableTableManager(_db, _db.amcContracts);
   $$SerialReplacementsTableTableManager get serialReplacements =>
       $$SerialReplacementsTableTableManager(_db, _db.serialReplacements);
+  $$KitsTableTableManager get kits => $$KitsTableTableManager(_db, _db.kits);
+  $$KitLinesTableTableManager get kitLines =>
+      $$KitLinesTableTableManager(_db, _db.kitLines);
 }

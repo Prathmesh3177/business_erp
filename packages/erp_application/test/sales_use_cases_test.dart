@@ -30,9 +30,12 @@ class InMemorySalesStore implements SalesStore {
     String? customerPartyId,
   }) async {
     return headers.values.where((h) {
-      if (h.organizationId != organizationId) return false;
-      if (customerPartyId != null && h.customerPartyId != customerPartyId)
+      if (h.organizationId != organizationId) {
         return false;
+      }
+      if (customerPartyId != null && h.customerPartyId != customerPartyId) {
+        return false;
+      }
       return true;
     }).toList();
   }

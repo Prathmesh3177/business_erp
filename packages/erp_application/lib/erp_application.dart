@@ -17,6 +17,8 @@ export 'src/identity_store.dart';
 export 'src/identity_use_cases.dart';
 export 'src/inventory_store.dart';
 export 'src/inventory_use_cases.dart';
+export 'src/kit_store.dart';
+export 'src/kit_use_cases.dart';
 export 'src/logging.dart';
 export 'src/party_store.dart';
 export 'src/party_use_cases.dart';
@@ -36,4 +38,3 @@ export 'src/draft_recovery_use_case.dart';
 export 'src/service_store.dart';
 export 'src/service_amc_use_cases.dart';
 export 'src/warranty_use_cases.dart';
-

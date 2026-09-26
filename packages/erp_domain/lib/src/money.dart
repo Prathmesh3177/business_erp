@@ -67,7 +67,7 @@ final class Money {
       remainders.add(_RemainderPair(index: i, remainder: remainder));
     }
 
-    int unallocatedPaise = totalDiscount.paise - sumAllocatedPaise;
+    final unallocatedPaise = totalDiscount.paise - sumAllocatedPaise;
 
     remainders.sort((a, b) {
       final cmp = b.remainder.compareTo(a.remainder);

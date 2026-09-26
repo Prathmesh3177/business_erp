@@ -139,7 +139,8 @@ ThemeData buildSolarTheme() {
     ),
     dialogTheme: const DialogThemeData(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
+        borderRadius: BorderRadius.all(Radius.circular(16)),
+        side: BorderSide(color: SolarColors.slate100),
       ),
       surfaceTintColor: Colors.transparent,
     ),

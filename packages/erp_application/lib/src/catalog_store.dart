@@ -23,4 +23,7 @@ abstract interface class CatalogStore {
 
   Future<void> saveBarcode(Barcode barcode);
   Future<Product?> getProductByBarcode(String organizationId, String barcode);
+
+  Future<void> saveProductSupplierLink(ProductSupplierLink link);
+  Future<List<ProductSupplierLink>> getProductSupplierLinks(String productId);
 }

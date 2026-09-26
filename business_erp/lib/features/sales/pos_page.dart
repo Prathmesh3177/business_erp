@@ -129,9 +129,8 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
   List<Product> _allProducts = [];
   List<Party> _customers = [];
   Party? _selectedCustomer;
-  String _customerAddress =
-      'Buria Road, Jagadhri-135003, Distt. Yamuna Nagar, Haryana';
-  String _customerPhone = '9881630001';
+  String _customerAddress = 'Kalamb, Maharashtra';
+  String _customerPhone = '';
   String _customerGstin = '';
 
   // Invoice Meta
@@ -197,14 +196,15 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
         _invoiceNo = '${sales.length + 20}';
         _loadingMasters = false;
 
-        // Auto-select or initialize sample customer if available
+        // Select a real customer when available; otherwise keep a neutral
+        // guest customer without injecting sample records into the bill.
         if (_selectedCustomer == null && custs.isNotEmpty) {
           _onCustomerSelected(custs.first);
         } else if (_selectedCustomer == null) {
           _selectedCustomer = null;
-          _customerAddress = 'Shop No. 3 Village & Post Office Damupura, Tehsil Jagadhri-135001, Distt. Yamuna Nagar';
-          _customerPhone = '9881630001';
-          _customerGstin = '06ALFPC3114K1ZJ';
+          _customerAddress = 'Kalamb, Maharashtra';
+          _customerPhone = '';
+          _customerGstin = '';
         }
         if (quotationDraft != null) {
           final matchingCustomers = custs.where(
@@ -1965,7 +1965,17 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
 
   // 3. Product Action Bar & Search
   Widget _buildProductSearchBar() {
-    return Row(
+    final query = _searchController.text.trim().toLowerCase();
+    final matches = query.isEmpty
+        ? const <Product>[]
+        : _allProducts.where((product) =>
+            product.name.toLowerCase().contains(query) ||
+            product.sku.toLowerCase().contains(query) ||
+            product.hsnCode.toLowerCase().contains(query)).take(6).toList();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
       children: [
         // Red "Add Products" Button
         FilledButton.icon(
@@ -1994,7 +2004,10 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               borderRadius: BorderRadius.circular(6),
             ),
           ),
-          onPressed: () => _searchController.clear(),
+          onPressed: () {
+            _searchController.clear();
+            setState(() {});
+          },
           child: const Text(
             'Search by Barcode (F2)',
             style: TextStyle(fontSize: 11),
@@ -2026,8 +2039,44 @@ class _CounterPosTabState extends ConsumerState<_CounterPosTab> {
               ),
             ),
             onChanged: (val) => setState(() {}),
+            onSubmitted: (_) {
+              if (matches.isNotEmpty) {
+                _addToCart(matches.first);
+                _searchController.clear();
+              }
+            },
           ),
         ),
+      ],
+        ),
+        if (matches.isNotEmpty) ...[
+          const SizedBox(height: 6),
+          Material(
+            elevation: 2,
+            borderRadius: BorderRadius.circular(8),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxHeight: 220),
+              child: ListView.separated(
+                shrinkWrap: true,
+                itemCount: matches.length,
+                separatorBuilder: (_, _) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final product = matches[index];
+                  return ListTile(
+                    dense: true,
+                    title: Text(product.name),
+                    subtitle: Text('${product.sku} · ₹${(product.sellingPricePaise / 100).toStringAsFixed(2)}'),
+                    trailing: const Icon(Icons.add_circle_outline),
+                    onTap: () {
+                      _addToCart(product);
+                      _searchController.clear();
+                    },
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

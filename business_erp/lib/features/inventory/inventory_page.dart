@@ -104,6 +104,7 @@ final class _StockBalancesTab extends ConsumerStatefulWidget {
 final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
   List<StockBalance> _balances = [];
   List<Product> _products = [];
+  String _searchQuery = '';
   bool _loading = true;
   bool _rebuilding = false;
 
@@ -171,6 +172,16 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
       (sum, b) => sum + b.valueInRupees,
     );
     final isAdministrator = ref.watch(authProvider)?.roleId == Role.adminRoleId;
+    final normalizedQuery = _searchQuery.trim().toLowerCase();
+    final productsById = {for (final product in _products) product.id: product};
+    final displayedBalances = _balances.where((balance) {
+      if (normalizedQuery.isEmpty) return true;
+      final product = productsById[balance.productId];
+      return balance.productId.toLowerCase().contains(normalizedQuery) ||
+          (product?.name.toLowerCase().contains(normalizedQuery) ?? false) ||
+          (product?.sku.toLowerCase().contains(normalizedQuery) ?? false) ||
+          (product?.categoryId.toLowerCase().contains(normalizedQuery) ?? false);
+    }).toList();
 
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -240,8 +251,17 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
             ],
           ),
           const SizedBox(height: 16),
+          TextField(
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search),
+              labelText: 'Search stock by product name, SKU, category, or ID',
+              border: OutlineInputBorder(),
+            ),
+            onChanged: (value) => setState(() => _searchQuery = value),
+          ),
+          const SizedBox(height: 12),
           Expanded(
-            child: _balances.isEmpty
+            child: displayedBalances.isEmpty
                 ? Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -282,33 +302,24 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                 : Card(
                     elevation: 2,
                     child: ListView.separated(
-                      itemCount: _balances.length,
+                      itemCount: displayedBalances.length,
                       separatorBuilder: (context, index) =>
                           const Divider(height: 1),
                       itemBuilder: (context, index) {
-                        final b = _balances[index];
-                        final prod = _products.firstWhere(
-                          (p) => p.id == b.productId,
-                          orElse: () => Product(
-                            id: b.productId,
-                            organizationId: 'default_org',
-                            sku: b.productId,
-                            name: 'Product ${b.productId}',
-                            categoryId: 'cat_panels',
-                            baseUnitId: 'unit_pcs',
-                            hsnCode: '85414011',
-                            createdAt: DateTime.now(),
-                            updatedAt: DateTime.now(),
-                          ),
-                        );
+                        final b = displayedBalances[index];
+                        final prod = productsById[b.productId];
 
                         return ListTile(
-                          leading: _buildProductThumbnail(prod),
+                          leading: prod == null
+                              ? const CircleAvatar(child: Icon(Icons.inventory_2_outlined))
+                              : _buildProductThumbnail(prod),
                           title: Row(
                             children: [
                               Expanded(
                                 child: Text(
-                                  '${prod.name} (${prod.sku})',
+                                  prod == null
+                                      ? 'Unknown catalog product (${b.productId})'
+                                      : '${prod.name} (${prod.sku})',
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                               ),
@@ -322,7 +333,7 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                                 child: Text(
-                                  _formatCategory(prod.categoryId),
+                                  prod == null ? 'Unresolved' : _formatCategory(prod.categoryId),
                                   style: const TextStyle(
                                     fontSize: 11,
                                     color: Color(0xFF004D40),
@@ -336,8 +347,8 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               const SizedBox(height: 2),
-                              Text('Location ID: ${b.locationId} • Unit: ${prod.baseUnitId.replaceFirst('unit_', '')}'),
-                              if (prod.sellingPricePaise > 0 || (isAdministrator && prod.costPricePaise > 0)) ...[
+                              Text('Location ID: ${b.locationId} • Unit: ${prod?.baseUnitId.replaceFirst('unit_', '') ?? '—'}'),
+                              if (prod != null && (prod.sellingPricePaise > 0 || (isAdministrator && prod.costPricePaise > 0))) ...[
                                 const SizedBox(height: 2),
                                 Text(
                                   'Selling: ₹${(prod.sellingPricePaise / 100.0).toStringAsFixed(2)}${isAdministrator && prod.costPricePaise > 0 ? ' • Purchase: ₹${(prod.costPricePaise / 100.0).toStringAsFixed(2)}' : ''}',
@@ -349,26 +360,47 @@ final class _StockBalancesTabState extends ConsumerState<_StockBalancesTab> {
                               ],
                             ],
                           ),
-                          trailing: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.end,
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Text(
-                                '${b.quantityInUnits.toStringAsFixed(2)} Units',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Color(0xFF004D40),
-                                ),
-                              ),
-                              if (isAdministrator)
-                                Text(
-                                  'Val: ₹${b.valueInRupees.toStringAsFixed(2)} (Avg: ₹${(b.weightedAverageUnitCostMicroRupees / 1000000.0).toStringAsFixed(2)})',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF990000),
+                              Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    '${b.quantityInUnits.toStringAsFixed(2)} Units',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Color(0xFF004D40),
+                                    ),
                                   ),
+                                  if (isAdministrator)
+                                    Text(
+                                      'Val: ₹${b.valueInRupees.toStringAsFixed(2)} (Avg: ₹${(b.weightedAverageUnitCostMicroRupees / 1000000.0).toStringAsFixed(2)})',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Color(0xFF990000),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              if (isAdministrator && prod != null) ...[
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.edit_outlined, size: 20),
+                                  tooltip: 'Edit Product Details',
+                                  onPressed: () async {
+                                    final updated = await AddProductDialog.show(
+                                      context,
+                                      existingProduct: prod,
+                                    );
+                                    if (updated == true) {
+                                      _loadData();
+                                    }
+                                  },
                                 ),
+                              ],
                             ],
                           ),
                         );

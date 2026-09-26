@@ -2,11 +2,13 @@ import 'package:erp_application/erp_application.dart';
 import 'package:erp_domain/erp_domain.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app/auth_controller.dart';
 import '../../app/bootstrap.dart';
 import '../common/erp_shell.dart';
 import '../sales/quotation_page.dart';
+import 'project_detail_page.dart';
 
 final projectQuotationsProvider =
     FutureProvider.autoDispose<List<QuotationHeader>>((ref) async {
@@ -53,6 +55,23 @@ final class _ProjectsPageState extends ConsumerState<ProjectsPage>
     return ErpFeatureScaffold(
       appBar: AppBar(
         title: const Text('Solar Projects & Quotations'),
+        actions: [
+          IconButton(
+            tooltip: 'Create kit quotation',
+            icon: const Icon(Icons.add_business_outlined),
+            onPressed: () => _showCreateKitQuotation(context),
+          ),
+          IconButton(
+            tooltip: 'Subsidy calculator',
+            icon: const Icon(Icons.calculate_outlined),
+            onPressed: () => _showSubsidyCalculator(context),
+          ),
+          IconButton(
+            tooltip: 'Solar kit templates',
+            icon: const Icon(Icons.inventory_2_outlined),
+            onPressed: () => context.go('/kits'),
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
@@ -70,6 +89,194 @@ final class _ProjectsPageState extends ConsumerState<ProjectsPage>
           _ProjectsTabView(),
           _BudgetReportTabView(),
         ],
+      ),
+    );
+  }
+
+  Future<void> _showSubsidyCalculator(BuildContext context) async {
+    final capacity = TextEditingController(text: '3');
+    final cost = TextEditingController(text: '250000');
+    var scheme = SubsidyScheme.pmSuryaGhar;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setDialogState) {
+          final result = calculateSubsidy(
+            scheme: scheme,
+            capacityKw: double.tryParse(capacity.text) ?? 0,
+            projectCost: Money.fromRupees(double.tryParse(cost.text) ?? 0),
+          );
+          return AlertDialog(
+            title: const Text('Maharashtra Subsidy Calculator'),
+            content: SizedBox(
+              width: 440,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  DropdownButtonFormField<SubsidyScheme>(
+                    initialValue: scheme,
+                    items:
+                        [
+                              SubsidyScheme.pmSuryaGhar,
+                              SubsidyScheme.pmKusumSmallFarmer,
+                              SubsidyScheme.pmKusumOtherFarmer,
+                            ]
+                            .map(
+                              (item) => DropdownMenuItem(
+                                value: item,
+                                child: Text(item.name),
+                              ),
+                            )
+                            .toList(),
+                    onChanged: (item) => setDialogState(() => scheme = item!),
+                  ),
+                  TextField(
+                    controller: capacity,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(
+                      labelText: 'System capacity (kW)',
+                    ),
+                  ),
+                  TextField(
+                    controller: cost,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    onChanged: (_) => setDialogState(() {}),
+                    decoration: const InputDecoration(
+                      labelText: 'Total project cost (₹)',
+                    ),
+                  ),
+                  const Divider(height: 28),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Eligible subsidy: ₹${result.subsidy.inRupees.toStringAsFixed(0)}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Customer payable: ₹${result.customerPayable.inRupees.toStringAsFixed(0)}',
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Future<void> _showCreateKitQuotation(BuildContext context) async {
+    final runtime = await ref.read(runtimeProvider.future);
+    final identity = runtime.identity!;
+    final customers = await runtime.database.searchParties(
+      identity.organization.id.value,
+      isCustomer: true,
+    );
+    if (!context.mounted) return;
+    Party? customer;
+    final kits = await runtime.database.listKits(
+      identity.organization.id.value,
+    );
+    if (!context.mounted) return;
+    Kit? kit;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (dialogContext, setDialogState) => AlertDialog(
+          title: const Text('Create quotation from solar kit'),
+          content: SizedBox(
+            width: 440,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                DropdownButtonFormField<Party>(
+                  decoration: const InputDecoration(labelText: 'Customer'),
+                  items: customers
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item,
+                          child: Text(item.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (item) => setDialogState(() => customer = item),
+                ),
+                DropdownButtonFormField<Kit>(
+                  decoration: const InputDecoration(labelText: 'Saved kit'),
+                  items: kits
+                      .map(
+                        (item) => DropdownMenuItem(
+                          value: item,
+                          child: Text(item.name),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (item) => setDialogState(() => kit = item),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: customer == null || kit == null
+                  ? null
+                  : () async {
+                      try {
+                        await CreateKitQuotationUseCase(
+                          kitStore: runtime.database,
+                          catalogStore: runtime.database,
+                          projectStore: runtime.database,
+                          accountingStore: runtime.database,
+                        ).execute(
+                          CommandContext(
+                            session: _getEffectiveSession(ref),
+                            timestampUtc: DateTime.now(),
+                          ),
+                          organizationId: identity.organization.id.value,
+                          branchId: identity.branch.id.value,
+                          customerPartyId: customer!.id,
+                          customerName: customer!.name,
+                          validUntil: DateTime.now().add(
+                            const Duration(days: 15),
+                          ),
+                          kitId: kit!.id,
+                        );
+                        ref.invalidate(projectQuotationsProvider);
+                        if (dialogContext.mounted) Navigator.pop(dialogContext);
+                      } catch (error) {
+                        if (dialogContext.mounted) {
+                          ScaffoldMessenger.of(dialogContext).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Could not create kit quotation: $error',
+                              ),
+                            ),
+                          );
+                        }
+                      }
+                    },
+              child: const Text('Create quotation'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -408,6 +615,16 @@ final class _ProjectsTabView extends ConsumerWidget {
                     OverflowBar(
                       spacing: 8,
                       children: [
+                        OutlinedButton.icon(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute<void>(
+                              builder: (_) =>
+                                  ProjectDetailPage(projectId: p.id),
+                            ),
+                          ),
+                          icon: const Icon(Icons.dashboard_outlined),
+                          label: const Text('Project details'),
+                        ),
                         ElevatedButton.icon(
                           onPressed: () =>
                               _showIssueMaterialsDialog(context, ref, p),

@@ -168,18 +168,30 @@ final class _PartiesPageState extends ConsumerState<PartiesPage>
               subtitle: Text(
                 'GSTIN: ${party.gstin ?? 'Unregistered'} | Terms: ${party.paymentTermsDays} Days',
               ),
-              trailing: isCustomer
-                  ? Text(
+              trailing: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (isCustomer)
+                    Text(
                       'Limit: ₹${(party.creditLimitPaise / 100).toStringAsFixed(0)}',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF990000),
                       ),
                     )
-                  : const Chip(
+                  else
+                    const Chip(
                       label: Text('Supplier'),
                       backgroundColor: Colors.amber,
                     ),
+                  const SizedBox(width: 8),
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 20),
+                    tooltip: 'Edit Party',
+                    onPressed: () => _showEditPartyDialog(party),
+                  ),
+                ],
+              ),
             ),
           );
         },
@@ -193,8 +205,8 @@ final class _PartiesPageState extends ConsumerState<PartiesPage>
     final creditCtrl = TextEditingController(text: '100000');
     final phoneCtrl = TextEditingController();
     final cityCtrl = TextEditingController();
-    bool isCustomer = true;
-    bool isSupplier = false;
+    bool isCustomer = _tabController.index == 0;
+    bool isSupplier = _tabController.index == 1;
 
     showDialog(
       context: context,
@@ -234,19 +246,27 @@ final class _PartiesPageState extends ConsumerState<PartiesPage>
                 ),
                 Row(
                   children: [
-                    Checkbox(
-                      value: isCustomer,
-                      onChanged: (val) =>
-                          setDlgState(() => isCustomer = val ?? true),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Customer'),
+                        selected: isCustomer,
+                        onSelected: (_) => setDlgState(() {
+                          isCustomer = true;
+                          isSupplier = false;
+                        }),
+                      ),
                     ),
-                    const Text('Customer'),
                     const SizedBox(width: 16),
-                    Checkbox(
-                      value: isSupplier,
-                      onChanged: (val) =>
-                          setDlgState(() => isSupplier = val ?? false),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Supplier'),
+                        selected: isSupplier,
+                        onSelected: (_) => setDlgState(() {
+                          isCustomer = false;
+                          isSupplier = true;
+                        }),
+                      ),
                     ),
-                    const Text('Supplier'),
                   ],
                 ),
               ],
@@ -263,12 +283,11 @@ final class _PartiesPageState extends ConsumerState<PartiesPage>
               backgroundColor: const Color(0xFF990000),
             ),
             onPressed: () async {
-              if (nameCtrl.text.trim().isEmpty ||
-                  (!isCustomer && !isSupplier)) {
+              if (nameCtrl.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
-                      'Name is required & select at least one role.',
+                      'Name is required.',
                     ),
                   ),
                 );
@@ -347,5 +366,75 @@ final class _PartiesPageState extends ConsumerState<PartiesPage>
         ],
       ),
     );
+  }
+
+  Future<void> _showEditPartyDialog(Party party) async {
+    final nameCtrl = TextEditingController(text: party.name);
+    final gstinCtrl = TextEditingController(text: party.gstin ?? '');
+    final creditCtrl = TextEditingController(
+      text: (party.creditLimitPaise / 100).toStringAsFixed(0),
+    );
+    var isCustomer = party.isCustomer;
+    var isSupplier = party.isSupplier;
+    await showDialog<void>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Edit Party'),
+          content: SizedBox(
+            width: 440,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Party legal name')),
+                  const SizedBox(height: 12),
+                  TextField(controller: gstinCtrl, decoration: const InputDecoration(labelText: 'GSTIN')),
+                  const SizedBox(height: 12),
+                  TextField(controller: creditCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Credit limit (₹)')),
+                  const SizedBox(height: 12),
+                  Row(children: [
+                    Expanded(child: ChoiceChip(label: const Text('Customer'), selected: isCustomer, onSelected: (_) => setDialogState(() { isCustomer = true; isSupplier = false; }))),
+                    const SizedBox(width: 12),
+                    Expanded(child: ChoiceChip(label: const Text('Supplier'), selected: isSupplier, onSelected: (_) => setDialogState(() { isCustomer = false; isSupplier = true; }))),
+                  ]),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            OutlinedButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+            FilledButton(
+              onPressed: () async {
+                if (nameCtrl.text.trim().isEmpty) return;
+                final runtime = await ref.read(runtimeProvider.future);
+                final updated = Party(
+                  id: party.id,
+                  organizationId: party.organizationId,
+                  name: nameCtrl.text.trim(),
+                  isCustomer: isCustomer,
+                  isSupplier: isSupplier,
+                  gstin: gstinCtrl.text.trim().isEmpty ? null : gstinCtrl.text.trim().toUpperCase(),
+                  pan: party.pan,
+                  paymentTermsDays: party.paymentTermsDays,
+                  creditLimitPaise: ((double.tryParse(creditCtrl.text) ?? 0) * 100).round(),
+                  active: party.active,
+                  createdAt: party.createdAt,
+                  updatedAt: DateTime.now(),
+                );
+                await runtime.database.saveParty(updated);
+                if (!dialogContext.mounted) return;
+                Navigator.pop(dialogContext);
+                _loadParties();
+              },
+              child: const Text('Save changes'),
+            ),
+          ],
+        ),
+      ),
+    );
+    nameCtrl.dispose();
+    gstinCtrl.dispose();
+    creditCtrl.dispose();
   }
 }

@@ -14,10 +14,10 @@ final class AppStrings {
       AppStrings(Localizations.maybeLocaleOf(context) ?? const Locale('en'));
 
   static const _english = <String, String>{
-    'appTitle': 'Shree Krushna Sales ERP',
-    'shopName': 'Shree Krushna Sales',
+    'appTitle': 'श्री कृष्णा सेल्स ईआरपी',
+    'shopName': 'श्री कृष्णा सेल्स',
     'shopAddress':
-        'Rajmata Jijau Chowk, Jantre Plaza, Dhoki Road, Kalamb- 413507',
+        'राजमाता जिजाऊ चौक, जंत्रे प्लाझा, ढोकी रोड, कळंब- 413507',
     'shopPhone': 'Mo. 7020422291 / 9881630001',
     'setupTitle': 'Set up Shree Krushna Sales ERP',
     'organizationLegalName': 'Organization legal name',
@@ -67,9 +67,11 @@ final class AppStrings {
     'catalog': 'Product Catalog',
     'inventory': 'Inventory & Serials',
     'sales': 'Sales / POS',
+    'orders': 'Orders',
     'purchases': 'Purchases & Receipts',
     'accounting': 'Accounting & GST',
     'finance': 'Payments & Expenses',
+    'backup': 'Backup & Recovery',
     'projects': 'Solar Projects',
     'service': 'Service & AMC',
     'parties': 'Customers & Suppliers',
@@ -183,9 +185,11 @@ final class AppStrings {
     'catalog': 'उत्पादन सूची',
     'inventory': 'साठा व सिरियल क्रमांक',
     'sales': 'विक्री / पीओएस',
+    'orders': 'ऑर्डर',
     'purchases': 'खरेदी व माल प्राप्ती',
     'accounting': 'लेखांकन व जीएसटी',
     'finance': 'देयके व खर्च',
+    'backup': 'बॅकअप व पुनर्प्राप्ती',
     'projects': 'सौर प्रकल्प',
     'service': 'सेवा व एएमसी',
     'parties': 'ग्राहक व पुरवठादार',

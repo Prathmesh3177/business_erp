@@ -33,77 +33,19 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
       final prods = await runtime.database.searchProducts(orgId, includeInactive: true);
       if (mounted) {
         setState(() {
-          _products = prods.isNotEmpty ? prods : _mockProducts;
+          _products = prods;
           _loading = false;
         });
       }
     } catch (_) {
       if (mounted) {
         setState(() {
-          _products = _mockProducts;
+          _products = const [];
           _loading = false;
         });
       }
     }
   }
-
-  final List<Product> _mockProducts = [
-    Product(
-      id: 'p1',
-      organizationId: 'org1',
-      sku: 'SKS-PANEL-540W',
-      name: 'Shree Krushna 540W Mono PERC Panel',
-      categoryId: 'solarPanel',
-      baseUnitId: 'Pcs',
-      hsnCode: '85414011',
-      costPricePaise: 1350000,
-      sellingPricePaise: 1650000,
-      attributes: {
-        'wattage': '540W',
-        'cell_type': 'Mono PERC',
-        'efficiency': '21.3%',
-      },
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ),
-    Product(
-      id: 'p2',
-      organizationId: 'org1',
-      sku: 'SKS-INV-5KW',
-      name: '5kW Hybrid Solar Inverter (3-Phase)',
-      categoryId: 'solarInverter',
-      baseUnitId: 'Pcs',
-      hsnCode: '85044090',
-      costPricePaise: 4200000,
-      sellingPricePaise: 4950000,
-      isMadeToOrder: true,
-      attributes: {
-        'capacity': '5kW',
-        'phase': 'Three Phase',
-        'waveform': 'Pure Sine',
-      },
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ),
-    Product(
-      id: 'p3',
-      organizationId: 'org1',
-      sku: 'SKS-BAT-150AH',
-      name: '150Ah Solar Tall Tubular Battery',
-      categoryId: 'solarBattery',
-      baseUnitId: 'Pcs',
-      hsnCode: '85072000',
-      costPricePaise: 1100000,
-      sellingPricePaise: 1380000,
-      attributes: {
-        'capacity': '150Ah',
-        'voltage': '12V',
-        'type': 'C10 Lead Acid',
-      },
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -187,7 +129,15 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
             else
               Expanded(
                 child: Card(
-                child: ListView.separated(
+                child: filteredProducts.isEmpty
+                    ? Center(
+                        child: Text(
+                          _products.isEmpty
+                              ? 'No products in catalog yet. Click Add Product to create one.'
+                              : 'No products match this search.',
+                        ),
+                      )
+                    : ListView.separated(
                   itemCount: filteredProducts.length,
                   separatorBuilder: (context, index) =>
                       const Divider(height: 1),
@@ -232,6 +182,7 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                           const SizedBox(height: 4),
                           Wrap(
                             spacing: 6,
+                            runSpacing: 4,
                             children: [
                               if (product.isMadeToOrder)
                                 Chip(
@@ -249,7 +200,25 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                                   backgroundColor: const Color(0xFFE8F5E9),
                                   side: const BorderSide(color: Color(0xFF2E7D32), width: 0.5),
                                 ),
-                              ...product.attributes.entries.map((e) {
+                              if (product.attributes['supplierName'] != null)
+                                Chip(
+                                  avatar: const Icon(Icons.business_outlined, size: 14, color: Color(0xFF004D40)),
+                                  label: Text(
+                                    'Supplier: ${product.attributes['supplierName']}',
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Color(0xFF004D40),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                  padding: EdgeInsets.zero,
+                                  backgroundColor: const Color(0xFFE0F2F1),
+                                  side: const BorderSide(color: Color(0xFF004D40), width: 0.5),
+                                ),
+                              ...product.attributes.entries
+                                  .where((e) => !['imageUrl', 'image', 'supplierId', 'supplierName'].contains(e.key))
+                                  .map((e) {
                                 return Chip(
                                   label: Text(
                                     '${e.key}: ${e.value}',
@@ -265,29 +234,50 @@ final class _CatalogPageState extends ConsumerState<CatalogPage> {
                           ),
                         ],
                       ),
-                      trailing: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.end,
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Text(
-                            '₹${(product.sellingPricePaise / 100).toStringAsFixed(2)}',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Color(0xFF990000),
-                            ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '₹${(product.sellingPricePaise / 100).toStringAsFixed(2)}',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF990000),
+                                ),
+                              ),
+                              Text(
+                                hasCostAccess
+                                    ? 'Cost: ₹${(product.costPricePaise / 100).toStringAsFixed(2)}'
+                                    : 'Cost: [REDACTED]',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: hasCostAccess
+                                      ? Colors.grey[700]
+                                      : Colors.amber[900],
+                                ),
+                              ),
+                            ],
                           ),
-                          Text(
-                            hasCostAccess
-                                ? 'Cost: ₹${(product.costPricePaise / 100).toStringAsFixed(2)}'
-                                : 'Cost: [REDACTED]',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: hasCostAccess
-                                  ? Colors.grey[700]
-                                  : Colors.amber[900],
+                          if (isAdministrator) ...[
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.edit_outlined, size: 20),
+                              tooltip: 'Edit Product',
+                              onPressed: () async {
+                                final updated = await AddProductDialog.show(
+                                  context,
+                                  existingProduct: product,
+                                );
+                                if (updated == true) {
+                                  _loadProducts();
+                                }
+                              },
                             ),
-                          ),
+                          ],
                         ],
                       ),
                     );

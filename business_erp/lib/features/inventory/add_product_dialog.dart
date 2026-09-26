@@ -10,13 +10,15 @@ import '../../app/theme.dart';
 /// Modal dialog allowing administrators to create a new product in the catalog
 /// and optionally seed initial inventory stock in one cohesive step.
 final class AddProductDialog extends ConsumerStatefulWidget {
-  const AddProductDialog({super.key});
+  const AddProductDialog({super.key, this.existingProduct});
 
-  static Future<bool?> show(BuildContext context) {
+  final Product? existingProduct;
+
+  static Future<bool?> show(BuildContext context, {Product? existingProduct}) {
     return showDialog<bool>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const AddProductDialog(),
+      builder: (context) => AddProductDialog(existingProduct: existingProduct),
     );
   }
 
@@ -49,6 +51,9 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
   bool _showAdvanced = false;
   bool _isSaving = false;
   String? _errorMessage;
+
+  List<Party> _suppliers = [];
+  String? _selectedSupplierId;
 
   static const Map<String, ({String label, String defaultHsn, IconData icon})> _categories = {
     'solarPanel': (
@@ -113,20 +118,196 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _skuController = TextEditingController();
-    _imageUrlController = TextEditingController();
-    _purchasePriceController = TextEditingController();
-    _sellingPriceController = TextEditingController();
-    _initialStockController = TextEditingController(text: '10');
-    _hsnController = TextEditingController(text: _categories[_selectedCategory]!.defaultHsn);
-    _brandController = TextEditingController();
-    _modelController = TextEditingController();
-    _minStockController = TextEditingController(text: '0');
+    final p = widget.existingProduct;
+    if (p != null) {
+      _nameController = TextEditingController(text: p.name);
+      _skuController = TextEditingController(text: p.sku);
+      _imageUrlController = TextEditingController(
+        text: p.attributes['imageUrl'] ?? p.attributes['image'] ?? '',
+      );
+      _purchasePriceController = TextEditingController(
+        text: p.costPricePaise > 0 ? (p.costPricePaise / 100).toStringAsFixed(2) : '',
+      );
+      _sellingPriceController = TextEditingController(
+        text: p.sellingPricePaise > 0 ? (p.sellingPricePaise / 100).toStringAsFixed(2) : '',
+      );
+      _initialStockController = TextEditingController(text: '0');
+      _hsnController = TextEditingController(text: p.hsnCode);
+      _brandController = TextEditingController(text: p.brandId ?? '');
+      _modelController = TextEditingController(text: p.model ?? '');
+      _minStockController = TextEditingController(text: p.minStock.toString());
+      _selectedCategory = _categories.containsKey(p.categoryId) ? p.categoryId : 'solarPanel';
+      _selectedUnit = p.baseUnitId.isNotEmpty ? p.baseUnitId : 'unit_pcs';
+      _selectedTaxRateBps = p.defaultTaxRateBps;
+      _isMadeToOrder = p.isMadeToOrder;
+      _addInitialStock = false;
+      _selectedSupplierId = p.attributes['supplierId'];
+    } else {
+      _nameController = TextEditingController();
+      _skuController = TextEditingController();
+      _imageUrlController = TextEditingController();
+      _purchasePriceController = TextEditingController();
+      _sellingPriceController = TextEditingController();
+      _initialStockController = TextEditingController(text: '10');
+      _hsnController = TextEditingController(text: _categories[_selectedCategory]!.defaultHsn);
+      _brandController = TextEditingController();
+      _modelController = TextEditingController();
+      _minStockController = TextEditingController(text: '0');
+    }
 
     _imageUrlController.addListener(() {
       if (mounted) setState(() {});
     });
+
+    _loadSuppliers();
+  }
+
+  Future<void> _loadSuppliers() async {
+    try {
+      final runtime = await ref.read(runtimeProvider.future);
+      final orgId = runtime.identity?.organization.id.value ?? 'default_org';
+      final suppliers = await runtime.database.searchParties(orgId, isSupplier: true);
+
+      String? matchedSupplierId = _selectedSupplierId;
+      if (matchedSupplierId == null && widget.existingProduct != null) {
+        final links = await runtime.database.getProductSupplierLinks(widget.existingProduct!.id);
+        if (links.isNotEmpty) {
+          matchedSupplierId = links.first.partyId;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _suppliers = suppliers;
+          _selectedSupplierId = matchedSupplierId;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _showQuickAddSupplierDialog() async {
+    final nameCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    final gstinCtrl = TextEditingController();
+
+    final created = await showDialog<Party>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        title: const Text('Add New Supplier'),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Supplier Legal Name *',
+                  hintText: 'e.g. Tata Power Solar',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneCtrl,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(
+                  labelText: 'Phone Number',
+                  hintText: 'e.g. 9876543210',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: gstinCtrl,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'GSTIN (Optional)',
+                  hintText: '27AAAAA0000A1Z5',
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final name = nameCtrl.text.trim();
+              if (name.isEmpty) return;
+              try {
+                final runtime = await ref.read(runtimeProvider.future);
+                final orgId = runtime.identity?.organization.id.value ?? 'default_org';
+                final partyId = 'supp_${DateTime.now().millisecondsSinceEpoch}';
+                final cleanGstin = gstinCtrl.text.trim().toUpperCase();
+
+                final newParty = Party(
+                  id: partyId,
+                  organizationId: orgId,
+                  name: name,
+                  isCustomer: false,
+                  isSupplier: true,
+                  gstin: cleanGstin.isEmpty ? null : cleanGstin,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                );
+
+                final newAddr = PartyAddress(
+                  id: 'addr_$partyId',
+                  partyId: partyId,
+                  addressLine1: 'Main Market',
+                  city: 'Kalamb',
+                  state: 'Maharashtra',
+                  pincode: '413507',
+                  stateCode: '27',
+                );
+
+                final newContact = PartyContact(
+                  id: 'cont_$partyId',
+                  partyId: partyId,
+                  name: name,
+                  phone: phoneCtrl.text.trim(),
+                );
+
+                await runtime.database.saveParty(
+                  newParty,
+                  addresses: [newAddr],
+                  contacts: [newContact],
+                );
+
+                if (dialogCtx.mounted) {
+                  Navigator.pop(dialogCtx, newParty);
+                }
+              } catch (e) {
+                if (dialogCtx.mounted) {
+                  ScaffoldMessenger.of(dialogCtx).showSnackBar(
+                    SnackBar(content: Text('Error adding supplier: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Save Supplier'),
+          ),
+        ],
+      ),
+    );
+
+    if (created != null && mounted) {
+      await _loadSuppliers();
+      setState(() {
+        _selectedSupplierId = created.id;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Supplier "${created.name}" added and selected!'),
+            backgroundColor: const Color(0xFF004D40),
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -183,7 +364,7 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
     final session = ref.read(authProvider);
     if (session == null || session.roleId != Role.adminRoleId) {
       setState(() {
-        _errorMessage = 'Permission denied. Only administrators can add products.';
+        _errorMessage = 'Permission denied. Only administrators can add or edit products.';
       });
       return;
     }
@@ -212,13 +393,88 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
       final costPricePaise = (purchasePriceRupees * 100).round();
       final sellingPricePaise = (sellingPriceRupees * 100).round();
 
+      final now = DateTime.now();
+
+      // Edit existing product flow
+      if (widget.existingProduct != null) {
+        final existing = widget.existingProduct!;
+        final updatedAttributes = Map<String, String>.from(existing.attributes);
+        final imageUrl = _imageUrlController.text.trim();
+        if (imageUrl.isNotEmpty) {
+          updatedAttributes['imageUrl'] = imageUrl;
+        } else {
+          updatedAttributes.remove('imageUrl');
+        }
+        if (_selectedSupplierId != null) {
+          updatedAttributes['supplierId'] = _selectedSupplierId!;
+          final sup = _suppliers.where((s) => s.id == _selectedSupplierId).firstOrNull;
+          if (sup != null) {
+            updatedAttributes['supplierName'] = sup.name;
+          }
+        } else {
+          updatedAttributes.remove('supplierId');
+          updatedAttributes.remove('supplierName');
+        }
+
+        final updatedProduct = existing.copyWith(
+          name: name,
+          sku: sku,
+          categoryId: _selectedCategory,
+          brandId: _brandController.text.trim().isNotEmpty ? _brandController.text.trim() : null,
+          model: _modelController.text.trim().isNotEmpty ? _modelController.text.trim() : null,
+          baseUnitId: _selectedUnit,
+          minStock: double.tryParse(_minStockController.text.trim()) ?? 0.0,
+          hsnCode: _hsnController.text.trim().isNotEmpty
+              ? _hsnController.text.trim()
+              : (_categories[_selectedCategory]?.defaultHsn ?? '85414011'),
+          defaultTaxRateBps: _selectedTaxRateBps,
+          costPricePaise: costPricePaise,
+          sellingPricePaise: sellingPricePaise,
+          isMadeToOrder: _isMadeToOrder,
+          attributes: updatedAttributes,
+          updatedAt: now,
+        );
+
+        await runtime.database.saveProduct(updatedProduct);
+
+        if (_selectedSupplierId != null) {
+          await runtime.database.saveProductSupplierLink(
+            ProductSupplierLink(
+              id: 'psl_${existing.id}_$_selectedSupplierId',
+              productId: existing.id,
+              partyId: _selectedSupplierId!,
+              supplierProductCode: sku,
+              isPrimary: true,
+            ),
+          );
+        }
+
+        if (mounted) {
+          Navigator.of(context).pop(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: const Color(0xFF004D40),
+              content: Text('Product "$name" updated successfully!'),
+            ),
+          );
+        }
+        return;
+      }
+
+      // Add new product flow
       final attributes = <String, String>{};
       final imageUrl = _imageUrlController.text.trim();
       if (imageUrl.isNotEmpty) {
         attributes['imageUrl'] = imageUrl;
       }
+      if (_selectedSupplierId != null) {
+        attributes['supplierId'] = _selectedSupplierId!;
+        final sup = _suppliers.where((s) => s.id == _selectedSupplierId).firstOrNull;
+        if (sup != null) {
+          attributes['supplierName'] = sup.name;
+        }
+      }
 
-      final now = DateTime.now();
       final productId = 'prod_${now.millisecondsSinceEpoch}';
 
       final product = Product(
@@ -246,6 +502,18 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
 
       // Save product to database
       await runtime.database.saveProduct(product);
+
+      if (_selectedSupplierId != null) {
+        await runtime.database.saveProductSupplierLink(
+          ProductSupplierLink(
+            id: 'psl_${product.id}_$_selectedSupplierId',
+            productId: product.id,
+            partyId: _selectedSupplierId!,
+            supplierProductCode: sku,
+            isPrimary: true,
+          ),
+        );
+      }
 
       // Add to initial stock if requested
       final initialStockUnits = (!_isMadeToOrder && _addInitialStock)
@@ -386,18 +654,22 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           Text(
-                            'Add Product to Inventory',
-                            style: TextStyle(
+                            widget.existingProduct != null
+                                ? 'Edit Product'
+                                : 'Add Product to Inventory',
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: SolarColors.charcoal,
                             ),
                           ),
                           Text(
-                            'Admin Portal • Enter details & initial opening stock',
-                            style: TextStyle(
+                            widget.existingProduct != null
+                                ? 'Admin Portal • Update product catalog specifications'
+                                : 'Admin Portal • Enter details & initial opening stock',
+                            style: const TextStyle(
                               fontSize: 12,
                               color: SolarColors.slate500,
                             ),
@@ -570,6 +842,46 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                         ),
                         const SizedBox(height: 14),
 
+                        // Preferred Supplier (Optional)
+                        Row(
+                          children: [
+                            Expanded(
+                              child: DropdownButtonFormField<String?>(
+                                key: ValueKey(_selectedSupplierId),
+                                initialValue: _selectedSupplierId,
+                                decoration: const InputDecoration(
+                                  labelText: 'Preferred Supplier (Optional)',
+                                  prefixIcon: Icon(Icons.business_outlined),
+                                  helperText: 'Supplier providing this product',
+                                ),
+                                items: [
+                                  const DropdownMenuItem<String?>(
+                                    value: null,
+                                    child: Text('None / Direct Purchase'),
+                                  ),
+                                  ..._suppliers.map((s) => DropdownMenuItem<String?>(
+                                    value: s.id,
+                                    child: Text(s.name),
+                                  )),
+                                ],
+                                onChanged: (val) {
+                                  setState(() => _selectedSupplierId = val);
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: IconButton.outlined(
+                                tooltip: 'Add New Supplier',
+                                icon: const Icon(Icons.person_add_alt_1, color: Color(0xFF990000)),
+                                onPressed: _showQuickAddSupplierDialog,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 14),
+
                         // Made to Order / Order on Demand Switch
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -609,84 +921,86 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                         ),
                         const SizedBox(height: 14),
 
-                        // Initial Stock Card
-                        Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: _isMadeToOrder
-                                ? Colors.grey.shade100
-                                : const Color(0xFF004D40).withValues(alpha: 0.04),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
+                        // Initial Stock Card (Only for new products)
+                        if (widget.existingProduct == null) ...[
+                          Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
                               color: _isMadeToOrder
-                                  ? Colors.grey.shade300
-                                  : const Color(0xFF004D40).withValues(alpha: 0.2),
-                            ),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                children: [
-                                  Checkbox(
-                                    value: !_isMadeToOrder && _addInitialStock,
-                                    activeColor: const Color(0xFF004D40),
-                                    onChanged: _isMadeToOrder
-                                        ? null
-                                        : (val) {
-                                            setState(() => _addInitialStock = val ?? false);
-                                          },
-                                  ),
-                                  const SizedBox(width: 4),
-                                  Expanded(
-                                    child: Text(
-                                      'Add to initial inventory stock immediately',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                        color: _isMadeToOrder
-                                            ? Colors.grey.shade500
-                                            : SolarColors.charcoal,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                  ? Colors.grey.shade100
+                                  : const Color(0xFF004D40).withValues(alpha: 0.04),
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: _isMadeToOrder
+                                    ? Colors.grey.shade300
+                                    : const Color(0xFF004D40).withValues(alpha: 0.2),
                               ),
-                              if (_isMadeToOrder)
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 36, top: 4),
-                                  child: Text(
-                                    'Initial stock disabled for Made-to-Order items.',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontStyle: FontStyle.italic,
-                                      color: Colors.grey.shade600,
-                                    ),
-                                  ),
-                                ),
-                              if (!_isMadeToOrder && _addInitialStock) ...[
-                                const SizedBox(height: 10),
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Row(
                                   children: [
+                                    Checkbox(
+                                      value: !_isMadeToOrder && _addInitialStock,
+                                      activeColor: const Color(0xFF004D40),
+                                      onChanged: _isMadeToOrder
+                                          ? null
+                                          : (val) {
+                                              setState(() => _addInitialStock = val ?? false);
+                                            },
+                                    ),
+                                    const SizedBox(width: 4),
                                     Expanded(
-                                      child: TextFormField(
-                                        controller: _initialStockController,
-                                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                                        decoration: InputDecoration(
-                                          labelText: 'Initial Quantity (${_selectedUnit.replaceFirst('unit_', '')})',
-                                          hintText: 'e.g. 10',
-                                          prefixIcon: const Icon(Icons.all_inbox_outlined),
-                                          helperText: 'Posted to Main Warehouse (Sellable)',
+                                      child: Text(
+                                        'Add to initial inventory stock immediately',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                          color: _isMadeToOrder
+                                              ? Colors.grey.shade500
+                                              : SolarColors.charcoal,
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
+                                if (_isMadeToOrder)
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 36, top: 4),
+                                    child: Text(
+                                      'Initial stock disabled for Made-to-Order items.',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontStyle: FontStyle.italic,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                    ),
+                                  ),
+                                if (!_isMadeToOrder && _addInitialStock) ...[
+                                  const SizedBox(height: 10),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: TextFormField(
+                                          controller: _initialStockController,
+                                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                          decoration: InputDecoration(
+                                            labelText: 'Initial Quantity (${_selectedUnit.replaceFirst('unit_', '')})',
+                                            hintText: 'e.g. 10',
+                                            prefixIcon: const Icon(Icons.all_inbox_outlined),
+                                            helperText: 'Posted to Main Warehouse (Sellable)',
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 18),
+                          const SizedBox(height: 18),
+                        ],
 
                         // SECTION 3: Image (Optional)
                         const Text(
@@ -902,7 +1216,13 @@ final class _AddProductDialogState extends ConsumerState<AddProductDialog> {
                               ),
                             )
                           : const Icon(Icons.check_circle_outline),
-                      label: Text(_isSaving ? 'Saving...' : 'Save & Add to Inventory'),
+                      label: Text(
+                        _isSaving
+                            ? 'Saving...'
+                            : (widget.existingProduct != null
+                                ? 'Update Product'
+                                : 'Save & Add to Inventory'),
+                      ),
                     ),
                   ],
                 ),

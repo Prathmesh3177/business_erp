@@ -1112,6 +1112,34 @@ class SerialReplacements extends Table {
   Set<Column<Object>> get primaryKey => {id};
 }
 
+@DataClassName('KitRow')
+class Kits extends Table {
+  TextColumn get id => text()();
+  TextColumn get organizationId => text()();
+  TextColumn get name => text()();
+  TextColumn get category => text()();
+  RealColumn get capacityKw => real().withDefault(const Constant(0))();
+  IntColumn get installationChargesPaise => integer().withDefault(const Constant(0))();
+  BoolColumn get active => boolean().withDefault(const Constant(true))();
+  IntColumn get createdAtUtcMs => integer()();
+  IntColumn get updatedAtUtcMs => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
+@DataClassName('KitLineRow')
+class KitLines extends Table {
+  TextColumn get id => text()();
+  TextColumn get kitId => text()();
+  TextColumn get productId => text()();
+  IntColumn get quantityMicroUnits => integer()();
+  IntColumn get sortOrder => integer()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 @DriftDatabase(
   tables: [
     Organizations,
@@ -1177,6 +1205,8 @@ class SerialReplacements extends Table {
     ServiceJobVisits,
     AmcContracts,
     SerialReplacements,
+    Kits,
+    KitLines,
   ],
 )
 final class FoundationDatabase extends _$FoundationDatabase
@@ -1193,6 +1223,7 @@ final class FoundationDatabase extends _$FoundationDatabase
         SalesStore,
         FinanceStore,
         ProjectStore,
+        KitStore,
         ServiceStore {
   FoundationDatabase._(super.executor, this._file, this._key);
 
@@ -1220,7 +1251,7 @@ final class FoundationDatabase extends _$FoundationDatabase
   }
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -1322,6 +1353,10 @@ final class FoundationDatabase extends _$FoundationDatabase
       if (from < 12) {
         await migrator.createTable(saleOrders);
         await migrator.createTable(saleOrderLines);
+      }
+      if (from < 13) {
+        await migrator.createTable(kits);
+        await migrator.createTable(kitLines);
       }
     },
     beforeOpen: (details) async {
@@ -2047,6 +2082,37 @@ final class FoundationDatabase extends _$FoundationDatabase
             .getSingleOrNull();
     if (bRow == null) return null;
     return getProductById(organizationId, bRow.productId);
+  }
+
+  @override
+  Future<void> saveProductSupplierLink(ProductSupplierLink link) async {
+    await into(productSupplierLinks).insertOnConflictUpdate(
+      ProductSupplierLinksCompanion.insert(
+        id: link.id,
+        productId: link.productId,
+        partyId: link.partyId,
+        supplierProductCode: Value(link.supplierProductCode),
+        isPrimary: Value(link.isPrimary),
+      ),
+    );
+  }
+
+  @override
+  Future<List<ProductSupplierLink>> getProductSupplierLinks(String productId) async {
+    final rows = await (select(productSupplierLinks)
+          ..where((l) => l.productId.equals(productId)))
+        .get();
+    return rows
+        .map(
+          (r) => ProductSupplierLink(
+            id: r.id,
+            productId: r.productId,
+            partyId: r.partyId,
+            supplierProductCode: r.supplierProductCode,
+            isPrimary: r.isPrimary,
+          ),
+        )
+        .toList();
   }
 
   Product _mapProductRow(ProductRow r) {
@@ -3678,6 +3744,14 @@ final class FoundationDatabase extends _$FoundationDatabase
     return (await query.get()).map(_mapSaleOrderRow).toList();
   }
 
+  Future<List<SaleOrder>> getOrdersByCustomer(
+    String organizationId,
+    String partyId,
+  ) async =>
+      (await listSaleOrders(organizationId: organizationId))
+          .where((order) => order.customerPartyId == partyId)
+          .toList();
+
   @override
   Future<void> saveWarrantyEntitlement(WarrantyEntitlement entitlement) async {
     await into(warranties).insertOnConflictUpdate(
@@ -4418,6 +4492,76 @@ final class FoundationDatabase extends _$FoundationDatabase
   // ProjectStore Implementation
   // ---------------------------------------------------------------------
 
+  // ---------------------------------------------------------------------
+  // KitStore Implementation
+  // ---------------------------------------------------------------------
+
+  @override
+  Future<void> saveKit({required Kit kit, required List<KitLine> lines}) async {
+    await transaction(() async {
+      await into(kits).insertOnConflictUpdate(
+        KitsCompanion.insert(
+          id: kit.id,
+          organizationId: kit.organizationId,
+          name: kit.name,
+          category: kit.category,
+          capacityKw: Value(kit.capacityKw),
+          installationChargesPaise: Value(kit.installationChargesPaise.paise),
+          active: Value(kit.active),
+          createdAtUtcMs: kit.createdAtUtc.millisecondsSinceEpoch,
+          updatedAtUtcMs: kit.updatedAtUtc.millisecondsSinceEpoch,
+        ),
+      );
+      await (delete(kitLines)..where((line) => line.kitId.equals(kit.id))).go();
+      for (final line in lines) {
+        await into(kitLines).insert(
+          KitLinesCompanion.insert(
+            id: line.id,
+            kitId: line.kitId,
+            productId: line.productId,
+            quantityMicroUnits: line.quantity.microUnits,
+            sortOrder: line.sortOrder,
+          ),
+        );
+      }
+    });
+  }
+
+  @override
+  Future<Kit?> getKit(String organizationId, String kitId) async {
+    final row = await (select(kits)..where(
+      (kit) => kit.organizationId.equals(organizationId) & kit.id.equals(kitId),
+    )).getSingleOrNull();
+    return row == null ? null : _mapKit(row);
+  }
+
+  @override
+  Future<List<Kit>> listKits(String organizationId, {bool includeInactive = false}) async {
+    final query = select(kits)..where((kit) => kit.organizationId.equals(organizationId));
+    if (!includeInactive) query.where((kit) => kit.active.equals(true));
+    final rows = await (query..orderBy([(kit) => OrderingTerm.asc(kit.name)])).get();
+    return rows.map(_mapKit).toList();
+  }
+
+  @override
+  Future<List<KitLine>> getKitLines(String kitId) async {
+    final rows = await (select(kitLines)
+          ..where((line) => line.kitId.equals(kitId))
+          ..orderBy([(line) => OrderingTerm.asc(line.sortOrder)]))
+        .get();
+    return rows.map(_mapKitLine).toList();
+  }
+
+  @override
+  Future<void> deleteKit(String organizationId, String kitId) async {
+    await transaction(() async {
+      await (delete(kitLines)..where((line) => line.kitId.equals(kitId))).go();
+      await (delete(kits)..where(
+        (kit) => kit.organizationId.equals(organizationId) & kit.id.equals(kitId),
+      )).go();
+    });
+  }
+
   @override
   Future<void> saveQuotation({
     required QuotationHeader header,
@@ -4500,6 +4644,14 @@ final class FoundationDatabase extends _$FoundationDatabase
     return rows.map(_mapQuotationHeader).toList();
   }
 
+  Future<List<QuotationHeader>> getQuotationsByCustomer(
+    String organizationId,
+    String partyId,
+  ) async =>
+      (await listQuotations(organizationId))
+          .where((quote) => quote.customerPartyId == partyId)
+          .toList();
+
   @override
   Future<void> saveProject(SolarProject project) async {
     await into(solarProjects).insertOnConflictUpdate(
@@ -4542,6 +4694,14 @@ final class FoundationDatabase extends _$FoundationDatabase
     )..where((p) => p.organizationId.equals(organizationId))).get();
     return rows.map(_mapSolarProject).toList();
   }
+
+  Future<List<SolarProject>> getProjectsByCustomer(
+    String organizationId,
+    String partyId,
+  ) async =>
+      (await listProjects(organizationId))
+          .where((project) => project.customerPartyId == partyId)
+          .toList();
 
   @override
   Future<void> saveMaterialIssue({required ProjectMaterialIssue issue}) async {
@@ -4592,6 +4752,26 @@ final class FoundationDatabase extends _$FoundationDatabase
 
     return issues;
   }
+
+  Kit _mapKit(KitRow r) => Kit(
+    id: r.id,
+    organizationId: r.organizationId,
+    name: r.name,
+    category: r.category,
+    capacityKw: r.capacityKw,
+    installationChargesPaise: Money.fromPaise(r.installationChargesPaise),
+    active: r.active,
+    createdAtUtc: DateTime.fromMillisecondsSinceEpoch(r.createdAtUtcMs),
+    updatedAtUtc: DateTime.fromMillisecondsSinceEpoch(r.updatedAtUtcMs),
+  );
+
+  KitLine _mapKitLine(KitLineRow r) => KitLine(
+    id: r.id,
+    kitId: r.kitId,
+    productId: r.productId,
+    quantity: Quantity.fromUnits(r.quantityMicroUnits / 1000000),
+    sortOrder: r.sortOrder,
+  );
 
   QuotationHeader _mapQuotationHeader(QuotationHeaderRow r) {
     return QuotationHeader(

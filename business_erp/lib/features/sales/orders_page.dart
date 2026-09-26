@@ -24,6 +24,40 @@ final class OrdersPage extends ConsumerStatefulWidget {
   ConsumerState<OrdersPage> createState() => _OrdersPageState();
 }
 
+List<OrderStatus> _allowedStatuses(OrderStatus status) {
+  const transitions = {
+    OrderStatus.pending: [
+      OrderStatus.pending,
+      OrderStatus.ordered,
+      OrderStatus.cancelled,
+    ],
+    OrderStatus.ordered: [
+      OrderStatus.ordered,
+      OrderStatus.partialArrival,
+      OrderStatus.arrived,
+      OrderStatus.cancelled,
+    ],
+    OrderStatus.partialArrival: [
+      OrderStatus.partialArrival,
+      OrderStatus.arrived,
+      OrderStatus.cancelled,
+    ],
+    OrderStatus.arrived: [
+      OrderStatus.arrived,
+      OrderStatus.readyToDeliver,
+      OrderStatus.cancelled,
+    ],
+    OrderStatus.readyToDeliver: [
+      OrderStatus.readyToDeliver,
+      OrderStatus.delivered,
+      OrderStatus.cancelled,
+    ],
+    OrderStatus.delivered: [OrderStatus.delivered],
+    OrderStatus.cancelled: [OrderStatus.cancelled],
+  };
+  return transitions[status]!;
+}
+
 final class _OrdersPageState extends ConsumerState<OrdersPage>
     with SingleTickerProviderStateMixin {
   late final TabController _tabs;
@@ -123,7 +157,7 @@ final class _OrdersPageState extends ConsumerState<OrdersPage>
   }
 }
 
-final class _OrderList extends StatelessWidget {
+final class _OrderList extends ConsumerWidget {
   const _OrderList({required this.orders, required this.onStatusChanged});
 
   final List<SaleOrder> orders;
@@ -131,7 +165,7 @@ final class _OrderList extends StatelessWidget {
   onStatusChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (orders.isEmpty) {
       return const Center(child: Text('No orders in this section.'));
     }
@@ -167,6 +201,19 @@ final class _OrderList extends StatelessWidget {
                 Text(
                   'Total: ${formatIndianCurrency(order.grandTotalPaise.inRupees)}',
                 ),
+                FutureBuilder<List<SaleOrderLine>>(
+                  future: ref
+                      .read(runtimeProvider.future)
+                      .then(
+                        (runtime) =>
+                            runtime.database.getSaleOrderLines(order.id),
+                      ),
+                  builder: (context, snapshot) => Text(
+                    snapshot.hasData
+                        ? 'Items: ${snapshot.data!.map((line) => '${line.productName} × ${line.quantity.inUnits}').join(', ')}'
+                        : 'Items: loading…',
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Row(
                   children: [
@@ -176,7 +223,7 @@ final class _OrderList extends StatelessWidget {
                         decoration: const InputDecoration(
                           labelText: 'Order status',
                         ),
-                        items: OrderStatus.values
+                        items: _allowedStatuses(order.status)
                             .map(
                               (status) => DropdownMenuItem(
                                 value: status,

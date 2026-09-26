@@ -1,5 +1,3 @@
-import 'dart:async';
-
 final class BarcodeScanResult {
   const BarcodeScanResult({
     required this.barcode,

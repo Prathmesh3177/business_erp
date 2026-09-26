@@ -489,15 +489,16 @@ final class _LegacyReadyView extends ConsumerWidget {
                       icon: const Icon(Icons.verified_user),
                       label: const Text('Warranty & Reminders'),
                     ),
-                    ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF990000),
-                        foregroundColor: Colors.white,
+                    if (ErpBreakpoints.isCompact(context))
+                      ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF990000),
+                          foregroundColor: Colors.white,
+                        ),
+                        onPressed: () => context.push('/mobile'),
+                        icon: const Icon(Icons.phone_android),
+                        label: const Text('Mobile Draft Workflows'),
                       ),
-                      onPressed: () => context.push('/mobile'),
-                      icon: const Icon(Icons.phone_android),
-                      label: const Text('Mobile Draft Workflows'),
-                    ),
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF004D40),
@@ -573,7 +574,11 @@ final class _ReadyViewState extends ConsumerState<_ReadyView> {
     final strings = AppStrings.of(context);
     final copy = _WorkspaceCopy.of(context);
     final modules = _WorkspaceModule.values
-        .where((item) => item.isVisibleTo(session))
+        .where(
+          (item) =>
+              item.isVisibleTo(session) &&
+              (item != _WorkspaceModule.mobile || ErpBreakpoints.isCompact(context)),
+        )
         .toList();
     final compact = ErpBreakpoints.isCompact(context);
 
@@ -2733,14 +2738,16 @@ final class _StockDonutPainter extends CustomPainter {
 }
 
 enum _WorkspaceModule {
-  dashboard('/', Icons.dashboard_rounded, Color(0xFF2563EB), null),
+  dashboard('/dashboard', Icons.dashboard_rounded, Color(0xFF2563EB), Capability.salesRead),
   reports('/reports', Icons.bar_chart_rounded, Color(0xFFF43F5E), Capability.salesRead),
   catalog('/catalog', Icons.category_outlined, Color(0xFF2563EB), Capability.inventoryManage),
   inventory('/inventory', Icons.dns_outlined, Color(0xFFF59E0B), Capability.inventoryManage),
   sales('/sales', Icons.shopping_cart_outlined, SolarColors.crimson, Capability.salesCreate),
+  orders('/orders', Icons.pending_actions_outlined, Color(0xFF8B5CF6), Capability.salesCreate),
   purchases('/purchases', Icons.local_shipping_outlined, Color(0xFF10B981), Capability.purchaseManage),
   accounting('/accounting', Icons.calculate_outlined, Color(0xFF0369A1), Capability.costDataRead),
-  projects('/projects', Icons.wb_sunny_outlined, Color(0xFFF59E0B), null),
+  finance('/finance', Icons.payments_outlined, Color(0xFF0F766E), Capability.financeManage),
+  projects('/projects', Icons.wb_sunny_outlined, Color(0xFFF59E0B), Capability.salesCreate),
   service('/service', Icons.build_outlined, Color(0xFF06B6D4), null),
   parties('/parties', Icons.people_alt_outlined, Color(0xFF8B5CF6), Capability.partyManage),
   warranty('/warranty', Icons.verified_user_outlined, Color(0xFF16A34A), Capability.salesRead),
@@ -2757,7 +2764,7 @@ enum _WorkspaceModule {
 
   bool isVisibleTo(UserSession? session) {
     if (session == null) return false;
-    if (this == _WorkspaceModule.projects || this == _WorkspaceModule.service) {
+    if (this == _WorkspaceModule.service) {
       return session.roleId == Role.adminRoleId;
     }
     return capability == null || session.hasCapability(capability!);
@@ -2791,14 +2798,16 @@ final class _WorkspaceCopy {
     _WorkspaceModule.inventory =>
       marathi ? 'साठा व सिरियल' : 'Inventory & Serials',
     _WorkspaceModule.sales => marathi ? 'विक्री / पीओएस' : 'Sales / POS',
+    _WorkspaceModule.orders => marathi ? 'ऑर्डर' : 'Orders',
     _WorkspaceModule.purchases =>
       marathi ? 'खरेदी व माल प्राप्ती' : 'Purchases & Receipts',
     _WorkspaceModule.accounting =>
       marathi ? 'लेखांकन व जीएसटी' : 'Accounting & GST',
+    _WorkspaceModule.finance => marathi ? 'देयके व खर्च' : 'Payments & Expenses',
     _WorkspaceModule.projects => marathi ? 'सौर प्रकल्प' : 'Solar Projects',
     _WorkspaceModule.service => marathi ? 'सेवा व एएमसी' : 'Service & AMC',
     _WorkspaceModule.parties =>
-      marathi ? 'पार्टी मास्टर्स' : 'Party Masters',
+      marathi ? 'ग्राहक व पुरवठादार' : 'Customers & Suppliers',
     _WorkspaceModule.warranty =>
       marathi ? 'हमी व स्मरणपत्रे' : 'Warranty & Reminders',
     _WorkspaceModule.mobile =>

@@ -6,13 +6,12 @@ import 'inventory_store.dart';
 
 final class PostOpeningStockUseCase {
   const PostOpeningStockUseCase({
-    required InventoryStore inventoryStore,
-    required AccountingStore accountingStore,
-  })  : _inventoryStore = inventoryStore,
-        _accountingStore = accountingStore;
+    required this.inventoryStore,
+    required this.accountingStore,
+  });
 
-  final InventoryStore _inventoryStore;
-  final AccountingStore _accountingStore;
+  final InventoryStore inventoryStore;
+  final AccountingStore accountingStore;
 
   Future<StockBalance> execute(
     CommandContext context, {
@@ -56,10 +55,10 @@ final class PostOpeningStockUseCase {
     );
 
     // Save movement
-    await _inventoryStore.saveStockMovement(movement);
+    await inventoryStore.saveStockMovement(movement);
 
     // Apply movement to stock balance
-    final currentBal = await _inventoryStore.getStockBalance(productId, locationId) ??
+    final currentBal = await inventoryStore.getStockBalance(productId, locationId) ??
         StockBalance(
           productId: productId,
           locationId: locationId,
@@ -69,12 +68,12 @@ final class PostOpeningStockUseCase {
         );
 
     final updatedBal = currentBal.applyMovement(movement: movement, updatedAt: now);
-    await _inventoryStore.saveStockBalance(updatedBal);
+    await inventoryStore.saveStockBalance(updatedBal);
 
     // Process Serials if provided
     for (final rawSerial in serialNumbers) {
       final normalized = SerialRecord.normalizeSerialNumber(rawSerial);
-      final existing = await _inventoryStore.getSerialByNumber(organizationId, productId, normalized);
+      final existing = await inventoryStore.getSerialByNumber(organizationId, productId, normalized);
       if (existing != null) {
         throw ConflictFailure(
           'duplicate_serial',
@@ -92,7 +91,7 @@ final class PostOpeningStockUseCase {
         locationId: locationId,
         updatedAt: now,
       );
-      await _inventoryStore.saveSerialRecord(serialRecord);
+      await inventoryStore.saveSerialRecord(serialRecord);
 
       final event = SerialEvent(
         id: 'se_${now.microsecondsSinceEpoch}_${normalized.hashCode}',
@@ -102,7 +101,7 @@ final class PostOpeningStockUseCase {
         documentId: documentId,
         createdAt: now,
       );
-      await _inventoryStore.saveSerialEvent(event);
+      await inventoryStore.saveSerialEvent(event);
     }
 
     // Post balanced double-entry journal
@@ -131,7 +130,7 @@ final class PostOpeningStockUseCase {
       createdAt: now,
     );
 
-    await _accountingStore.saveJournalEntry(journalEntry);
+    await accountingStore.saveJournalEntry(journalEntry);
 
     return updatedBal;
   }
@@ -139,13 +138,12 @@ final class PostOpeningStockUseCase {
 
 final class PostStockAdjustmentUseCase {
   const PostStockAdjustmentUseCase({
-    required InventoryStore inventoryStore,
-    required AccountingStore accountingStore,
-  })  : _inventoryStore = inventoryStore,
-        _accountingStore = accountingStore;
+    required this.inventoryStore,
+    required this.accountingStore,
+  });
 
-  final InventoryStore _inventoryStore;
-  final AccountingStore _accountingStore;
+  final InventoryStore inventoryStore;
+  final AccountingStore accountingStore;
 
   Future<StockBalance> execute(
     CommandContext context, {
@@ -169,7 +167,7 @@ final class PostStockAdjustmentUseCase {
     final now = DateTime.now();
     final documentId = 'doc_adj_${now.millisecondsSinceEpoch}';
 
-    final currentBal = await _inventoryStore.getStockBalance(productId, locationId) ??
+    final currentBal = await inventoryStore.getStockBalance(productId, locationId) ??
         StockBalance(
           productId: productId,
           locationId: locationId,
@@ -200,8 +198,8 @@ final class PostStockAdjustmentUseCase {
     );
 
     final updatedBal = currentBal.applyMovement(movement: movement, updatedAt: now);
-    await _inventoryStore.saveStockMovement(movement);
-    await _inventoryStore.saveStockBalance(updatedBal);
+    await inventoryStore.saveStockMovement(movement);
+    await inventoryStore.saveStockBalance(updatedBal);
 
     final adjustment = StockAdjustment(
       id: 'adj_${now.millisecondsSinceEpoch}',
@@ -215,7 +213,7 @@ final class PostStockAdjustmentUseCase {
       approvedByUserId: approvedByUserId,
       createdAt: now,
     );
-    await _inventoryStore.saveStockAdjustment(adjustment);
+    await inventoryStore.saveStockAdjustment(adjustment);
 
     // Journal Entry: Surplus (Dr Inv, Cr Equity/Gain) vs Shrinkage (Dr COGS, Cr Inv)
     final absValuePaise = valueDeltaPaise.abs();
@@ -246,7 +244,7 @@ final class PostStockAdjustmentUseCase {
         ],
         createdAt: now,
       );
-      await _accountingStore.saveJournalEntry(journalEntry);
+      await accountingStore.saveJournalEntry(journalEntry);
     }
 
     return updatedBal;

@@ -7,6 +7,7 @@ import '../../app/auth_controller.dart';
 import '../../app/locale_controller.dart';
 import '../../app/theme.dart';
 import '../../l10n/strings.dart';
+import '../settings/backup_restore_dialog.dart';
 import 'erp_ui.dart';
 
 /// Shared authenticated application chrome. Feature pages provide only their
@@ -26,24 +27,232 @@ class ErpFeatureScaffold extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final compact = ErpBreakpoints.isCompact(context);
+    // The dashboard rail needs roughly 236px. Collapse it at tablet widths so
+    // feature pages keep the same stable composition without squeezing their
+    // content or top bar into a different-looking desktop layout.
+    final compact = MediaQuery.sizeOf(context).width < ErpBreakpoints.tablet;
     final session = ref.watch(authProvider);
+    final strings = AppStrings.of(context);
     final nav = _FeatureNavigation(session: session);
+    final featureAppBar = _FeatureAppBar(source: appBar, showMenu: false);
     return Scaffold(
       drawer: compact ? Drawer(child: nav) : null,
-      appBar: _FeatureAppBar(source: appBar, showMenu: compact),
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: compact
           ? _CompactQuickNavigation(session: session)
           : null,
-      body: Row(
-        children: [
-          if (!compact) SizedBox(width: 244, child: nav),
-          Expanded(child: body),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _UnifiedWorkspaceHeader(
+              compact: compact,
+              strings: strings,
+              session: session,
+              onLanguage: () => ref.read(localeProvider.notifier).toggle(),
+            ),
+            Expanded(
+              child: Row(
+                children: [
+                  if (!compact) SizedBox(width: 236, child: nav),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: featureAppBar.preferredSize.height,
+                          child: featureAppBar,
+                        ),
+                        Expanded(child: body),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
+}
+
+/// The same fixed top bar used by the executive dashboard. Keeping it in the
+/// shared feature shell prevents individual workflows from drifting into their
+/// own navigation and account chrome.
+class _UnifiedWorkspaceHeader extends StatelessWidget {
+  const _UnifiedWorkspaceHeader({
+    required this.compact,
+    required this.strings,
+    required this.session,
+    required this.onLanguage,
+  });
+
+  final bool compact;
+  final AppStrings strings;
+  final UserSession? session;
+  final VoidCallback onLanguage;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    height: 68,
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    decoration: const BoxDecoration(
+      color: SolarColors.surface,
+      border: Border(bottom: BorderSide(color: SolarColors.slate100)),
+    ),
+    child: Row(
+      children: [
+        if (compact)
+          Builder(
+            builder: (menuContext) => IconButton(
+              onPressed: () => Scaffold.of(menuContext).openDrawer(),
+              icon: const Icon(Icons.menu_rounded),
+            ),
+          )
+        else
+          const SizedBox(width: 4),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(
+            'assets/images/app_logo.png',
+            width: 38,
+            height: 38,
+            fit: BoxFit.contain,
+            errorBuilder: (_, _, _) => const Icon(
+              Icons.solar_power_rounded,
+              color: SolarColors.crimson,
+              size: 28,
+            ),
+          ),
+        ),
+        const SizedBox(width: 10),
+        if (compact)
+          Expanded(
+            child: Text(
+              strings.get('shopName'),
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
+            ),
+          )
+        else
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                strings.get('shopName'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              Text(strings.get('branch'), style: const TextStyle(color: SolarColors.slate500, fontSize: 11)),
+            ],
+          ),
+        if (!compact) ...[
+          const SizedBox(width: 24),
+          Expanded(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 500),
+                child: Container(
+                  height: 40,
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: SolarColors.canvas,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: SolarColors.slate100),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.search_rounded, size: 19, color: SolarColors.slate500),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: strings.get('searchHint'),
+                            border: InputBorder.none,
+                            isDense: true,
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: SolarColors.surface,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: SolarColors.slate100),
+                        ),
+                        child: const Text('Ctrl + K', style: TextStyle(fontSize: 11, color: SolarColors.slate500, fontWeight: FontWeight.w600)),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ] else const Spacer(),
+        compact
+            ? IconButton(
+                onPressed: onLanguage,
+                icon: const Icon(Icons.language_rounded),
+                tooltip: strings.get('language'),
+              )
+            : InkWell(
+                onTap: onLanguage,
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: SolarColors.surface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: SolarColors.slate100),
+                  ),
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.language_rounded, size: 16, color: SolarColors.charcoal),
+                    const SizedBox(width: 6),
+                    Text(strings.get('language'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: SolarColors.slate500),
+                  ]),
+                ),
+              ),
+        const SizedBox(width: 10),
+        CircleAvatar(
+          radius: 18,
+          backgroundColor: const Color(0xFF065F46),
+          child: Text(
+            session?.username.isNotEmpty == true ? session!.username[0].toUpperCase() : 'A',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+          ),
+        ),
+        if (!compact) ...[
+          const SizedBox(width: 8),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(session?.username ?? 'Admin', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+              Text(
+                session?.roleId == Role.adminRoleId ? strings.get('administrator') : strings.get('counterStaff'),
+                style: const TextStyle(fontSize: 11, color: SolarColors.slate500),
+              ),
+            ],
+          ),
+          const SizedBox(width: 4),
+          const Icon(Icons.keyboard_arrow_down_rounded, size: 16, color: SolarColors.slate500),
+          const SizedBox(width: 18),
+          const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.remove, size: 16, color: SolarColors.slate500),
+              SizedBox(width: 12),
+              Icon(Icons.crop_square, size: 14, color: SolarColors.slate500),
+              SizedBox(width: 12),
+              Icon(Icons.close, size: 16, color: SolarColors.slate500),
+            ],
+          ),
+        ],
+      ],
+    ),
+  );
 }
 
 class _FeatureAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -96,85 +305,54 @@ class _FeatureNavigation extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 18, 12, 14),
-              child: Row(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.asset(
-                      'assets/images/app_logo.png',
-                      width: 36,
-                      height: 36,
-                      fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEE2E2),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Icon(
-                          Icons.solar_power_rounded,
-                          color: Color(0xFFDC2626),
-                          size: 22,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Shree Krushna Sales',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        Text(
-                          strings.get('branch'),
-                          style: const TextStyle(
-                            fontSize: 11,
-                            color: Color(0xFF64748B),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 10),
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
                 children: [
                   for (final entry in entries)
                     Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 2,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 1),
                       child: ListTile(
-                        minLeadingWidth: 24,
+                        dense: true,
+                        visualDensity: const VisualDensity(vertical: -1),
+                        minLeadingWidth: 20,
                         selected: entry.matches(currentPath),
-                        selectedColor: const Color(0xFF0B57D0),
                         selectedTileColor: const Color(0xFFE8F1FF),
-                        leading: Icon(entry.icon),
-                        title: Text(strings.get(entry.labelKey)),
+                        leading: Icon(
+                          entry.icon,
+                          size: 20,
+                          color: entry.matches(currentPath)
+                              ? const Color(0xFF0B57D0)
+                              : const Color(0xFF475569),
+                        ),
+                        title: Text(
+                          strings.get(entry.labelKey),
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: entry.matches(currentPath)
+                                ? FontWeight.w700
+                                : FontWeight.w500,
+                            color: entry.matches(currentPath)
+                                ? const Color(0xFF0B57D0)
+                                : const Color(0xFF334155),
+                          ),
+                        ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(9),
                         ),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14,
                         ),
                         onTap: () {
-                          if (ErpBreakpoints.isCompact(context)) {
+                          if (MediaQuery.sizeOf(context).width < ErpBreakpoints.tablet) {
                             Navigator.of(context).pop();
+                          }
+                          if (entry == _FeatureNavEntry.backup) {
+                            showDialog<void>(
+                              context: context,
+                              builder: (_) => const BackupRestoreDialog(),
+                            );
+                            return;
                           }
                           context.go(entry.path);
                         },
@@ -185,31 +363,22 @@ class _FeatureNavigation extends StatelessWidget {
             ),
             const Divider(height: 1),
             Consumer(
-              builder: (context, ref, _) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    minimumSize: const Size.fromHeight(44),
-                  ),
-                  onPressed: () => ref.read(localeProvider.notifier).toggle(),
-                  icon: const Icon(Icons.language, size: 18),
-                  label: Text(strings.get('language')),
-                ),
-              ),
-            ),
-            Consumer(
               builder: (context, ref, _) => ListTile(
-                leading: const Icon(Icons.lock_outline),
-                title: Text(strings.get('lockSession')),
+                dense: true,
+                visualDensity: const VisualDensity(vertical: -2),
+                leading: const Icon(Icons.lock_outline_rounded, size: 19, color: Color(0xFF475569)),
+                title: Text(strings.get('lockSession'), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Color(0xFF334155))),
                 onTap: () => ref.read(authProvider.notifier).lockSession(),
               ),
             ),
             Consumer(
               builder: (context, ref, _) => ListTile(
-                leading: const Icon(Icons.logout, color: SolarColors.crimson),
+                dense: true,
+                visualDensity: const VisualDensity(vertical: -2),
+                leading: const Icon(Icons.logout_rounded, size: 19, color: SolarColors.crimson),
                 title: Text(
                   strings.get('logout'),
-                  style: const TextStyle(color: SolarColors.crimson),
+                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: SolarColors.crimson),
                 ),
                 onTap: () => ref.read(authProvider.notifier).logout(),
               ),
@@ -223,7 +392,7 @@ class _FeatureNavigation extends StatelessWidget {
 }
 
 enum _FeatureNavEntry {
-  dashboard('/', 'dashboard', Icons.dashboard_rounded, Capability.salesRead),
+  dashboard('/dashboard', 'dashboard', Icons.dashboard_rounded, Capability.salesRead),
   reports('/reports', 'reports', Icons.bar_chart_rounded, Capability.salesRead),
   catalog(
     '/catalog',
@@ -249,6 +418,12 @@ enum _FeatureNavEntry {
     Icons.pending_actions_outlined,
     Capability.salesCreate,
   ),
+  finance(
+    '/finance',
+    'finance',
+    Icons.payments_outlined,
+    Capability.financeManage,
+  ),
   purchases(
     '/purchases',
     'purchases',
@@ -261,7 +436,7 @@ enum _FeatureNavEntry {
     Icons.calculate_outlined,
     Capability.costDataRead,
   ),
-  projects('/projects', 'projects', Icons.wb_sunny_outlined, null),
+  projects('/projects', 'projects', Icons.wb_sunny_outlined, Capability.salesCreate),
   service('/service', 'service', Icons.build_outlined, null),
   parties(
     '/parties',
@@ -274,6 +449,12 @@ enum _FeatureNavEntry {
     'warranty',
     Icons.verified_user_outlined,
     Capability.salesRead,
+  ),
+  backup(
+    '#backup',
+    'backup',
+    Icons.cloud_sync_outlined,
+    Capability.userManage,
   ),
   users(
     '/users',
@@ -290,7 +471,7 @@ enum _FeatureNavEntry {
 
   bool isVisibleTo(UserSession? activeSession) {
     if (activeSession == null) return false;
-    if (this == projects || this == service) {
+    if (this == service) {
       return activeSession.roleId == Role.adminRoleId;
     }
     return activeSession.hasCapability(capability!);

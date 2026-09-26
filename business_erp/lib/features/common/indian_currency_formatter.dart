@@ -2,6 +2,20 @@
 /// to words using the Indian numbering system (Crores, Lakhs, Thousands, Hundreds).
 library;
 
+/// Marathi UI copy must never localize business identifiers or numeric values.
+/// This normalizes any Devanagari digits received from platform formatters.
+String ensureEnglishNumerals(String text) => text
+    .replaceAll('०', '0')
+    .replaceAll('१', '1')
+    .replaceAll('२', '2')
+    .replaceAll('३', '3')
+    .replaceAll('४', '4')
+    .replaceAll('५', '5')
+    .replaceAll('६', '6')
+    .replaceAll('७', '7')
+    .replaceAll('८', '8')
+    .replaceAll('९', '9');
+
 String formatIndianCurrency(double amount, {bool showSymbol = true}) {
   final isNegative = amount < 0;
   final absAmount = amount.abs();
@@ -13,7 +27,7 @@ String formatIndianCurrency(double amount, {bool showSymbol = true}) {
   final symbol = showSymbol ? '₹ ' : '';
 
   if (integerPart.length <= 3) {
-    return '${isNegative ? '-' : ''}$symbol$integerPart.$decimalPart';
+    return ensureEnglishNumerals('${isNegative ? '-' : ''}$symbol$integerPart.$decimalPart');
   }
 
   final lastThree = integerPart.substring(integerPart.length - 3);
@@ -29,7 +43,7 @@ String formatIndianCurrency(double amount, {bool showSymbol = true}) {
   }
 
   final formattedInteger = '${segments.join(',')},$lastThree';
-  return '${isNegative ? '-' : ''}$symbol$formattedInteger.$decimalPart';
+  return ensureEnglishNumerals('${isNegative ? '-' : ''}$symbol$formattedInteger.$decimalPart');
 }
 
 String numberToIndianWords(

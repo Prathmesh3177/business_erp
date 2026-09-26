@@ -46,7 +46,7 @@ final class DriftReportStore implements ReportStore {
 
     Money totalGrossSales = Money.zero;
     Money totalDiscounts = Money.zero;
-    Money totalTax = Money.zero;
+    final totalTax = Money.zero;
     Money totalNetSales = Money.zero;
     Money totalCogs = Money.zero;
 

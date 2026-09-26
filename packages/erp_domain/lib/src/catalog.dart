@@ -178,6 +178,52 @@ final class Product {
 
   String? get imageUrl => attributes['imageUrl'] ?? attributes['image'];
 
+  Product copyWith({
+    String? id,
+    String? organizationId,
+    String? sku,
+    String? name,
+    String? categoryId,
+    String? brandId,
+    String? model,
+    String? baseUnitId,
+    SerialPolicy? serialPolicy,
+    BatchPolicy? batchPolicy,
+    double? minStock,
+    String? hsnCode,
+    int? defaultTaxRateBps,
+    int? costPricePaise,
+    int? sellingPricePaise,
+    bool? active,
+    bool? isMadeToOrder,
+    Map<String, String>? attributes,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return Product(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      sku: sku ?? this.sku,
+      name: name ?? this.name,
+      categoryId: categoryId ?? this.categoryId,
+      brandId: brandId ?? this.brandId,
+      model: model ?? this.model,
+      baseUnitId: baseUnitId ?? this.baseUnitId,
+      serialPolicy: serialPolicy ?? this.serialPolicy,
+      batchPolicy: batchPolicy ?? this.batchPolicy,
+      minStock: minStock ?? this.minStock,
+      hsnCode: hsnCode ?? this.hsnCode,
+      defaultTaxRateBps: defaultTaxRateBps ?? this.defaultTaxRateBps,
+      costPricePaise: costPricePaise ?? this.costPricePaise,
+      sellingPricePaise: sellingPricePaise ?? this.sellingPricePaise,
+      active: active ?? this.active,
+      isMadeToOrder: isMadeToOrder ?? this.isMadeToOrder,
+      attributes: attributes ?? this.attributes,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   static String normalizeSku(String rawSku) {
     return rawSku.trim().toUpperCase();
   }

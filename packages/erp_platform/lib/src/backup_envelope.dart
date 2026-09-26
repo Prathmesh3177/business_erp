@@ -3,7 +3,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
-import 'package:erp_application/erp_application.dart';
 import 'package:erp_domain/erp_domain.dart';
 
 import 'crypto_hasher.dart';

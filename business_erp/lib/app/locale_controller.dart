@@ -7,9 +7,9 @@ final localeProvider = NotifierProvider<LocaleController, Locale>(
 
 final class LocaleController extends Notifier<Locale> {
   @override
-  Locale build() => const Locale('en');
+  Locale build() => const Locale('mr');
 
   void toggle() {
-    state = Locale(state.languageCode == 'en' ? 'mr' : 'en');
+    state = Locale(state.languageCode == 'mr' ? 'en' : 'mr');
   }
 }

@@ -7,7 +7,6 @@ import 'package:erp_domain/erp_domain.dart';
 import '../features/accounting/accounting_page.dart';
 import '../features/auth/login_page.dart';
 import '../features/catalog/catalog_page.dart';
-import '../features/dashboard/dashboard_page.dart';
 import '../features/finance/finance_page.dart';
 import '../features/foundation/foundation_page.dart';
 import '../features/inventory/inventory_page.dart';
@@ -15,6 +14,7 @@ import '../features/parties/parties_page.dart';
 import '../features/parties/party_detail_page.dart';
 import '../features/purchases/purchases_page.dart';
 import '../features/projects/projects_page.dart';
+import '../features/projects/kit_library_page.dart';
 import '../features/reports/reports_page.dart';
 import '../features/sales/pos_page.dart';
 import '../features/sales/orders_page.dart';
@@ -36,7 +36,10 @@ final _router = GoRouter(
       path: '/dashboard',
       builder: (context, state) => const _RoleGuard(
         capability: Capability.salesRead,
-        child: DashboardPage(),
+        // The root workspace is the canonical dashboard. Rendering the legacy
+        // KPI-only page here caused the UI to change after navigating away and
+        // back through the sidebar.
+        child: FoundationPage(),
       ),
     ),
     GoRoute(
@@ -118,7 +121,14 @@ final _router = GoRouter(
     ),
     GoRoute(
       path: '/projects',
-      builder: (context, state) => const _AdminRoleGuard(child: ProjectsPage()),
+      builder: (context, state) => const _RoleGuard(
+        capability: Capability.salesCreate,
+        child: ProjectsPage(),
+      ),
+    ),
+    GoRoute(
+      path: '/kits',
+      builder: (context, state) => const _AdminRoleGuard(child: KitLibraryPage()),
     ),
     GoRoute(
       path: '/mobile',
@@ -250,15 +260,15 @@ final class RootShell extends ConsumerStatefulWidget {
 }
 
 final class _RootShellState extends ConsumerState<RootShell> {
-  bool _splashCompleted = false;
+  static bool _globalSplashCompleted = false;
 
   @override
   Widget build(BuildContext context) {
-    if (!_splashCompleted) {
+    if (!_globalSplashCompleted) {
       return SplashScreen(
         onFinished: () {
           if (mounted) {
-            setState(() => _splashCompleted = true);
+            setState(() => _globalSplashCompleted = true);
           }
         },
       );

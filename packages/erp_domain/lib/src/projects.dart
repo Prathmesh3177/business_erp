@@ -1,20 +1,53 @@
 import 'money.dart';
 import 'tax_engine.dart';
 
-enum QuotationStatus {
-  draft,
-  sent,
-  approved,
-  rejected,
-  superseded,
+enum QuotationStatus { draft, sent, approved, rejected, superseded }
+
+enum ProjectStatus { draft, planning, inProgress, completed, cancelled }
+
+/// A reusable, organization-owned bill of materials for a solar installation.
+///
+/// Kit lines deliberately retain only product IDs. Product names, SKU, tax and
+/// prices are resolved from the catalog when a quotation is created so a kit
+/// can never silently quote a made-up template product.
+final class Kit {
+  const Kit({
+    required this.id,
+    required this.organizationId,
+    required this.name,
+    required this.category,
+    required this.capacityKw,
+    required this.installationChargesPaise,
+    required this.active,
+    required this.createdAtUtc,
+    required this.updatedAtUtc,
+  });
+
+  final String id;
+  final String organizationId;
+  final String name;
+  final String category;
+  final double capacityKw;
+  final Money installationChargesPaise;
+  final bool active;
+  final DateTime createdAtUtc;
+  final DateTime updatedAtUtc;
 }
 
-enum ProjectStatus {
-  draft,
-  planning,
-  inProgress,
-  completed,
-  cancelled,
+final class KitLine {
+  const KitLine({
+    required this.id,
+    required this.kitId,
+    required this.productId,
+    required this.quantity,
+    required this.sortOrder,
+  });
+
+  final String id;
+  final String kitId;
+  final String productId;
+  final Quantity quantity;
+  final int sortOrder;
 }
 
 final class QuotationHeader {
@@ -33,7 +66,8 @@ final class QuotationHeader {
     required this.totalTaxPaise,
     required this.grandTotalPaise,
     required this.installationChargesPaise,
-    this.termsSnapshot = 'Standard 1-Year Workmanship & 25-Year Performance Warranty',
+    this.termsSnapshot =
+        'Standard 1-Year Workmanship & 25-Year Performance Warranty',
     required this.createdAtUtc,
   });
 
@@ -151,7 +185,8 @@ final class ProjectMaterialIssueLine {
   final List<String> serials;
 
   Money get totalCostPaise {
-    final doubleRupees = (costSnapshotMicroRupees / 1000000.0) * quantity.inUnits;
+    final doubleRupees =
+        (costSnapshotMicroRupees / 1000000.0) * quantity.inUnits;
     return Money.fromRupees(doubleRupees);
   }
 }

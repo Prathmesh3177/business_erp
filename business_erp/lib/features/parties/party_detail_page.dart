@@ -71,24 +71,18 @@ final class PartyDetailPage extends ConsumerWidget {
         organizationId: identity.organization.id.value,
         customerPartyId: partyId,
       ),
-      db.listQuotations(identity.organization.id.value),
-      db.listSaleOrders(organizationId: identity.organization.id.value),
-      db.listProjects(identity.organization.id.value),
+      db.getQuotationsByCustomer(identity.organization.id.value, partyId),
+      db.getOrdersByCustomer(identity.organization.id.value, partyId),
+      db.getProjectsByCustomer(identity.organization.id.value, partyId),
     ]);
     return _PartyProfile(
       party: party,
       addresses: results[0] as List<PartyAddress>,
       contacts: results[1] as List<PartyContact>,
       sales: results[2] as List<SaleHeader>,
-      quotations: (results[3] as List<QuotationHeader>)
-          .where((item) => item.customerPartyId == partyId)
-          .toList(),
-      orders: (results[4] as List<SaleOrder>)
-          .where((item) => item.customerPartyId == partyId)
-          .toList(),
-      projects: (results[5] as List<SolarProject>)
-          .where((item) => item.customerPartyId == partyId)
-          .toList(),
+      quotations: results[3] as List<QuotationHeader>,
+      orders: results[4] as List<SaleOrder>,
+      projects: results[5] as List<SolarProject>,
     );
   }
 }
@@ -173,7 +167,7 @@ final class _SalesHistory extends StatelessWidget {
         .map(
           (s) => (
             'Invoice ${s.id.substring(0, 8)}',
-            '${_date(s.businessDate)} · ${s.status.name.toUpperCase()}',
+            '${_date(s.businessDate)} · ${_paymentStatus(s)} · Paid ${formatIndianCurrency(s.amountPaidPaise.inRupees)} · Due ${formatIndianCurrency(s.balanceDuePaise.inRupees)}',
             formatIndianCurrency(s.grandTotalPaise.inRupees),
           ),
         )
@@ -275,35 +269,71 @@ final class _Ledger extends StatelessWidget {
       0,
       (sum, sale) => sum + sale.balanceDuePaise.inRupees,
     );
-    return Center(
-      child: Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Customer Ledger',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              Text('Invoiced: ${formatIndianCurrency(billed)}'),
-              Text('Received: ${formatIndianCurrency(paid)}'),
-              const Divider(),
-              Text(
-                'Outstanding: ${formatIndianCurrency(due)}',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Customer Ledger',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text('Invoiced: ${formatIndianCurrency(billed)}'),
+                Text('Received: ${formatIndianCurrency(paid)}'),
+                const Divider(),
+                Text(
+                  'Outstanding: ${formatIndianCurrency(due)}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
-      ),
+        const SizedBox(height: 12),
+        Text('Payment history', style: Theme.of(context).textTheme.titleMedium),
+        const SizedBox(height: 6),
+        ...profile.sales.map(
+          (sale) => Card(
+            child: ListTile(
+              leading: Icon(
+                sale.balanceDuePaise.paise == 0
+                    ? Icons.check_circle
+                    : Icons.pending_actions,
+                color: sale.balanceDuePaise.paise == 0
+                    ? Colors.green
+                    : Colors.orange,
+              ),
+              title: Text(
+                'Invoice ${sale.id.substring(0, 8)} · ${_paymentStatus(sale)}',
+              ),
+              subtitle: Text(
+                '${_date(sale.businessDate)} · Received ${formatIndianCurrency(sale.amountPaidPaise.inRupees)}',
+              ),
+              trailing: Text(
+                'Due ${formatIndianCurrency(sale.balanceDuePaise.inRupees)}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
 String _date(DateTime value) =>
     '${value.day.toString().padLeft(2, '0')}/${value.month.toString().padLeft(2, '0')}/${value.year}';
+
+String _paymentStatus(SaleHeader sale) => sale.balanceDuePaise.paise == 0
+    ? 'PAID'
+    : sale.amountPaidPaise.paise == 0
+    ? 'UNPAID'
+    : 'PARTIALLY PAID';

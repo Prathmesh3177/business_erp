@@ -2,7 +2,6 @@ import 'package:erp_domain/erp_domain.dart';
 
 import 'catalog_store.dart';
 import 'command_context.dart';
-import 'party_store.dart';
 
 final class CsvRowError {
   const CsvRowError({required this.rowIndex, required this.field, required this.message});
@@ -31,14 +30,9 @@ final class CsvImportResult {
 }
 
 final class CsvMasterImportUseCase {
-  CsvMasterImportUseCase({
-    required CatalogStore catalogStore,
-    required PartyStore partyStore,
-  })  : _catalogStore = catalogStore,
-        _partyStore = partyStore;
+  CsvMasterImportUseCase({required this.catalogStore});
 
-  final CatalogStore _catalogStore;
-  final PartyStore _partyStore;
+  final CatalogStore catalogStore;
   final Set<String> _processedImportCommandIds = {};
 
   Future<CsvImportResult> importProducts(
@@ -115,7 +109,7 @@ final class CsvMasterImportUseCase {
         continue;
       }
 
-      final existing = await _catalogStore.getProductBySku(organizationId, Product.normalizeSku(sku));
+    final existing = await catalogStore.getProductBySku(organizationId, Product.normalizeSku(sku));
       if (existing != null) {
         errors.add(CsvRowError(rowIndex: i, field: 'sku', message: 'Duplicate SKU "${Product.normalizeSku(sku)}" ignored'));
         skipped++;
@@ -137,7 +131,7 @@ final class CsvMasterImportUseCase {
           updatedAt: DateTime.now(),
         );
 
-        await _catalogStore.saveProduct(product);
+        await catalogStore.saveProduct(product);
         imported++;
       } catch (e) {
         errors.add(CsvRowError(rowIndex: i, field: 'row', message: e.toString()));

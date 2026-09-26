@@ -501,6 +501,10 @@ final class _QuotationPageState extends ConsumerState<QuotationPage> {
             onPressed: () => _previewQuotation(quote, lines),
             child: const Text('Preview / Print'),
           ),
+          TextButton(
+            onPressed: () => _editQuotation(quote, lines),
+            child: const Text('Edit'),
+          ),
           if (quote.status != QuotationStatus.approved)
             TextButton(
               onPressed: () => _convertToProject(quote),
@@ -522,6 +526,147 @@ final class _QuotationPageState extends ConsumerState<QuotationPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _editQuotation(
+    QuotationHeader quote,
+    List<QuotationLine> lines,
+  ) async {
+    final quantities = lines
+        .map(
+          (line) =>
+              TextEditingController(text: line.quantity.inUnits.toString()),
+        )
+        .toList();
+    final prices = lines
+        .map(
+          (line) => TextEditingController(
+            text: line.unitPrice.inRupees.toStringAsFixed(2),
+          ),
+        )
+        .toList();
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Edit ${quote.quotationNumber}'),
+        content: SizedBox(
+          width: 560,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: lines.length,
+            itemBuilder: (_, index) => Row(
+              children: [
+                Expanded(child: Text(lines[index].productName)),
+                SizedBox(
+                  width: 80,
+                  child: TextField(
+                    controller: quantities[index],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(labelText: 'Qty'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 110,
+                  child: TextField(
+                    controller: prices[index],
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(labelText: 'Price ₹'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Save changes'),
+          ),
+        ],
+      ),
+    );
+    if (saved != true) return;
+    final requests = <TaxLineRequest>[];
+    for (var index = 0; index < lines.length; index++) {
+      requests.add(
+        TaxLineRequest(
+          lineId: lines[index].id,
+          quantity: Quantity.fromUnits(
+            double.tryParse(quantities[index].text) ?? 0,
+          ),
+          unitPrice: UnitPrice.fromRupees(
+            double.tryParse(prices[index].text) ?? 0,
+          ),
+          taxRate: TaxRate.fromBps(
+            lines[index].taxSnapshot.taxableAmount.paise == 0
+                ? 0
+                : ((lines[index].taxSnapshot.totalTax.paise /
+                              lines[index].taxSnapshot.taxableAmount.paise) *
+                          10000)
+                      .round(),
+          ),
+        ),
+      );
+    }
+    final invoice = const TaxEngine().calculateInvoiceTax(
+      lines: requests,
+      supplyType: TaxSupplyType.intraState,
+    );
+    final updated = <QuotationLine>[];
+    for (var index = 0; index < lines.length; index++) {
+      final old = lines[index];
+      final request = requests[index];
+      final tax = invoice.lineResults[index];
+      updated.add(
+        QuotationLine(
+          id: old.id,
+          quotationId: old.quotationId,
+          productId: old.productId,
+          productName: old.productName,
+          sku: old.sku,
+          hsnCode: old.hsnCode,
+          quantity: request.quantity,
+          unitPrice: request.unitPrice,
+          lineDiscountPaise: old.lineDiscountPaise,
+          taxSnapshot: tax,
+          netTotalPaise: tax.totalAmount,
+          isServiceLine: old.isServiceLine,
+          bomSnapshotJson: old.bomSnapshotJson,
+        ),
+      );
+    }
+    final subtotal = invoice.subtotal;
+    final header = QuotationHeader(
+      id: quote.id,
+      organizationId: quote.organizationId,
+      branchId: quote.branchId,
+      quotationNumber: quote.quotationNumber,
+      revisionNumber: quote.revisionNumber + 1,
+      customerPartyId: quote.customerPartyId,
+      customerName: quote.customerName,
+      validUntil: quote.validUntil,
+      status: quote.status,
+      subtotalPaise: subtotal,
+      allocatedDiscountPaise: quote.allocatedDiscountPaise,
+      totalTaxPaise: invoice.totalTax,
+      grandTotalPaise: invoice.grandTotal + quote.installationChargesPaise,
+      installationChargesPaise: quote.installationChargesPaise,
+      termsSnapshot: quote.termsSnapshot,
+      createdAtUtc: quote.createdAtUtc,
+    );
+    final runtime = await ref.read(runtimeProvider.future);
+    await runtime.database.saveQuotation(header: header, lines: updated);
+    ref.invalidate(quotationListProvider);
+    if (mounted) Navigator.pop(context);
   }
 
   Future<void> _setStatus(QuotationHeader quote, QuotationStatus status) async {

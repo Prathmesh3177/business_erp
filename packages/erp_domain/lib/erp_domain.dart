@@ -22,7 +22,7 @@ export 'src/purchasing.dart';
 export 'src/reports.dart';
 export 'src/sales.dart';
 export 'src/service_amc.dart';
+export 'src/subsidy.dart';
 export 'src/tax_engine.dart';
 export 'src/user.dart';
 export 'src/warranty_reminder.dart';
-

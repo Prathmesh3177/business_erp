@@ -44,35 +44,22 @@ final class _MemoryCatalogStore implements CatalogStore {
   Future<Product?> getProductById(String organizationId, String id) async => null;
   @override
   Future<List<Unit>> getUnits(String organizationId) async => [];
-}
-
-final class _MemoryPartyStore implements PartyStore {
   @override
-  Future<Party?> getPartyByGstin(String organizationId, String gstin) async => null;
+  Future<void> saveProductSupplierLink(ProductSupplierLink link) async {}
   @override
-  Future<Party?> getPartyById(String organizationId, String id) async => null;
-  @override
-  Future<List<PartyAddress>> getPartyAddresses(String partyId) async => [];
-  @override
-  Future<List<PartyContact>> getPartyContacts(String partyId) async => [];
-  @override
-  Future<void> saveParty(Party party, {List<PartyAddress>? addresses, List<PartyContact>? contacts}) async {}
-  @override
-  Future<List<Party>> searchParties(String organizationId, {String? query, bool? isCustomer, bool? isSupplier, bool includeInactive = false}) async => [];
+  Future<List<ProductSupplierLink>> getProductSupplierLinks(String productId) async => [];
 }
 
 void main() {
   late _MemoryCatalogStore catalogStore;
-  late _MemoryPartyStore partyStore;
   late SearchCatalogUseCase searchUseCase;
   late CsvMasterImportUseCase csvImportUseCase;
   final now = DateTime.now();
 
   setUp(() {
     catalogStore = _MemoryCatalogStore();
-    partyStore = _MemoryPartyStore();
     searchUseCase = SearchCatalogUseCase(catalogStore);
-    csvImportUseCase = CsvMasterImportUseCase(catalogStore: catalogStore, partyStore: partyStore);
+    csvImportUseCase = CsvMasterImportUseCase(catalogStore: catalogStore);
   });
 
   test('SearchCatalogUseCase filters cost data based on costDataRead capability', () async {

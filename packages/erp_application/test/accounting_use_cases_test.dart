@@ -69,13 +69,11 @@ final class _MemoryAccountingStore implements AccountingStore {
 
 void main() {
   late _MemoryAccountingStore store;
-  late PostJournalEntryUseCase postJournalUseCase;
   late PostOpeningBalancesUseCase postOpeningUseCase;
   final now = DateTime.now();
 
   setUp(() {
     store = _MemoryAccountingStore();
-    postJournalUseCase = PostJournalEntryUseCase(store);
     postOpeningUseCase = PostOpeningBalancesUseCase(store);
   });
 

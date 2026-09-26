@@ -3,6 +3,16 @@ import 'package:test/test.dart';
 
 void main() {
   group('P15 Solar Projects & BOM Quotations Domain Tests', () {
+    test('PM Surya Ghar caps subsidy at ₹78,000 for systems above 3 kW', () {
+      final result = calculateSubsidy(
+        scheme: SubsidyScheme.pmSuryaGhar,
+        capacityKw: 5,
+        projectCost: Money.fromRupees(350000),
+      );
+      expect(result.subsidy, Money.fromRupees(78000));
+      expect(result.customerPayable, Money.fromRupees(272000));
+    });
+
     test('ProjectMaterialIssueLine computes total cost paise correctly', () {
       final line = ProjectMaterialIssueLine(
         id: 'iss_line_1',
@@ -14,7 +24,10 @@ void main() {
         costSnapshotMicroRupees: 12000000000, // ₹12,000 per unit micro rupees
       );
 
-      expect(line.totalCostPaise.inRupees, equals(120000.0)); // 10 * ₹12,000 = ₹1,20,000
+      expect(
+        line.totalCostPaise.inRupees,
+        equals(120000.0),
+      ); // 10 * ₹12,000 = ₹1,20,000
     });
 
     test('ProjectBudgetReport calculates estimated profit and margin %', () {
@@ -32,10 +45,11 @@ void main() {
         totalActualCostPaise: Money.fromRupees(200000.0),
         wipBalancePaise: Money.fromRupees(180000.0),
         invoicedPaise: Money.fromRupees(300000.0),
-        estimatedGrossProfitPaise: Money.fromRupees(100000.0), // ₹3,00,000 revenue - ₹2,00,000 cost
+        estimatedGrossProfitPaise: Money.fromRupees(
+          100000.0,
+        ), // ₹3,00,000 revenue - ₹2,00,000 cost
         marginPercentage: 33.33,
       );
-
 
       expect(report.totalBudgetPaise.inRupees, equals(250000.0));
       expect(report.totalActualCostPaise.inRupees, equals(200000.0));

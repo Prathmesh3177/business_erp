@@ -6,12 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('locale controller switches English to Marathi', (tester) async {
+  testWidgets('locale controller switches Marathi to English and back', (tester) async {
     await tester.pumpWidget(const ProviderScope(child: _LocaleProbe()));
-    expect(find.text('Shree Krushna Sales ERP'), findsOneWidget);
+    expect(find.text('डॅशबोर्ड'), findsOneWidget);
     await tester.tap(find.byType(TextButton));
     await tester.pump();
-    expect(find.text('श्री कृष्णा सेल्स ईआरपी'), findsOneWidget);
+    expect(find.text('Dashboard'), findsOneWidget);
   });
 }
 
@@ -34,7 +34,7 @@ final class _LocaleProbe extends ConsumerWidget {
         builder: (context) => Scaffold(
           body: Column(
             children: [
-              Text(AppStrings.of(context).get('appTitle')),
+              Text(AppStrings.of(context).get('dashboard')),
               TextButton(
                 onPressed: () => ref.read(localeProvider.notifier).toggle(),
                 child: const Text('switch'),

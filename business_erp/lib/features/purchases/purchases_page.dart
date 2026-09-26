@@ -39,9 +39,9 @@ final class _PurchasesPageState extends ConsumerState<PurchasesPage>
         foregroundColor: const Color(0xFF1E293B),
         bottom: TabBar(
           controller: _tabController,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          indicatorColor: Colors.white,
+          labelColor: const Color(0xFF990000),
+          unselectedLabelColor: const Color(0xFF64748B),
+          indicatorColor: const Color(0xFF990000),
           indicatorWeight: 3,
           tabs: const [
             Tab(icon: Icon(Icons.receipt_long), text: 'Purchase Invoices'),
@@ -294,6 +294,7 @@ class _NewPurchaseBillTabState extends ConsumerState<_NewPurchaseBillTab> {
   final _formKey = GlobalKey<FormState>();
 
   Party? _selectedSupplier;
+  String? _selectedSupplierId;
   final _extInvoiceNoController = TextEditingController();
   final _invoiceDate = DateTime.now();
   String _selectedLocationId = 'MAIN_WH';
@@ -329,8 +330,143 @@ class _NewPurchaseBillTabState extends ConsumerState<_NewPurchaseBillTab> {
       setState(() {
         _suppliers = parties;
         _products = prods;
+        if (_selectedSupplierId != null) {
+          try {
+            _selectedSupplier = parties.firstWhere((p) => p.id == _selectedSupplierId);
+          } catch (_) {}
+        }
         _loadingMasters = false;
       });
+    }
+  }
+
+  Future<void> _showQuickAddSupplierDialog() async {
+    final nameCtrl = TextEditingController();
+    final phoneCtrl = TextEditingController();
+    final cityCtrl = TextEditingController();
+    final gstinCtrl = TextEditingController();
+
+    final created = await showDialog<Party>(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Row(
+          children: [
+            Icon(Icons.business, color: Color(0xFF004D40)),
+            SizedBox(width: 8),
+            Text('Add New Supplier'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameCtrl,
+                decoration: const InputDecoration(labelText: 'Supplier Legal Name *'),
+                autofocus: true,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phoneCtrl,
+                decoration: const InputDecoration(labelText: 'Phone Number'),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: cityCtrl,
+                decoration: const InputDecoration(labelText: 'City'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: gstinCtrl,
+                decoration: const InputDecoration(labelText: 'GSTIN (Optional)'),
+                textCapitalization: TextCapitalization.characters,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogCtx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF990000)),
+            onPressed: () async {
+              final name = nameCtrl.text.trim();
+              if (name.isEmpty) return;
+              try {
+                final runtime = await ref.read(runtimeProvider.future);
+                final orgId = runtime.identity?.organization.id.value ?? 'default_org';
+                final partyId = 'supp_${DateTime.now().millisecondsSinceEpoch}';
+                final cleanGstin = gstinCtrl.text.trim().toUpperCase();
+
+                final newParty = Party(
+                  id: partyId,
+                  organizationId: orgId,
+                  name: name,
+                  isCustomer: false,
+                  isSupplier: true,
+                  gstin: cleanGstin.isEmpty ? null : cleanGstin,
+                  createdAt: DateTime.now(),
+                  updatedAt: DateTime.now(),
+                );
+
+                final newAddr = PartyAddress(
+                  id: 'addr_$partyId',
+                  partyId: partyId,
+                  addressLine1: 'Main Market',
+                  city: cityCtrl.text.trim().isEmpty ? 'Kalamb' : cityCtrl.text.trim(),
+                  state: 'Maharashtra',
+                  pincode: '413507',
+                  stateCode: '27',
+                );
+
+                final newContact = PartyContact(
+                  id: 'cont_$partyId',
+                  partyId: partyId,
+                  name: name,
+                  phone: phoneCtrl.text.trim(),
+                );
+
+                await runtime.database.saveParty(
+                  newParty,
+                  addresses: [newAddr],
+                  contacts: [newContact],
+                );
+
+                if (dialogCtx.mounted) {
+                  Navigator.pop(dialogCtx, newParty);
+                }
+              } catch (e) {
+                if (dialogCtx.mounted) {
+                  ScaffoldMessenger.of(dialogCtx).showSnackBar(
+                    SnackBar(content: Text('Error adding supplier: $e')),
+                  );
+                }
+              }
+            },
+            child: const Text('Save Supplier'),
+          ),
+        ],
+      ),
+    );
+
+    if (created != null && mounted) {
+      await _loadMasters();
+      setState(() {
+        _selectedSupplierId = created.id;
+        _selectedSupplier = created;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Supplier "${created.name}" added and selected!'),
+            backgroundColor: Colors.green[800],
+          ),
+        );
+      }
     }
   }
 
@@ -463,18 +599,40 @@ class _NewPurchaseBillTabState extends ConsumerState<_NewPurchaseBillTab> {
                     Row(
                       children: [
                         Expanded(
-                          child: DropdownButtonFormField<Party>(
-                            initialValue: _selectedSupplier,
-                            decoration: const InputDecoration(
+                          child: DropdownButtonFormField<String>(
+                            key: ValueKey(_selectedSupplierId),
+                            initialValue: _selectedSupplierId,
+                            isExpanded: true,
+                            decoration: InputDecoration(
                               labelText: 'Select Supplier *',
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
+                              helperText: _suppliers.isEmpty
+                                  ? 'No suppliers found. Click (+) to add one.'
+                                  : null,
+                              helperStyle: const TextStyle(color: Colors.orange),
                             ),
                             items: _suppliers.map((s) {
-                              return DropdownMenuItem(value: s, child: Text(s.name));
+                              return DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name, overflow: TextOverflow.ellipsis),
+                              );
                             }).toList(),
-                            onChanged: (val) => setState(() => _selectedSupplier = val),
-                            validator: (val) => val == null ? 'Required' : null,
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedSupplierId = val;
+                                _selectedSupplier = val != null
+                                    ? _suppliers.firstWhere((s) => s.id == val)
+                                    : null;
+                              });
+                            },
+                            validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                           ),
+                        ),
+                        const SizedBox(width: 8),
+                        IconButton.filledTonal(
+                          icon: const Icon(Icons.person_add_alt_1),
+                          tooltip: 'Add New Supplier',
+                          onPressed: _showQuickAddSupplierDialog,
                         ),
                         const SizedBox(width: 16),
                         Expanded(

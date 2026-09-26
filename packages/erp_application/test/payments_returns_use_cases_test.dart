@@ -394,7 +394,6 @@ class InMemoryPartyStore implements PartyStore {
 void main() {
   late InMemoryFinanceStore financeStore;
   late InMemorySalesStore salesStore;
-  late InMemoryPurchasingStore purchasingStore;
   late InMemoryInventoryStore inventoryStore;
   late InMemoryAccountingStore accountingStore;
   late InMemoryPartyStore partyStore;
@@ -418,7 +417,6 @@ void main() {
   setUp(() async {
     financeStore = InMemoryFinanceStore();
     salesStore = InMemorySalesStore();
-    purchasingStore = InMemoryPurchasingStore();
     inventoryStore = InMemoryInventoryStore();
     accountingStore = InMemoryAccountingStore();
     partyStore = InMemoryPartyStore();
